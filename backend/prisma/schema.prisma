@@ -1,0 +1,223 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+model Casing {
+  id           String     @id @default(cuid())
+  api          String
+  casingEnumId String
+  topDepth     Int
+  bottomDepth  Int
+  joints       Int?
+  centralizer  Boolean?
+  shortJtTop   Boolean?
+  casingEnum   CasingEnum @relation(fields: [casingEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  well         Well       @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model CasingEnum {
+  id               String   @id @default(cuid())
+  internalDiameter Float
+  externalDiameter Float
+  tocDepth         Int // top of cement depth
+  weight           Float?
+  grade            String?
+  casings          Casing[]
+}
+
+model Geology {
+  id                      String  @id @default(cuid())
+  sandName                String?
+  formationCommonName     String?
+  usableWaterStrata       String
+  shallowestProducingZone String?
+  saltwaterDisposalZone   String?
+  wells                   Well[]
+}
+
+model Location {
+  id               String  @id @default(cuid())
+  api              String  @unique
+  county           String
+  latitude         Float?
+  longitude        Float?
+  sectionNo        String?
+  blockNo          String?
+  survey           String?
+  abstractNo       String?
+  distanceFromTown String
+  well             Well    @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model MechanicalIsolation {
+  id                        String                  @id @default(cuid())
+  api                       String
+  mechanicalIsolationEnumId String
+  topDepth                  Int
+  bottomDepth               Int?
+  dateSet                   DateTime?
+  mechanicalIsolationEnum   MechanicalIsolationEnum @relation(fields: [mechanicalIsolationEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  well                      Well                    @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model MechanicalIsolationEnum {
+  id                  String                @id @default(cuid())
+  type                String
+  mechanicalIsolation MechanicalIsolation[]
+  PlugSchedule        PlugSchedule[]
+}
+
+model Operator {
+  id              String            @id @default(cuid())
+  operatorNo      String            @unique
+  name            String
+  rrcOperatorNo   String
+  wells           Well[]
+  operatorContact OperatorContact[]
+}
+
+model OperatorContact {
+  id          String   @id @default(cuid())
+  operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  operatorId  String
+  name        String
+  phoneNumber String
+  email       String
+}
+
+model Perforation {
+  id             String    @id @default(cuid())
+  api            String
+  stage          Int
+  formation      String?
+  topDepth       Int
+  bottomDepth    Int
+  datePerforated DateTime?
+  notes          String?
+  well           Well      @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model PlugCement {
+  id             String         @id @default(cuid())
+  plugScheduleId String
+  cementEnumType String
+  bbl            Float
+  sacks          Float
+  yield          Float
+  excessPercent  Float
+  plugCementEnum PlugCementEnum @relation(fields: [cementEnumType], references: [type], onDelete: Cascade, onUpdate: Cascade)
+  plugSchedule   PlugSchedule   @relation(fields: [plugScheduleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model PlugCementEnum {
+  type            String       @id
+  plugCementTypes PlugCement[]
+}
+
+model PlugSchedule {
+  id                        String                  @id @default(cuid())
+  api                       String
+  mechanicalIsolationEnumId String
+  summary                   String
+  topDepth                  Int
+  bottomDepth               Int?
+  dateSet                   DateTime?
+  description               String
+  wocDetails                String?
+  notes                     String?
+  mechanicalIsolationEnum   MechanicalIsolationEnum @relation(fields: [mechanicalIsolationEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  well                      Well                    @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+  PlugCement                PlugCement[]
+}
+
+model Rods {
+  id        String  @id @default(cuid())
+  api       String
+  joints    Int
+  rodEnumId String
+  rodEnum   RodEnum @relation(fields: [rodEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  well      Well    @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model RodEnum {
+  id   String @id @default(cuid())
+  type String
+  rods Rods[]
+}
+
+model Tubing {
+  id           String     @id @default(cuid())
+  api          String
+  tubingEnumId String
+  depth        Int
+  joints       Int
+  size         Float
+  grade        String
+  tubingEnum   TubingEnum @relation(fields: [tubingEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  well         Well       @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model TubingEnum {
+  id               String   @id @default(cuid())
+  internalDiameter Float
+  externalDiameter Float
+  weight           Float
+  grade            String
+  name             String
+  tubings          Tubing[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  name         String
+  roleId       String    @default("default_role_id") // Replace with actual default role ID
+  code         String?
+  registeredAt DateTime  @default(now())
+  validatedAt  DateTime?
+  role         UserRole  @relation(fields: [roleId], references: [role], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model UserRole {
+  role  String @id
+  users User[]
+}
+
+model Well {
+  api                 String                @id @unique
+  operatorId          String?
+  wellInfoId          String?               @unique
+  locationId          String?               @unique
+  geologyId           String?
+  casings             Casing[]
+  geology             Geology?              @relation(fields: [geologyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  location            Location?
+  mechanicalIsolation MechanicalIsolation[]
+  operator            Operator?             @relation(fields: [operatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  perforations        Perforation[]
+  plugSchedules       PlugSchedule[]
+  rods                Rods[]
+  tubings             Tubing[]
+  wellInfo            WellInfo?
+}
+
+model WellInfo {
+  id               String @id @default(cuid())
+  api              String @unique
+  districtNo       String
+  drillingPermitNo String
+  wellNo           String
+  field            String
+  lease            String
+  completionType   String
+  totalDepth       Int
+  wellType         String
+  well             Well   @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
+}
