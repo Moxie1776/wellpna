@@ -1,69 +1,53 @@
-# React + TypeScript + Vite
+# WellPNA Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+The WellPNA frontend is a React application that provides the user interface for data visualization and management in the Well Planning and Analysis system.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technology Stack
 
-## Expanding the ESLint configuration
+- React with TypeScript
+- React Admin - Admin dashboard framework
+- Tailwind CSS - Utility-first CSS framework
+- shadcn/ui - UI component library
+- React Router - Routing library
+- Zustand - State management
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Component Architecture
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Frontend Components
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Pages** (`src/pages/`): Top-level page components
+- **Components** (`src/components/`): Reusable UI components
+- **Services** (`src/services/`): Client-side service functions
+- **Providers** (`src/providers/`): Data and authentication providers for React Admin
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Key Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- User authentication interface (login/signup/user management)
+- Dashboard for viewing well data
+- Wellbore diagram generation and visualization
+- Data management interfaces for wells and related entities
+  - Import PDF and Excel files
+  - View and edit well data
+  - Generate ad-hoc WBD's (Wellbore Diagrams) in SVG/PDF format
+  - Possibly generate regulatory forms in the future
+- In the future, implement automated bidding features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Setup
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Install dependencies: `npm install`
+2. Start the development server: `npm run dev`
+
+## Development
+
+The frontend uses TypeScript for type safety and follows React best practices. Components are styled using Tailwind CSS with the project's defined color scheme.
+
+## Color Scheme
+
+The application uses a consistent color scheme:
+
+- **Primary Color:** #012d6c (Dark Blue)
+- **Secondary Color:** #c51230 (Red)
+
+These colors are defined in `tailwind.config.js` and can be used as `text-primary`, `bg-primary`, etc.
