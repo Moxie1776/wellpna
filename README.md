@@ -31,12 +31,13 @@ The backend is a Node.js/TypeScript application that provides the data processin
 - Node.js - JavaScript runtime
 - TypeScript - Type safety for JavaScript
 - Prisma - Database ORM
-- Apollo Server - GraphQL server implementation
-- pdf2json - PDF parsing library
-- ExcelJS - Excel file processing
-- jsPDF - PDF generation
-- bcrypt - Password hashing
+- GraphQL Yoga - GraphQL server implementation
+- Pothos - Code-first GraphQL schema builder
+- SQLite - Database
+- bcryptjs - Password hashing
 - jsonwebtoken - JWT implementation
+- nodemailer - Email sending
+- winston - Logging
 
 For detailed information about the backend, see [backend/README.md](backend/README.md).
 
@@ -46,7 +47,7 @@ The frontend is a React application that provides the user interface for data vi
 
 **Purpose:**
 
-- User authentication interface (login/signup/user management)
+- User authentication interface (login/signup/user management) integrated with the backend GraphQL API
 - Dashboard for viewing well data
 - Wellbore diagram generation and visualization
 - Data management interfaces for wells and related entities
@@ -60,7 +61,10 @@ The frontend is a React application that provides the user interface for data vi
 
 - React - UI library
 - TypeScript - Type safety for JavaScript
-- React Admin - Admin dashboard framework
+- urql - GraphQL client for API communication (lightweight alternative to Apollo Client)
+  - Integrates seamlessly with shadcn/ui components
+  - All libraries are fully open source with permissive licenses (MIT/Apache 2.0) suitable for commercial use in oil & gas companies
+  - Note: GraphQL Yoga and Pothos are server-side libraries (not clients) used for building the backend GraphQL API
 - Tailwind CSS - Utility-first CSS framework
 - shadcn/ui - UI component library
 - React Router - Routing library
@@ -95,12 +99,13 @@ Both the backend and frontend use TypeScript for type safety and modern JavaScri
 ## Project Progression
 
 The development will follow this general progression:
+
 - Setup testing along the way with each phase in both the backend and frontend
 - User authentication / management
 - Analyzing the pdf document and excel files
-  + Creating CRUD to handle managing this data
-  + Create webpages for managing it
+  - Creating CRUD to handle managing this data
+  - Create webpages for managing it
 - Implement datamining of these documents
-  + Automated DB population
+  - Automated DB population
 - Creating automated WBD's (Wellbore Diagrams)
 - Add surveys and wellbore trajectories that include graphing where the producing and plugged regions are

@@ -1,93 +1,64 @@
-# WellPNA Backend
+# WellPNA Backend Architecture
 
-## Overview
+This document outlines the architecture and development guidelines for the WellPNA GraphQL backend.
 
-The WellPNA backend is a Node.js/TypeScript application that provides the data processing, storage, and API services for the Well Planning and Analysis system. It handles importing well data from PDF and Excel files, storing it in a structured database, and providing APIs for the frontend to access this data.
+## Guiding Principles
 
-## Major Subdirectories
+1.  **Pure GraphQL:** The server exposes a single GraphQL endpoint for all client-server communication. There are no REST endpoints.
+2.  **Code-First Schema:** The GraphQL schema is built using Pothos, a code-first schema builder. This ensures type safety and allows us to leverage TypeScript for our schema definitions.
+3.  **Separation of Concerns:** Business logic is handled directly within GraphQL resolvers. Database interactions are managed by the Prisma Client. Utility functions are kept in a separate `utils` directory.
+4.  **Standalone Server:** We use GraphQL Yoga's standalone server. We do not use a separate web framework like Fastify or Express.
 
-- `src/` - Main source code
-  - `services/` - Business logic for data processing, file generation, and bid generation
-  - `resolvers/` - GraphQL resolvers for API endpoints
-  - `__tests__/` - Unit tests for various components
-- `prisma/` - Database schema and migrations
+## Authentication Flow
 
-## Technology Stack
+The following diagram illustrates the `signIn` mutation flow:
 
-- Node.js with TypeScript
-- Prisma ORM with SQLite database
-- GraphQL API with Apollo Server
-- PDF processing with pdf2json
-- Excel processing with ExcelJS
-- PDF generation with jsPDF
-- Authentication with JWT and bcrypt
 
-## Project Layout Plan
 
-1. **Data Ingestion Layer** (`src/services/dataMiner.ts`)
-   - Parses PDF and Excel files to extract well data
-   - Normalizes data into structured format
+```mermaid
+sequenceDiagram;
+    participant Client;
+    participant GraphQL Yoga Server;
+    participant Prisma Client;
+    participant Database;
+    participant JWT Service;
 
-2. **Data Storage Layer** (`prisma/schema.prisma`)
-   - Defines the database schema for well data
-   - Uses Prisma ORM for database operations
+    Client->>GraphQL Yoga Server: Executes signIn mutation with email and password;
+    GraphQL Yoga Server->>Prisma Client: Find user by email;
+    Prisma Client->>Database: SELECT * FROM User WHERE email=...;
+    Database-->>Prisma Client: Returns user data;
+    Prisma Client-->>GraphQL Yoga Server: Returns user object;
+    GraphQL Yoga Server->>GraphQL Yoga Server: Compare hashed password;
+    alt Passwords Match
+        GraphQL Yoga Server->>JWT Service: Sign token with user payload;
+        JWT Service-->>GraphQL Yoga Server: Returns JWT;
+        GraphQL Yoga Server-->>Client: Returns AuthPayload [token, user];
+    else Passwords Do Not Match
+        GraphQL Yoga Server-->>Client: Returns authentication error;
+    end
+```
 
-3. **Business Logic Layer** (`src/services/`)
-   - Implements core functionality like file generation and bid generation
-   - Processes data for specific use cases
+## Project Structure
 
-4. **API Layer** (`src/resolvers/`)
-   - Exposes GraphQL endpoints for frontend consumption
-   - Handles data queries and mutations
+The `src` directory is organized as follows:
 
-5. **Authentication** (`src/auth.ts`)
-   - Manages user authentication and authorization
-   - Implements JWT-based security
+-   `src/`
+    -   `builder.ts`: Pothos schema builder configuration.
+    -   `client.ts`: Prisma client instance.
+    -   `schema.ts`: Root schema definition, where all types, queries, and mutations are imported.
+    -   `server.ts`: Standalone GraphQL Yoga server setup.
+    -   `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
+    -   `graphql/`: Contains all GraphQL-related code.
+        -   `types/`: GraphQL object type definitions (e.g., `User.ts`, `Auth.ts`).
+        -   `queries/`: GraphQL queries (e.g., `user.ts`).
+        -   `mutations/`: GraphQL mutations (e.g., `auth.ts`).
+    -   `utils/`: Utility functions (e.g., `auth.ts` for password hashing and JWT).
 
-## Data Model
+## Development Rules
 
-The backend uses Prisma ORM to manage a comprehensive well data model including:
-
-- Wells with API numbers, locations, and depths
-- Casing records
-- Perforation intervals
-- Plug schedules
-- Mechanical isolation data
-- Geological information
-- Operator details
-
-## Key Services
-
-- **Data Miner**: Extracts well data from PDF and Excel files
-- **File Generator**: Creates reports in PDF and Excel formats
-- **Bid Generator**: Generates bid documents (in development)
-- **Well Service**: Core well data management
-- **Wellbore Diagram Service**: Generates wellbore visualizations
-
-## Component Architecture
-
-### Backend Components
-- **Services** (`src/services/`): Contain business logic for specific functionalities
-- **Resolvers** (`src/resolvers/`): Handle GraphQL API requests (not yet implemented)
-- **Models** (`src/generated/`): Generated by Prisma based on the schema
-- **Authentication** (`src/auth.ts`): Handles user authentication and authorization
-
-## Setup
-
-1. Install dependencies: `npm install`
-2. Set up the database: `npx prisma migrate dev`
-3. Start the server: `npm run dev`
-
-## Testing
-
-Run tests with: `npm test`
-
-## API Endpoints
-
-The backend exposes a GraphQL API with the following main types of operations:
-
-- User authentication (login, signup)
-- Well data queries (by API number, location, etc.)
-- Data mutations (create, update, delete wells)
-- File generation requests
-- Wellbore diagram data retrieval
+1.  **GraphQL Types:** All GraphQL object types must be defined in the `src/graphql/types` directory. Each type should be in its own file (e.g., `User.ts`).
+2.  **GraphQL Queries:** All GraphQL queries must be defined in the `src/graphql/queries` directory.
+3.  **GraphQL Mutations:** All GraphQL mutations must be defined in the `src/graphql/mutations` directory.
+4.  **Business Logic:** All business logic should be contained within the `resolve` function of a query or mutation. We are not using a separate service layer.
+5.  **Database Access:** All database interactions must go through the Prisma client, which is available on the context (`ctx.prisma`).
+6.  **Schema Imports:** All types, queries, and mutations must be imported into `src/schema.ts` to be included in the final schema.

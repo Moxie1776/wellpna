@@ -1,11 +1,23 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+  moduleFormat           = "esm"
+  runtime                = "nodejs"
+}
+
+generator pothos {
+  provider          = "prisma-pothos-types"
+  output            = "../src/generated/pothos.ts"
+  clientOutput      = "./prisma"
+  documentation     = "true"
+  generateDatamodel = "true"
 }
 
 model Casing {
@@ -174,15 +186,18 @@ model TubingEnum {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  password     String
-  name         String
-  roleId       String    @default("default_role_id") // Replace with actual default role ID
-  code         String?
-  registeredAt DateTime  @default(now())
-  validatedAt  DateTime?
-  role         UserRole  @relation(fields: [roleId], references: [role], onDelete: Cascade, onUpdate: Cascade)
+  id                          String    @id @default(cuid())
+  email                       String    @unique
+  password                    String
+  name                        String
+  roleId                      String    @default("user")
+  registeredAt                DateTime  @default(now())
+  validatedAt                 DateTime?
+  verificationCode            String?
+  verificationCodeExpiresAt   DateTime?
+  passwordResetToken          String?
+  passwordResetTokenExpiresAt DateTime?
+  role                        UserRole  @relation(fields: [roleId], references: [role], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model UserRole {
