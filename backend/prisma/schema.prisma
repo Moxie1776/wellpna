@@ -4,12 +4,12 @@ datasource db {
 }
 
 generator client {
-  provider               = "prisma-client"
-  output                 = "../src/generated/prisma"
-  generatedFileExtension = "ts"
-  importFileExtension    = "ts"
-  moduleFormat           = "esm"
-  runtime                = "nodejs"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  // generatedFileExtension = "ts"
+  // importFileExtension    = "ts"
+  // moduleFormat           = "esm"
+  // runtime                = "nodejs"
 }
 
 generator pothos {
