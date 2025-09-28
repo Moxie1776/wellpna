@@ -1,25 +1,33 @@
-import winston from 'winston';
-import 'winston-daily-rotate-file';
+interface Logger {
+  error: (message: string, ...args: any[]) => void;
+  warn: (message: string, ...args: any[]) => void;
+  info: (message: string, ...args: any[]) => void;
+  debug: (message: string, ...args: any[]) => void;
+}
 
-const { combine, timestamp, json, errors } = winston.format;
+const createBrowserLogger = (): Logger => {
+  const isDevelopment = import.meta.env.MODE !== 'production';
 
-const fileRotateTransport = new winston.transports.DailyRotateFile({
-  filename: 'frontend-error-%DATE%.log',
-  dirname: 'frontend/logs',
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '14d',
-  level: 'error',
-});
+  return {
+    error: (message: string, ...args: any[]) => {
+      console.error(`[ERROR] ${message}`, ...args);
+    },
+    warn: (message: string, ...args: any[]) => {
+      if (isDevelopment) {
+        console.warn(`[WARN] ${message}`, ...args);
+      }
+    },
+    info: (message: string, ...args: any[]) => {
+      if (isDevelopment) {
+        console.info(`[INFO] ${message}`, ...args);
+      }
+    },
+    debug: (message: string, ...args: any[]) => {
+      if (isDevelopment) {
+        console.debug(`[DEBUG] ${message}`, ...args);
+      }
+    },
+  };
+};
 
-export const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: combine(errors({ stack: true }), timestamp(), json()),
-  transports: [
-    new winston.transports.Console({
-      format: combine(winston.format.colorize(), winston.format.simple()),
-    }),
-    fileRotateTransport,
-  ],
-});
+export const logger = createBrowserLogger();
