@@ -1,20 +1,47 @@
-import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
-export const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const LoginForm = ({
+  onLogin,
+  showCard = true,
+  title = 'Login',
+}: {
+  onLogin: () => void;
+  showCard?: boolean;
+  title?: string;
+}) => {
   const { signIn, error } = useAuth();
   console.log('LoginForm error:', error);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
-      await signIn(email, password);
+      await signIn(values.email, values.password);
       onLogin();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
@@ -22,37 +49,51 @@ export const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
     }
   };
 
-  return (
-    <Card className='w-[350px]'>
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className='grid w-full items-center gap-4'>
-            <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='email'>Email</Label>
-              <Input
-                id='email'
-                type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='password'>Password</Label>
-              <Input
-                id='password'
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button type='submit'>Login</Button>
-            {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Login</Button>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      </form>
+    </Form>
   );
+
+  if (showCard) {
+    return (
+      <Card className='w-full border-0'>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>{formContent}</CardContent>
+      </Card>
+    );
+  }
+
+  return formContent;
 };

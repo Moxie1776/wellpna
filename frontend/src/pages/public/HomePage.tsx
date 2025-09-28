@@ -1,80 +1,46 @@
-const HomePage = () => (
-  <div
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb',
-    }}
-  >
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '28rem',
-        padding: '1.5rem',
-        border: '1px solid #d1d5db',
-        borderRadius: '0.75rem',
-        backgroundColor: 'white',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      }}
-    >
-      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>WellPNA</h1>
-      </div>
-      <div style={{ padding: '1.5rem', paddingTop: 0 }}>
-        <p
-          style={{
-            textAlign: 'center',
-            color: '#6b7280',
-            marginBottom: '1rem',
-          }}
-        >
-          Welcome to WellPNA
-        </p>
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-        >
-          <a
-            href='/login'
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              textDecoration: 'none',
-            }}
-          >
-            Sign In
-          </a>
-          <a
-            href='/signup'
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              border: '1px solid #d1d5db',
-              backgroundColor: 'white',
-              color: '#374151',
-              textDecoration: 'none',
-            }}
-          >
-            Sign Up
-          </a>
+import { useNavigate } from 'react-router-dom';
+import { LoginForm } from '@/components/LoginForm';
+import { useTheme } from '@/providers/theme-provider';
+
+const HomePage = () => {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  return (
+    <div className='min-h-[80vh] flex items-center justify-center p-8'>
+      <div className='flex flex-col lg:p-20 justify-center w-full h-full p-10'>
+        {/* Left side - Illustration */}
+        <div className='item-center text-center'>
+          <h1 className='text-4xl font-bold text-primary mt-6 mb-2'>WellPNA</h1>
+          <p className='text-xl text-secondary text-center'>
+            Well Plug & Abandonment Solutions
+          </p>
+        </div>
+        <div className='mt-20 flex md:flex-row items-center justify-center'>
+          <div className='items-center justify-center max-w-[300px] w-full pb-10'>
+            <img
+              src='/src/assets/cybergedeon_no_shale_gas_red.svg'
+              alt='Well Symbol'
+              className={`w-80 h-80 max-w-[400px] max-h-[400px] opacity-90 ${
+                theme === 'dark' ? 'filter invert' : ''
+              }`}
+            />
+          </div>
+
+          <div className='w-[80px]'></div>
+
+          {/* Right side - Signin Card */}
+          <div className='max-w-[400px] w-full h-full ml-32'>
+            <LoginForm
+              title='Access your WellPNA account'
+              onLogin={() => navigate('/dashboard')}
+              showCard={true}
+            />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default HomePage;

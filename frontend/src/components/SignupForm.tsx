@@ -1,21 +1,41 @@
-import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+
+const signupSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 export const SignupForm = ({ onSignup }: { onSignup: () => void }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { signUp, error } = useAuth();
   console.log('SignupForm error:', error);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await signUp(email, password, name);
+      await signUp(values.email, values.password, values.name);
       onSignup();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
@@ -24,44 +44,60 @@ export const SignupForm = ({ onSignup }: { onSignup: () => void }) => {
   };
 
   return (
-    <Card className='w-[350px]'>
+    <Card className='w-full max-w-md'>
       <CardHeader>
         <CardTitle>Sign Up</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className='grid w-full items-center gap-4'>
-            <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='name'>Name</Label>
-              <Input
-                id='name'
-                type='text'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='email'>Email</Label>
-              <Input
-                id='email'
-                type='email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='password'>Password</Label>
-              <Input
-                id='password'
-                type='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter your name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='email'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter your email' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='Enter your password'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button type='submit'>Sign Up</Button>
             {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

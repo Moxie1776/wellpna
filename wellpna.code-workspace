@@ -2,6 +2,9 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "../admin_dashboard"
     }
   ],
   "settings": {
