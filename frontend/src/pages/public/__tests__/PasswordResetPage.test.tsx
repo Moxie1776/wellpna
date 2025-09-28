@@ -53,6 +53,11 @@ describe('PasswordResetPage', () => {
 
     it('submits the request reset form successfully', async () => {
       mockRequestResetMutation.mockResolvedValue({ data: {}, error: null });
+      // Mock useMutation to always return mockRequestResetMutation for this test
+      (useMutation as jest.Mock).mockImplementation(() => [
+        { fetching: false },
+        mockRequestResetMutation,
+      ]);
 
       render(
         <MemoryRouter>
@@ -96,6 +101,11 @@ describe('PasswordResetPage', () => {
         data: null,
         error: { message: 'User not found' },
       });
+      // Mock useMutation to always return mockRequestResetMutation for this test
+      (useMutation as jest.Mock).mockImplementation(() => [
+        { fetching: false },
+        mockRequestResetMutation,
+      ]);
 
       render(
         <MemoryRouter>
@@ -149,6 +159,11 @@ describe('PasswordResetPage', () => {
         },
         error: null,
       });
+      // Mock useMutation to always return mockResetPasswordMutation for this test
+      (useMutation as jest.Mock).mockImplementation(() => [
+        { fetching: false },
+        mockResetPasswordMutation,
+      ]);
 
       render(
         <MemoryRouter initialEntries={['/reset-password?token=abc123']}>
@@ -156,12 +171,15 @@ describe('PasswordResetPage', () => {
         </MemoryRouter>
       );
 
+      const otpInput = screen.getByLabelText('Verification Code');
       const newPasswordInput = screen.getByLabelText('New Password');
       const confirmPasswordInput = screen.getByLabelText('Confirm Password');
       const submitButton = screen.getByRole('button', {
         name: 'Reset Password',
       });
 
+      await userEvent.clear(otpInput);
+      await userEvent.type(otpInput, '123456');
       await userEvent.clear(newPasswordInput);
       await userEvent.type(newPasswordInput, 'newpassword123');
       await userEvent.clear(confirmPasswordInput);
@@ -172,6 +190,7 @@ describe('PasswordResetPage', () => {
         expect(mockResetPasswordMutation).toHaveBeenCalledWith({
           token: 'abc123',
           newPassword: 'newpassword123',
+          code: '123456',
         });
       });
 
@@ -227,6 +246,11 @@ describe('PasswordResetPage', () => {
         data: null,
         error: { message: 'Invalid token' },
       });
+      // Mock useMutation to always return mockResetPasswordMutation for this test
+      (useMutation as jest.Mock).mockImplementation(() => [
+        { fetching: false },
+        mockResetPasswordMutation,
+      ]);
 
       render(
         <MemoryRouter initialEntries={['/reset-password?token=abc123']}>
@@ -234,19 +258,20 @@ describe('PasswordResetPage', () => {
         </MemoryRouter>
       );
 
+      const otpInput = screen.getByLabelText('Verification Code');
       const newPasswordInput = screen.getByLabelText('New Password');
       const confirmPasswordInput = screen.getByLabelText('Confirm Password');
       const submitButton = screen.getByRole('button', {
         name: 'Reset Password',
       });
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: 'newpassword123' },
-      });
-      fireEvent.change(confirmPasswordInput, {
-        target: { value: 'newpassword123' },
-      });
-      fireEvent.click(submitButton);
+      await userEvent.clear(otpInput);
+      await userEvent.type(otpInput, '123456');
+      await userEvent.clear(newPasswordInput);
+      await userEvent.type(newPasswordInput, 'newpassword123');
+      await userEvent.clear(confirmPasswordInput);
+      await userEvent.type(confirmPasswordInput, 'newpassword123');
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockResetPasswordMutation).toHaveBeenCalled();

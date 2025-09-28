@@ -108,6 +108,7 @@ const PasswordResetPage = () => {
       const result = await resetPasswordMutation({
         token,
         newPassword: values.newPassword,
+        code: values.code,
       });
       if (result.error) throw new Error(result.error.message);
       showToast({
