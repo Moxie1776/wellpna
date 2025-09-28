@@ -1,3 +1,10 @@
+// Polyfill for document.elementFromPoint for JSDOM
+if (typeof document !== 'undefined' && !document.elementFromPoint) {
+  document.elementFromPoint = function (x, y) {
+    // Simple polyfill: always return the body
+    return document.body;
+  };
+}
 import '@testing-library/jest-dom';
 declare var global: typeof globalThis;
 

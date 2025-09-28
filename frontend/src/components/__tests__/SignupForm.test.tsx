@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { SignupForm } from '../SignupForm';
 import { useAuth } from '../../hooks/useAuth';
@@ -32,44 +33,51 @@ describe('SignupForm', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the signup form', () => {
+  // Rendering tests
+  it('renders the signup form fields and button', () => {
     render(<SignupForm onSignup={mockOnSignup} />);
-
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument();
   });
 
-  it('calls signUp and onSignup when form is submitted', async () => {
+  // Form submission success tests
+  it('calls signUp when form is submitted', async () => {
     mockSignUp.mockResolvedValueOnce({
       token: 'test-token',
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     });
-
     render(<SignupForm onSignup={mockOnSignup} />);
-
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByLabelText('Email'), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'password123' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
-
+    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
+    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
     await waitFor(() => {
       expect(mockSignUp).toHaveBeenCalledWith(
         'test@example.com',
         'password123',
         'Test User'
       );
+    });
+  });
+
+  it('calls onSignup after successful signUp', async () => {
+    mockSignUp.mockResolvedValueOnce({
+      token: 'test-token',
+      user: { id: '1', email: 'test@example.com', name: 'Test User' },
+    });
+    render(<SignupForm onSignup={mockOnSignup} />);
+    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
+    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+    await waitFor(() => {
       expect(mockOnSignup).toHaveBeenCalled();
     });
   });
 
+  // Error handling tests
   it('shows error message when signUp fails', async () => {
     const errorMessage = 'Email already exists';
     mockSignUp.mockRejectedValueOnce(new Error(errorMessage));
@@ -81,20 +89,11 @@ describe('SignupForm', () => {
       loading: false,
       error: errorMessage,
     } as any);
-
     render(<SignupForm onSignup={mockOnSignup} />);
-
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByLabelText('Email'), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'password123' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
-
+    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
+    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });

@@ -1,5 +1,26 @@
+import { z } from 'zod';
 import { useMutation, gql } from 'urql';
 import { useToast } from '@/hooks/useToast';
+import { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@/components/ui/input-otp';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 const REQUEST_PASSWORD_RESET_MUTATION = gql`
   mutation RequestPasswordReset($email: String!) {
@@ -36,27 +57,6 @@ const resetPasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
-import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 
 const PasswordResetPage = () => {
   const [searchParams] = useSearchParams();

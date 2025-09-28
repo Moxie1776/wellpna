@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { useMutation } from 'urql';
@@ -161,19 +162,20 @@ describe('PasswordResetPage', () => {
         name: 'Reset Password',
       });
 
-      fireEvent.change(newPasswordInput, {
-        target: { value: 'newpassword123' },
-      });
-      fireEvent.change(confirmPasswordInput, {
-        target: { value: 'newpassword123' },
-      });
-      fireEvent.click(submitButton);
+      await userEvent.clear(newPasswordInput);
+      await userEvent.type(newPasswordInput, 'newpassword123');
+      await userEvent.clear(confirmPasswordInput);
+      await userEvent.type(confirmPasswordInput, 'newpassword123');
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockResetPasswordMutation).toHaveBeenCalledWith({
           token: 'abc123',
           newPassword: 'newpassword123',
         });
+      });
+
+      await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
       });
     });
