@@ -1,8 +1,8 @@
-# WellPNA (Well Planning and Analysis) Project Outline
+# WellPNA (Well Plug & Abandon) Project Outline
 
 ## Project Purpose
 
-WellPNA (Well Planning and Analysis) is a comprehensive solution for oil and gas companies to manage well data, analyze well information, generate reports, and create visualizations. It streamlines the process of importing well data from various sources (PDFs, Excel files), storing it in a structured format, and providing tools for analysis and reporting.
+WellPNA (Well Plug & Abandon) is a comprehensive solution for oil and gas companies to manage well data, analyze well information, generate reports, and create visualizations. It streamlines the process of importing well data from various sources (PDFs, Excel files), storing it in a structured format, and providing tools for analysis and reporting.
 
 ## System Architecture
 

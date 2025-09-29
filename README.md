@@ -2,7 +2,7 @@
 
 ## Overview
 
-WellPNA (Well Planning and Analysis) is used to import existing pdf files from Texas and New Mexico oil and gas commissions, extract well data, store it in a database, create wellbore diagrams, and eventual automated bidding.
+WellPNA (Well Plug & Abandon) is used to import existing pdf files from Texas and New Mexico oil and gas commissions, extract well data, store it in a database, create wellbore diagrams, and eventual automated bidding.
 
 It aims to streamline the process of bidding and creating well plans by providing a user-friendly interface and robust backend services. The application will create automatic wellbore diagrams based on the imported data, allowing users customize the data, visualize well trajectories and other relevant information.
 

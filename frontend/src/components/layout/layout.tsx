@@ -13,12 +13,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/auth';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { getCurrentUser } = useAuth();
-  const isAuthenticated = !!getCurrentUser.name; // true if user exists, false otherwise
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = !!user; // true if user exists, false otherwise
 
   return (
     <SidebarProvider>

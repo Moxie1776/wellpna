@@ -2,7 +2,7 @@
 
 ## Overview
 
-The WellPNA frontend is a React application that provides the user interface for data visualization and management in the Well Planning and Analysis system.
+The WellPNA frontend is a React application that provides the user interface for data visualization and management in the Well Plug & Abandon system.
 
 ## Technology Stack
 
