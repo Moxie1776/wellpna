@@ -32,7 +32,50 @@ The WellPNA frontend is a React application that provides the user interface for
   - View and edit well data
   - Generate ad-hoc WBD's (Wellbore Diagrams) in SVG/PDF format
   - Possibly generate regulatory forms in the future
+ ## Project Structure
+ 
+ The frontend project follows a standard React/Vite structure, with key directories organized as follows:
+ 
+ -   **`public/`**: Static assets that are served directly by the web server (e.g., `vite.svg`).
+ -   **`src/`**: Contains the main application source code.
+     -   **`assets/`**: Images and other static assets used within components.
+     -   **`components/`**: Reusable UI components. This includes:
+         -   **`ui/`**: Presentational components, often from a UI library like shadcn/ui.
+         -   **`public/`**: Components related to public-facing pages (e.g., authentication forms).
+     -   **`hooks/`**: Custom React hooks.
+     -   **`lib/`**: Utility functions and client configurations (e.g., GraphQL client).
+     -   **`pages/`**: Top-level route components.
+     -   **`providers/`**: React context providers (e.g., theme, toast).
+     -   **`services/`**: API client functions or business logic services.
+     -   **`store/`**: State management logic (e.g., Zustand stores).
+     -   **`utils/`**: General utility functions.
+ -   **`vite.config.ts`**: Vite build configuration.
+ -   **`tsconfig.*.json`**: TypeScript configuration files for different build targets.
+ -   **`.env*` files**: Environment variable configuration.
+ 
+ ## Setup
 - In the future, implement automated bidding features
+
+## Project Structure
+
+The frontend project follows a standard React/Vite structure, with key directories organized as follows:
+
+-   **`public/`**: Static assets that are served directly by the web server (e.g., `vite.svg`).
+-   **`src/`**: Contains the main application source code.
+    -   **`assets/`**: Images and other static assets used within components.
+    -   **`components/`**: Reusable UI components. This includes:
+        -   **`ui/`**: installed shadcn components via `npx shadcn-ui add`
+        -   **`public/`**: Components related to public-facing pages (e.g., authentication forms).
+    -   **`hooks/`**: Custom React hooks.
+    -   **`lib/`**: Utility functions and client configurations (e.g., GraphQL client).
+    -   **`pages/`**: Top-level route components.
+    -   **`providers/`**: React context providers (e.g., theme, toast).
+    -   **`services/`**: API client functions or business logic services.
+    -   **`store/`**: State management logic (e.g., Zustand stores).
+    -   **`utils/`**: General utility functions.
+-   **`vite.config.ts`**: Vite build configuration.
+-   **`tsconfig.*.json`**: TypeScript configuration files for different build targets.
+-   **`.env*` files**: Environment variable configuration.
 
 ## Setup
 

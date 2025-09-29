@@ -3,13 +3,13 @@ import { Provider as UrqlProvider } from 'urql';
 import { client } from './lib/graphqlClient';
 import { ThemeProvider } from './providers/theme-provider';
 import { ToastProvider } from './providers/toast-provider';
-import { Layout } from './components/layout';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
+import Layout from './components/layout/layout';
+import SignInPage from './pages/public/Signin';
+import SignupPage from './pages/public/Signup';
 import { Dashboard } from './pages/dashboard/Dashboard';
-import HomePage from './pages/public/HomePage';
-import EmailVerificationPage from './pages/public/EmailVerificationPage';
-import PasswordResetPage from './pages/public/PasswordResetPage';
+import HomePage from './pages/public/Home';
+import EmailVerificationPage from './pages/public/EmailVerification';
+import PasswordResetPage from './pages/public/PasswordReset';
 
 const App = () => (
   <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
@@ -20,7 +20,7 @@ const App = () => (
           path='/login'
           element={
             <Layout>
-              <LoginPage />
+              <SignInPage />
             </Layout>
           }
         />

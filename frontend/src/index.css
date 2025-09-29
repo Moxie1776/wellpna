@@ -145,6 +145,10 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   }
 
+  form {
+   font-size: inherit;
+  }
+
   .dark input {
     background-color: var(--dark-surface);
     font-size: inherit;

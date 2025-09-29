@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { useMutation } from 'urql';
-import PasswordResetPage from '../PasswordResetPage';
+import PasswordResetPage from '../PasswordReset';
 
 // Mock urql
 jest.mock('urql', () => ({

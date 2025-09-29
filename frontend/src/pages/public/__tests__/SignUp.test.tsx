@@ -2,11 +2,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { SignupForm } from '../SignupForm';
-import { useAuth } from '../../hooks/useAuth';
+import { SignUpForm } from '../../../components/public/SignUpForm';
+import { useAuth } from '../../../hooks/useAuth';
 
 // Mock useAuth hook instead of low-level urql
-jest.mock('../../hooks/useAuth', () => ({
+jest.mock('../../../hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
@@ -35,7 +35,7 @@ describe('SignupForm', () => {
 
   // Rendering tests
   it('renders the signup form fields and button', () => {
-    render(<SignupForm onSignup={mockOnSignup} />);
+    render(<SignUpForm onSignup={mockOnSignup} />);
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('SignupForm', () => {
       token: 'test-token',
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     });
-    render(<SignupForm onSignup={mockOnSignup} />);
+    render(<SignUpForm onSignup={mockOnSignup} />);
     await userEvent.type(screen.getByLabelText('Name'), 'Test User');
     await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -67,7 +67,7 @@ describe('SignupForm', () => {
       token: 'test-token',
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     });
-    render(<SignupForm onSignup={mockOnSignup} />);
+    render(<SignUpForm onSignup={mockOnSignup} />);
     await userEvent.type(screen.getByLabelText('Name'), 'Test User');
     await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -89,7 +89,7 @@ describe('SignupForm', () => {
       loading: false,
       error: errorMessage,
     } as any);
-    render(<SignupForm onSignup={mockOnSignup} />);
+    render(<SignUpForm onSignup={mockOnSignup} />);
     await userEvent.type(screen.getByLabelText('Name'), 'Test User');
     await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'password123');

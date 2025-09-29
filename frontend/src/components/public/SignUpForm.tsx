@@ -1,4 +1,4 @@
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ const signupSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-export const SignupForm = ({ onSignup }: { onSignup: () => void }) => {
+export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   const { signUp, error } = useAuth();
   console.log('SignupForm error:', error);
 

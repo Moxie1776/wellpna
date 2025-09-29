@@ -1,4 +1,4 @@
-import { SignupForm } from '@/components/SignupForm';
+import { SignUpForm } from '@/components/public/SignUpForm';
 import { useNavigate } from 'react-router-dom';
 
 const SignupPage = () => {
@@ -9,8 +9,8 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <SignupForm onSignup={handleSignup} />
+    <div className='flex items-center justify-center h-screen'>
+      <SignUpForm onSignup={handleSignup} />
     </div>
   );
 };

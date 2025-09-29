@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '@/components/LoginForm';
+import { SignInForm } from '@/components/public/SignInForm';
 import { useTheme } from '@/providers/theme-provider';
 
 const HomePage = () => {
@@ -31,9 +31,9 @@ const HomePage = () => {
 
           {/* Right side - Signin Card */}
           <div className='max-w-[400px] w-full h-full ml-32'>
-            <LoginForm
+            <SignInForm
               title='Access your WellPNA account'
-              onLogin={() => navigate('/dashboard')}
+              onSignIn={() => navigate('/dashboard')}
               showCard={true}
             />
           </div>

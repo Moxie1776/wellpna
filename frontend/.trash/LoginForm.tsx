@@ -1,16 +1,17 @@
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { LogIn } from 'lucide-react';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
+  // FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 
@@ -51,36 +52,45 @@ export const LoginForm = ({
 
   const formContent = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Enter your password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Login</Button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-      </form>
+      <div className='my-10'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+          <FormField
+            control={form.control}
+            name='email'
+            render={({ field }) => (
+              <FormItem>
+                {/* <FormLabel>Email</FormLabel> */}
+                <FormControl>
+                  <Input placeholder='Enter your email' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='password'
+            render={({ field }) => (
+              <FormItem className='py-10'>
+                {/* <FormLabel>Password</FormLabel> */}
+                <FormControl>
+                  <Input
+                    type='password'
+                    placeholder='Enter your password'
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type='submit' className='mt-[10px]'>
+            Login&nbsp;
+            <LogIn size={20} />
+          </Button>
+          {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
+        </form>
+      </div>
     </Form>
   );
 
