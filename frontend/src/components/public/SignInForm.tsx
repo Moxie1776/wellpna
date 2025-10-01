@@ -1,17 +1,18 @@
 import { useAuth } from '../../hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Typography from '@mui/joy/Typography';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+// ...existing code...
 import { z } from 'zod';
-import { LogIn } from 'lucide-react';
+import { MdLogin } from 'react-icons/md';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 
@@ -51,61 +52,71 @@ export const SignInForm = ({
   };
 
   const formContent = (
-    <Form {...form}>
+    <Form onSubmit={form.handleSubmit(onSubmit)}>
       <div className='my-10'>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-          <FormField
-            control={form.control}
-            name='email'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter your email' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='password'
-            render={({ field }) => (
-              <FormItem className='py-10'>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type='password'
-                    placeholder='Enter your password'
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type='submit' className='mt-[10px]'>
-            <span className='font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]'>
-              Sign In&nbsp;
-              <LogIn size={20} />
-            </span>
-          </Button>
-          {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
-        </form>
+        <FormField
+          label='Email'
+          inputId='signin-email'
+          children={
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder='Enter your email'
+                  type='email'
+                  slotProps={{
+                    input: {
+                      ...form.register('email', { required: true }),
+                      id: 'signin-email',
+                    },
+                  }}
+                />
+              </FormControl>
+              <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+            </FormItem>
+          }
+        />
+        <FormField
+          label='Password'
+          inputId='signin-password'
+          children={
+            <FormItem className='py-10'>
+              <FormControl>
+                <Input
+                  type='password'
+                  placeholder='Enter your password'
+                  slotProps={{
+                    input: {
+                      ...form.register('password', { required: true }),
+                      id: 'signin-password',
+                    },
+                  }}
+                />
+              </FormControl>
+              <FormMessage>
+                {form.formState.errors.password?.message}
+              </FormMessage>
+            </FormItem>
+          }
+        />
+        <Button type='submit' className='mt-[10px]'>
+          <span className='font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]'>
+            Sign In&nbsp;
+            <MdLogin size={20} />
+          </span>
+        </Button>
+        {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
       </div>
     </Form>
   );
 
-  if (showCard) {
-    return (
-      <Card className='w-full border-0'>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>
-        <CardContent>{formContent}</CardContent>
-      </Card>
-    );
-  }
-
-  return formContent;
+  return showCard ? (
+    <Card className='w-full max-w-md'>
+      <Typography level='h4' sx={{ mb: 2 }}>
+        {title}
+      </Typography>
+      <CardContent>{formContent}</CardContent>
+    </Card>
+  ) : (
+    formContent
+  );
 };

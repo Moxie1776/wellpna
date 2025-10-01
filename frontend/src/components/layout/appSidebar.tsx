@@ -14,13 +14,13 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
-  Home,
-  LayoutDashboard,
-  LogIn,
-  UserPlus,
-  Key,
-  Mail,
-} from 'lucide-react';
+  MdHome,
+  MdDashboard,
+  MdLogin,
+  MdPersonAdd,
+  MdVpnKey,
+  MdEmail,
+} from 'react-icons/md';
 
 interface NavLink {
   label: string;
@@ -30,25 +30,25 @@ interface NavLink {
 }
 
 const navLinks: NavLink[] = [
-  { label: 'Home', href: '/', icon: Home, requiresAuth: false },
+  { label: 'Home', href: '/', icon: MdHome, requiresAuth: false },
   {
     label: 'Dashboard',
     href: '/dashboard',
-    icon: LayoutDashboard,
+    icon: MdDashboard,
     requiresAuth: true,
   },
-  { label: 'Sign In', href: '/login', icon: LogIn, requiresAuth: false },
-  { label: 'Sign Up', href: '/signup', icon: UserPlus, requiresAuth: false },
+  { label: 'Sign In', href: '/login', icon: MdLogin, requiresAuth: false },
+  { label: 'Sign Up', href: '/signup', icon: MdPersonAdd, requiresAuth: false },
   {
     label: 'Password Reset',
     href: '/reset-password',
-    icon: Key,
+    icon: MdVpnKey,
     requiresAuth: false,
   },
   {
     label: 'Email Verification',
     href: '/verify-email',
-    icon: Mail,
+    icon: MdEmail,
     requiresAuth: false,
   },
 ];
@@ -67,8 +67,8 @@ export function AppSidebar({
   console.log('AppSidebar isAuthenticated:', isAuthenticated);
 
   const homeLink = isAuthenticated
-    ? { label: 'WellPnA', href: '/dashboard', icon: LayoutDashboard }
-    : { label: 'WellPnA', href: '/', icon: Home };
+    ? { label: 'WellPnA', href: '/dashboard', icon: MdDashboard }
+    : { label: 'WellPnA', href: '/', icon: MdHome };
 
   const otherLinks = isAuthenticated
     ? navLinks.filter((link) => link.requiresAuth && link.href !== '/dashboard')
@@ -118,7 +118,7 @@ export function AppSidebar({
         {isAuthenticated && (
           <SidebarGroup>
             <SidebarGroupContent>
-              <Button variant='outline' onClick={signOut} className='w-full'>
+              <Button variant='outlined' onClick={signOut} className='w-full'>
                 Logout
               </Button>
             </SidebarGroupContent>

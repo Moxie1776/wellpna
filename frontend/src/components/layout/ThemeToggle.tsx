@@ -1,24 +1,36 @@
-import { Button } from '@/components/ui/button';
-import { useTheme } from '@/providers/theme-provider';
-import { Moon, Sun } from 'lucide-react';
+import * as React from 'react';
+import { useColorScheme } from '@mui/joy/styles';
+import Select from '@mui/joy/Select';
+import Option from '@mui/joy/Option';
+import { MdDarkMode, MdLightMode, MdSettingsBrightness } from 'react-icons/md';
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+export default function ThemeToggle() {
+  const { mode, setMode } = useColorScheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
 
   return (
-    <Button
-      variant='ghost'
-      size='icon'
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className={`w-10 h-10 p-0 ${
-        theme === 'light'
-          ? 'bg-yellow-400 text-black hover:bg-yellow-500'
-          : 'bg-blue-900 text-white hover:bg-blue-800'
-      }`}
+    <Select
+      value={mode}
+      onChange={(_, newMode) => setMode(newMode)}
+      sx={{ width: 'max-content', minWidth: 120 }}
+      startDecorator={
+        mode === 'dark' ? (
+          <MdDarkMode />
+        ) : mode === 'light' ? (
+          <MdLightMode />
+        ) : (
+          <MdSettingsBrightness />
+        )
+      }
     >
-      <Sun className='h-5 w-5 transition-all dark:-rotate-90 dark:scale-0' />
-      <Moon className='absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100' />
-      <span className='sr-only'>Toggle theme</span>
-    </Button>
+      <Option value='system'>System</Option>
+      <Option value='light'>Light</Option>
+      <Option value='dark'>Dark</Option>
+    </Select>
   );
 }

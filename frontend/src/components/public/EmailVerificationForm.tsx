@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Typography from '@mui/joy/Typography';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,14 +10,8 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
 
 const emailVerificationSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -50,55 +45,61 @@ export const EmailVerificationForm = ({
 
   return (
     <Card className='w-full max-w-md'>
-      <CardHeader>
-        <CardTitle>Verify Your Email</CardTitle>
-      </CardHeader>
+      <Typography level='h4' sx={{ mb: 2 }}>
+        Verify Your Email
+      </Typography>
       <CardContent>
         <Form {...form}>
           <form onSubmit={handleSubmit} className='space-y-8'>
             <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
+              label='Email'
+              inputId='email-input'
+              children={
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter your email' {...field} />
+                    <Input
+                      id='email-input'
+                      placeholder='Enter your email'
+                      {...form.register('email')}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {form.formState.errors.email?.message}
+                  </FormMessage>
                 </FormItem>
-              )}
+              }
             />
             <FormField
-              control={form.control}
-              name='code'
-              render={({ field }) => (
+              label='Verification Code'
+              inputId='code-input'
+              children={
                 <FormItem>
-                  <FormLabel>Verification Code</FormLabel>
                   <FormControl>
-                    <InputOTP
-                      maxLength={6}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={field.disabled}
-                    >
-                      <InputOTPGroup>
-                        {[...Array(6)].map((_, i) => (
-                          <InputOTPSlot key={i} index={i} />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
+                    <Input
+                      type='text'
+                      inputMode='numeric'
+                      placeholder='Enter 6-digit code'
+                      slotProps={{
+                        input: {
+                          ...form.register('code'),
+                          id: 'code-input',
+                        },
+                      }}
+                      disabled={loading}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {form.formState.errors.code?.message}
+                  </FormMessage>
                 </FormItem>
-              )}
+              }
             />
             <Button type='submit' disabled={loading}>
               <span className='font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]'>
                 {loading ? 'Verifying...' : 'Verify Email'}
               </span>
             </Button>
-            <Button type='button' variant='outline' onClick={handleResend}>
+            <Button type='button' variant='outlined' onClick={handleResend}>
               <span className='font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]'>
                 Resend Code
               </span>

@@ -11,10 +11,10 @@ jest.mock('urql', () => ({
   gql: jest.fn((template: TemplateStringsArray) => template.join('')),
 }));
 
-// Mock useToast
-jest.mock('@/hooks/useToast', () => ({
-  useToast: () => ({
-    showToast: jest.fn(),
+// Mock useSnackbar
+jest.mock('@/hooks/useSnackbar', () => ({
+  useSnackbar: () => ({
+    showSnackbar: jest.fn(),
   }),
 }));
 

@@ -1,24 +1,21 @@
 import { z } from 'zod';
 import { useMutation, gql } from 'urql';
-import { useToast } from '@/hooks/useToast';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Typography from '@mui/joy/Typography';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
+// InputOTP removed, use Input directly
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+// ...existing code...
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 
@@ -61,7 +58,7 @@ const resetPasswordSchema = z
 const PasswordResetPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { showToast } = useToast();
+  const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
   const token = searchParams.get('token');
@@ -85,12 +82,12 @@ const PasswordResetPage = () => {
     try {
       const result = await requestResetMutation({ email: values.email });
       if (result.error) throw new Error(result.error.message);
-      showToast({
+      showSnackbar({
         message: 'Password reset link sent to your email',
         color: 'success',
       });
     } catch (err: unknown) {
-      showToast({
+      showSnackbar({
         message:
           err instanceof Error ? err.message : 'Failed to send reset email',
         color: 'error',
@@ -111,13 +108,13 @@ const PasswordResetPage = () => {
         code: values.code,
       });
       if (result.error) throw new Error(result.error.message);
-      showToast({
+      showSnackbar({
         message: 'Password reset successfully! You are now logged in.',
         color: 'success',
       });
       navigate('/dashboard');
     } catch (err: unknown) {
-      showToast({
+      showSnackbar({
         message:
           err instanceof Error ? err.message : 'Failed to reset password',
         color: 'error',
@@ -131,77 +128,89 @@ const PasswordResetPage = () => {
     return (
       <div className='flex items-center justify-center p-4'>
         <Card className='w-full max-w-md'>
-          <CardHeader>
-            <CardTitle>Reset Your Password</CardTitle>
-          </CardHeader>
+          <Typography level='h4' sx={{ mb: 2 }}>
+            Reset Your Password
+          </Typography>
           <CardContent>
-            <Form {...resetForm}>
-              <form
-                onSubmit={resetForm.handleSubmit(onResetPassword)}
-                className='space-y-8'
+            <Form>
+              <FormField
+                label='Verification Code'
+                inputId='reset-code'
+                children={
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type='text'
+                        inputMode='numeric'
+                        placeholder='Enter 6-digit code'
+                        slotProps={{
+                          input: {
+                            ...resetForm.register('code'),
+                            id: 'reset-code',
+                          },
+                        }}
+                        disabled={resetForm.formState.isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {resetForm.formState.errors.code?.message}
+                    </FormMessage>
+                  </FormItem>
+                }
+              />
+              <FormField
+                label='New Password'
+                inputId='reset-new-password'
+                children={
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type='password'
+                        placeholder='Enter new password'
+                        slotProps={{
+                          input: {
+                            ...resetForm.register('newPassword'),
+                            id: 'reset-new-password',
+                          },
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {resetForm.formState.errors.newPassword?.message}
+                    </FormMessage>
+                  </FormItem>
+                }
+              />
+              <FormField
+                label='Confirm Password'
+                inputId='reset-confirm-password'
+                children={
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type='password'
+                        placeholder='Confirm new password'
+                        slotProps={{
+                          input: {
+                            ...resetForm.register('confirmPassword'),
+                            id: 'reset-confirm-password',
+                          },
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {resetForm.formState.errors.confirmPassword?.message}
+                    </FormMessage>
+                  </FormItem>
+                }
+              />
+              <Button
+                type='submit'
+                disabled={loading}
+                onClick={resetForm.handleSubmit(onResetPassword)}
               >
-                <FormField
-                  control={resetForm.control}
-                  name='code'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Verification Code</FormLabel>
-                      <FormControl>
-                        <InputOTP
-                          maxLength={6}
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={field.disabled}
-                        >
-                          <InputOTPGroup>
-                            {[...Array(6)].map((_, i) => (
-                              <InputOTPSlot key={i} index={i} />
-                            ))}
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name='newPassword'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='Enter new password'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name='confirmPassword'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='Confirm new password'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type='submit' disabled={loading}>
-                  {loading ? 'Resetting...' : 'Reset Password'}
-                </Button>
-              </form>
+                {loading ? 'Resetting...' : 'Reset Password'}
+              </Button>
             </Form>
           </CardContent>
         </Card>
@@ -212,32 +221,41 @@ const PasswordResetPage = () => {
   return (
     <div className='flex items-center justify-center p-4'>
       <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle>Request Password Reset</CardTitle>
-        </CardHeader>
+        <Typography level='h4' sx={{ mb: 2 }}>
+          Request Password Reset
+        </Typography>
         <CardContent>
-          <Form {...requestForm}>
-            <form
-              onSubmit={requestForm.handleSubmit(onRequestReset)}
-              className='space-y-8'
+          <Form>
+            <FormField
+              label='Email'
+              inputId='reset-email'
+              children={
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type='email'
+                      placeholder='Enter your email'
+                      slotProps={{
+                        input: {
+                          ...requestForm.register('email', { required: true }),
+                          id: 'reset-email',
+                        },
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {requestForm.formState.errors.email?.message}
+                  </FormMessage>
+                </FormItem>
+              }
+            />
+            <Button
+              type='submit'
+              disabled={loading}
+              onClick={requestForm.handleSubmit(onRequestReset)}
             >
-              <FormField
-                control={requestForm.control}
-                name='email'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter your email' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type='submit' disabled={loading}>
-                {loading ? 'Sending...' : 'Send Reset Link'}
-              </Button>
-            </form>
+              {loading ? 'Sending...' : 'Send Reset Link'}
+            </Button>
           </Form>
         </CardContent>
       </Card>

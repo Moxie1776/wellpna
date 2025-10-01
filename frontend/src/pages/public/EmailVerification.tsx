@@ -1,27 +1,22 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Typography from '@mui/joy/Typography';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+// ...existing code...
 import { z } from 'zod';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { useMutation, gql } from 'urql';
-import { useToast } from '@/hooks/useToast';
-
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
+import { useSnackbar } from '@/hooks/useSnackbar';
 
 const VERIFY_EMAIL_MUTATION = gql`
   mutation VerifyEmail($email: String!, $code: String!) {
@@ -50,7 +45,7 @@ const emailVerificationSchema = z.object({
 const EmailVerificationPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { showToast } = useToast();
+  const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof emailVerificationSchema>>({
@@ -78,7 +73,7 @@ const EmailVerificationPage = () => {
         throw new Error(result.error.message);
       }
 
-      showToast({
+      showSnackbar({
         message: 'Email verified successfully! You are now logged in.',
         color: 'success',
       });
@@ -86,7 +81,7 @@ const EmailVerificationPage = () => {
       // Redirect to dashboard or home
       navigate('/dashboard');
     } catch (err: unknown) {
-      showToast({
+      showSnackbar({
         message: err instanceof Error ? err.message : 'Failed to verify email',
         color: 'error',
       });
@@ -98,7 +93,7 @@ const EmailVerificationPage = () => {
   const handleResendCode = async () => {
     const email = form.getValues('email');
     if (!email) {
-      showToast({
+      showSnackbar({
         message: 'Please enter your email address',
         color: 'error',
       });
@@ -112,12 +107,12 @@ const EmailVerificationPage = () => {
         throw new Error(result.error.message);
       }
 
-      showToast({
+      showSnackbar({
         message: 'Verification code sent to your email',
         color: 'success',
       });
     } catch (err: unknown) {
-      showToast({
+      showSnackbar({
         message:
           err instanceof Error
             ? err.message
@@ -130,60 +125,61 @@ const EmailVerificationPage = () => {
   return (
     <div className='flex items-center justify-center p-4'>
       <Card className='w-full max-w-md'>
-        <CardHeader>
-          <CardTitle>Verify Your Email</CardTitle>
-        </CardHeader>
+        <Typography level='h4' sx={{ mb: 2 }}>
+          Verify Your Email
+        </Typography>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-              <FormField
-                control={form.control}
-                name='email'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter your email' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='code'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Verification Code</FormLabel>
-                    <FormControl>
-                      <InputOTP
-                        maxLength={6}
-                        value={field.value}
-                        onChange={field.onChange}
-                        disabled={field.disabled}
-                      >
-                        <InputOTPGroup>
-                          {[...Array(6)].map((_, i) => (
-                            <InputOTPSlot key={i} index={i} />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type='submit' disabled={loading}>
-                {loading ? 'Verifying...' : 'Verify Email'}
-              </Button>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={handleResendCode}
-              >
-                Resend Code
-              </Button>
-            </form>
+          <Form
+            {...form}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-8'
+          >
+            <FormField label='Email' inputId='verify-email'>
+              <FormItem>
+                {/* <FormLabel htmlFor='verify-email'>Email</FormLabel> */}
+                <FormControl>
+                  <Input
+                    placeholder='Enter your email'
+                    slotProps={{
+                      input: {
+                        ...form.register('email'),
+                        id: 'verify-email',
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.email?.message}
+                </FormMessage>
+              </FormItem>
+            </FormField>
+            <FormField label='Verification Code' inputId='verify-code'>
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type='text'
+                    inputMode='numeric'
+                    placeholder='Enter 6-digit code'
+                    slotProps={{
+                      input: {
+                        ...form.register('code'),
+                        id: 'verify-code',
+                        disabled: form.formState.isSubmitting,
+                        pattern: '\\d{6}',
+                        maxLength: 6,
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormMessage>{form.formState.errors.code?.message}</FormMessage>
+              </FormItem>
+            </FormField>
+            <Button type='submit' disabled={loading}>
+              {loading ? 'Verifying...' : 'Verify Email'}
+            </Button>
+            <Button type='button' variant='outlined' onClick={handleResendCode}>
+              Resend Code
+            </Button>
           </Form>
         </CardContent>
       </Card>

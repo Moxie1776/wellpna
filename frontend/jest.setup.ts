@@ -1,6 +1,6 @@
 // Polyfill for document.elementFromPoint for JSDOM
 if (typeof document !== 'undefined' && !document.elementFromPoint) {
-  document.elementFromPoint = function (x, y) {
+  document.elementFromPoint = function (_x, _y) {
     // Simple polyfill: always return the body
     return document.body;
   };

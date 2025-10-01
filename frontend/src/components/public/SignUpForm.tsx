@@ -1,16 +1,17 @@
 import { useAuth } from '../../hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import Typography from '@mui/joy/Typography';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+// ...existing code...
 import { z } from 'zod';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 
@@ -45,58 +46,74 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
 
   return (
     <Card className='w-full max-w-md'>
-      <CardHeader>
-        <CardTitle>Sign Up</CardTitle>
-      </CardHeader>
+      <Typography level='h4' sx={{ mb: 2 }}>
+        Sign Up
+      </Typography>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter your name' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter your email' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='password'
-                      placeholder='Enter your password'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type='submit'>Sign Up</Button>
-            {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
-          </form>
+        <Form>
+          <FormField
+            label='Name'
+            inputId='signup-name'
+            children={
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder='Enter your name'
+                    slotProps={{
+                      input: { ...form.register('name'), id: 'signup-name' },
+                    }}
+                  />
+                </FormControl>
+                <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+              </FormItem>
+            }
+          />
+          <FormField
+            label='Email'
+            inputId='signup-email'
+            children={
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder='Enter your email'
+                    slotProps={{
+                      input: { ...form.register('email'), id: 'signup-email' },
+                    }}
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.email?.message}
+                </FormMessage>
+              </FormItem>
+            }
+          />
+          <FormField
+            label='Password'
+            inputId='signup-password'
+            children={
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type='password'
+                    placeholder='Enter your password'
+                    slotProps={{
+                      input: {
+                        ...form.register('password'),
+                        id: 'signup-password',
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.password?.message}
+                </FormMessage>
+              </FormItem>
+            }
+          />
+          <Button type='submit' onClick={form.handleSubmit(onSubmit)}>
+            Sign Up
+          </Button>
+          {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
         </Form>
       </CardContent>
     </Card>

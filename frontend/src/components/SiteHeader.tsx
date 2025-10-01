@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { MdDarkMode, MdLightMode } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/theme-provider';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -16,8 +16,8 @@ export function SiteHeader() {
       <div className='relative ml-auto flex-1 md:grow-0'>
         {/* Theme toggle */}
         <Button
-          variant='ghost'
-          size='icon'
+          variant='plain'
+          size='md'
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className={`w-10 h-10 p-0 ${
             theme === 'light'
@@ -25,8 +25,8 @@ export function SiteHeader() {
               : 'bg-blue-900 text-white hover:bg-blue-800'
           }`}
         >
-          <Sun className='h-5 w-5 transition-all dark:-rotate-90 dark:scale-0' />
-          <Moon className='absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100' />
+          <MdLightMode className='h-5 w-5 transition-all dark:-rotate-90 dark:scale-0' />
+          <MdDarkMode className='absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100' />
           <span className='sr-only'>Toggle theme</span>
         </Button>
       </div>

@@ -59,6 +59,14 @@
   --primary-foreground: #ffffff;
   --secondary: #c51230;
   --secondary-foreground: #ffffff;
+    --success: #2e7d32;
+    --success-foreground: #ffffff;
+    --info: #0288d1;
+    --info-foreground: #ffffff;
+    --warning: #ed6c02;
+    --warning-foreground: #ffffff;
+    --error: #d32f2f;
+    --error-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
