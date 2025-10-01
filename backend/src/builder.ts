@@ -1,13 +1,13 @@
 import SchemaBuilder from '@pothos/core';
 import PrismaPlugin, { PrismaClient } from '@pothos/plugin-prisma';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
-import { DateResolver, DateTimeResolver, ByteResolver } from 'graphql-scalars';
 import { GraphQLScalarType, Kind } from 'graphql';
-import { Decimal } from './generated/prisma/internal/prismaNamespace';
+import { ByteResolver,DateResolver, DateTimeResolver } from 'graphql-scalars';
 
 import { prisma } from './client';
 import PrismaTypes from './generated/pothos';
 import { getDatamodel } from './generated/pothos';
+import { Decimal } from './generated/prisma/internal/prismaNamespace';
 
 // ----------------------------------------------------------------------------
 export const builder = new SchemaBuilder<{

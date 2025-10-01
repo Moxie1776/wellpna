@@ -1,5 +1,6 @@
-import { SignUpForm } from '@/components/public/SignUpForm';
 import { useNavigate } from 'react-router-dom';
+
+import { SignUpForm } from '@/components/public/SignUpForm';
 
 const SignupPage = () => {
   const navigate = useNavigate();

@@ -1,8 +1,9 @@
-import * as React from 'react';
 import Snackbar from '@mui/joy/Snackbar';
 import type { ColorPaletteProp } from '@mui/joy/styles';
-import { ToastContext } from './ToastContext';
+import * as React from 'react';
+
 import type { ToastOptions } from './ToastContext';
+import { ToastContext } from './ToastContext';
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

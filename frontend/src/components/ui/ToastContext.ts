@@ -1,5 +1,5 @@
-import * as React from 'react';
 import type { ColorPaletteProp } from '@mui/joy/styles';
+import * as React from 'react';
 
 export interface ToastOptions {
   message: string;

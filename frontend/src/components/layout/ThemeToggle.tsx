@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useColorScheme } from '@mui/joy/styles';
-import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
+import Select from '@mui/joy/Select';
+import { useColorScheme } from '@mui/joy/styles';
+import * as React from 'react';
 import { MdDarkMode, MdLightMode, MdSettingsBrightness } from 'react-icons/md';
 
 export default function ThemeToggle() {

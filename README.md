@@ -62,13 +62,41 @@ The frontend is a React application that provides the user interface for data vi
 - React - UI library
 - TypeScript - Type safety for JavaScript
 - urql - GraphQL client for API communication (lightweight alternative to Apollo Client)
-  - Integrates seamlessly with shadcn/ui components
   - All libraries are fully open source with permissive licenses (MIT/Apache 2.0) suitable for commercial use in oil & gas companies
   - Note: GraphQL Yoga and Pothos are server-side libraries (not clients) used for building the backend GraphQL API
 - Tailwind CSS - Utility-first CSS framework
-- shadcn/ui - UI component library
+- Joy UI - React component library for building beautiful and accessible user interfaces.
 - React Router - Routing library
 - Zustand - State management
+
+## Code Quality and Linting
+
+Both the backend and frontend projects are configured with ESLint and Prettier to maintain code quality and consistency.
+
+- **ESLint:** Used for static code analysis to identify problematic patterns and enforce coding style.
+  - Configuration files: `backend/eslint.config.js` and `frontend/eslint.config.js`
+  - Ignore files: `backend/.eslintignore` and `frontend/.eslintignore`
+
+- **Prettier:** Used for code formatting to ensure consistent code style.
+  - Configuration files: `backend/.prettierrc` and `frontend/.prettierrc`
+
+To run linting and fix issues:
+
+- **Backend:**
+  - `npm run lint`
+  - `npm run lint:fix`
+- **Frontend:**
+  - `npm run lint`
+  - `npm run lint:fix`
+
+To run formatting and check formatting:
+
+- **Backend:**
+  - `npm run format`
+  - `npm run format:check`
+- **Frontend:**
+  - `npm run format`
+  - `npm run format:check`
 
 ## Color Scheme
 

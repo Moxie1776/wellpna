@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+
 import { JWT_SECRET } from './constants';
 
 export interface JwtPayload {

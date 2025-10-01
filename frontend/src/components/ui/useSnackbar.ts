@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { ToastContext } from './ToastContext';
 import type { ColorPaletteProp } from '@mui/joy/styles';
+import * as React from 'react';
+
+import { ToastContext } from './ToastContext';
 
 export const useToast = () => {
   const context = React.useContext(ToastContext);

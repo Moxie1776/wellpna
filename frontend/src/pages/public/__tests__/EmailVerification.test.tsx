@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { useMutation } from 'urql';
+
 import EmailVerificationPage from '../EmailVerification';
 
 // Mock urql

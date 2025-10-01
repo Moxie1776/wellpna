@@ -6,7 +6,7 @@ if (typeof document !== 'undefined' && !document.elementFromPoint) {
   };
 }
 import '@testing-library/jest-dom';
-declare var global: typeof globalThis;
+declare let global: typeof globalThis;
 
 // Minimal TextEncoder/TextDecoder polyfill for Jest
 if (typeof global.TextEncoder === 'undefined') {

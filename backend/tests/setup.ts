@@ -1,6 +1,7 @@
+import { afterAll,beforeAll, jest } from '@jest/globals';
 import { config } from 'dotenv';
+
 import { PrismaClient } from '../src/generated/prisma/client';
-import { jest, beforeAll, afterAll } from '@jest/globals';
 
 // Load test environment variables
 config({ path: '.env.test' });

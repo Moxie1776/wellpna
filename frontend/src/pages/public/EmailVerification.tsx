@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import Typography from '@mui/joy/Typography';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Typography from '@mui/joy/Typography';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate,useSearchParams } from 'react-router-dom';
+import { gql,useMutation } from 'urql';
 // ...existing code...
 import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -15,7 +16,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { useMutation, gql } from 'urql';
+import { Input } from '@/components/ui/input';
 import { useSnackbar } from '@/hooks/useSnackbar';
 
 const VERIFY_EMAIL_MUTATION = gql`

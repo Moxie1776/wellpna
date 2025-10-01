@@ -4,7 +4,6 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import { defineConfig } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
-import react from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import path from 'path';
@@ -36,14 +35,11 @@ export default defineConfig([
         sourceType: 'module',
       },
       globals: {
-        ...globals.browser,
+        ...globals.node,
         ...globals.es2021,
-        // react: 'readonly',
-        // React: 'readonly',
       },
     },
     plugins: {
-      react,
       '@typescript-eslint': tseslint,
       'simple-import-sort': simpleImportSort,
       import: importPlugin,
@@ -55,8 +51,6 @@ export default defineConfig([
       'no-extra-boolean-cast': 'off',
       'no-unused-vars': 'off',
       quotes: ['warn', 'single'],
-      'react/no-children-prop': 'off',
-      'react/react-in-jsx-scope': 'off',
       semi: 'off',
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',

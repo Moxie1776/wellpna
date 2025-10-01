@@ -1,9 +1,10 @@
+import crypto from 'crypto';
+
 import { builder } from '../../builder';
-import { hashPassword, comparePassword, signJwt } from '../../utils/auth';
-import { AuthPayload } from '../types/Auth';
 import { prisma } from '../../client';
 import { emailService } from '../../services/emailService';
-import crypto from 'crypto';
+import { comparePassword, hashPassword, signJwt } from '../../utils/auth';
+import { AuthPayload } from '../types/Auth';
 
 builder.mutationFields((t) => ({
   signUp: t.field({

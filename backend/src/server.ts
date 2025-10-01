@@ -1,12 +1,14 @@
-import dotenv from 'dotenv';
 import { createServer } from 'node:http';
-import { createYoga } from 'graphql-yoga';
+
 import {
-  useJWT,
   createInlineSigningKeyProvider,
+  useJWT,
 } from '@graphql-yoga/plugin-jwt';
-import { schema } from './schema';
+import dotenv from 'dotenv';
+import { createYoga } from 'graphql-yoga';
+
 import { prisma } from './client';
+import { schema } from './schema';
 import { JWT_SECRET } from './utils/constants';
 
 // Load environment variables first

@@ -1,4 +1,4 @@
-import { createClient, cacheExchange, fetchExchange } from 'urql';
+import { cacheExchange, createClient, fetchExchange } from 'urql';
 
 export const client = createClient({
   url: import.meta.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql',

@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+import '@testing-library/jest-dom';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
+
 import { SignUpForm } from '../../../components/public/SignUpForm';
 import { useAuth } from '../../../hooks/useAuth';
 

@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/providers/theme-provider';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useTheme } from '@/providers/theme-provider';
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();

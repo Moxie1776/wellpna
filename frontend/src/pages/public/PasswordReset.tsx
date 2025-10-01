@@ -1,15 +1,14 @@
-import { z } from 'zod';
-import { useMutation, gql } from 'urql';
-import { useSnackbar } from '@/hooks/useSnackbar';
-import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import Typography from '@mui/joy/Typography';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 // InputOTP removed, use Input directly
 import { zodResolver } from '@hookform/resolvers/zod';
+import Typography from '@mui/joy/Typography';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate,useSearchParams } from 'react-router-dom';
+import { gql,useMutation } from 'urql';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 // ...existing code...
 import {
   Form,
@@ -18,6 +17,8 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useSnackbar } from '@/hooks/useSnackbar';
 
 const REQUEST_PASSWORD_RESET_MUTATION = gql`
   mutation RequestPasswordReset($email: String!) {
@@ -51,7 +52,7 @@ const resetPasswordSchema = z
       .min(6, 'Password must be at least 6 characters'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: 'Passwords don\'t match',
     path: ['confirmPassword'],
   });
 

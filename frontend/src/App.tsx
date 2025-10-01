@@ -1,15 +1,16 @@
-import { Routes, Route } from 'react-router-dom';
+import { Route,Routes } from 'react-router-dom';
 import { Provider as UrqlProvider } from 'urql';
-import { client } from './lib/graphqlClient';
-import { ThemeProvider } from './providers/theme-provider';
-import { ToastProvider } from './providers/toast-provider';
+
 import Layout from './components/layout/layout';
+import { client } from './lib/graphqlClient';
+import { Dashboard } from './pages/dashboard/Dashboard';
+import EmailVerificationPage from './pages/public/EmailVerification';
+import HomePage from './pages/public/Home';
+import PasswordResetPage from './pages/public/PasswordReset';
 import SignInPage from './pages/public/Signin';
 import SignupPage from './pages/public/Signup';
-import { Dashboard } from './pages/dashboard/Dashboard';
-import HomePage from './pages/public/Home';
-import EmailVerificationPage from './pages/public/EmailVerification';
-import PasswordResetPage from './pages/public/PasswordReset';
+import { ThemeProvider } from './providers/theme-provider';
+import { ToastProvider } from './providers/toast-provider';
 
 const App = () => (
   <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>

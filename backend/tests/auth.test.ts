@@ -1,7 +1,8 @@
+import { afterAll,beforeAll, describe, expect, it } from '@jest/globals';
+
+import { yoga } from '../src/server';
 import { prisma } from './setup';
 import { createTestUserAndJwt, generateTestUserData } from './testHelpers';
-import { describe, beforeAll, it, expect, afterAll } from '@jest/globals';
-import { yoga } from '../src/server';
 // import logger from './utils/logger';
 
 // const testUtils = new TestUtils(prisma);

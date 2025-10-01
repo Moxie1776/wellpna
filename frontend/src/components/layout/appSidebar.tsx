@@ -1,5 +1,15 @@
 import { type ComponentProps } from 'react';
+import {
+  MdDashboard,
+  MdEmail,
+  MdHome,
+  MdLogin,
+  MdPersonAdd,
+  MdVpnKey,
+} from 'react-icons/md';
 import { Link, useLocation } from 'react-router-dom';
+
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -12,15 +22,6 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import {
-  MdHome,
-  MdDashboard,
-  MdLogin,
-  MdPersonAdd,
-  MdVpnKey,
-  MdEmail,
-} from 'react-icons/md';
 
 interface NavLink {
   label: string;
