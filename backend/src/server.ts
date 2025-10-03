@@ -47,13 +47,13 @@ export const yoga = createYoga<GraphQLContext>({
   context: async ({ request }) => {
     return {
       req: request,
-      prisma,
+      prisma: (global as any).testPrisma || prisma,
     };
   },
 });
 
 // Pass it into a server to hook into request handlers.
-const server = createServer(yoga);
+export const server = createServer(yoga);
 
 // Start the server and you're done!
 // Only start if this file is run directly (not imported)

@@ -1,32 +1,38 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
-import { defineConfig } from 'eslint/config';
-import importPlugin from 'eslint-plugin-import';
-import react from 'eslint-plugin-react';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import globals from 'globals';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsparser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
+import importPlugin from 'eslint-plugin-import'
+import react from 'eslint-plugin-react'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import globals from 'globals'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 // mimic CommonJS variables -- not needed if using CommonJS
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended,
-});
+})
 
 export default defineConfig([
   {
-    ignores: ['**/node_modules/*', '**/out/*', '**/src/assets/*'],
+    ignores: [
+      '**/node_modules/*',
+      '**/out/*',
+      '**/src/assets/*',
+      '**/dist/*',
+      '**/logs/*',
+    ],
   },
   ...compat.extends(
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier'
+    'prettier',
   ),
   {
     languageOptions: {
@@ -68,4 +74,4 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
-]);
+])

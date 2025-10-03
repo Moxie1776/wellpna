@@ -1,13 +1,16 @@
-import { afterAll,beforeAll, jest } from '@jest/globals';
-import { config } from 'dotenv';
+import { afterAll, beforeAll, jest } from '@jest/globals'
+import { config } from 'dotenv'
+import dotenv from 'dotenv'
 
-import { PrismaClient } from '../src/generated/prisma/client';
+import { prisma } from '../src/client'
+import { server } from '../src/server'
 
 // Load test environment variables
-config({ path: '.env.test' });
+dotenv.config()
 
 // Mock nodemailer
-import nodemailerMock from 'nodemailer-mock'; // Renamed to avoid conflict with the mock target
+// Renamed to avoid conflict with the mock target
+// import nodemailerMock from 'nodemailer-mock'
 
 // Mock nodemailer to return an object with a createTransporter method
 jest.mock('nodemailer', () => ({
@@ -21,47 +24,42 @@ jest.mock('nodemailer', () => ({
             from: 'test@example.com',
             to: ['user@example.com'],
           },
-        })
+        }),
       ),
-    };
-    return mockTransporter;
+    }
+    return mockTransporter
   }),
-}));
+}))
 
 // Global test database client
-let prisma: PrismaClient;
+// Use imported prisma from src/client
 
 beforeAll(async () => {
-  // Use a test database
-  process.env.DATABASE_URL = 'file:./test.db';
-
-  prisma = new PrismaClient();
-
-  // Clean up test data only (users with @example.com emails)
-  await prisma.user.deleteMany({
-    where: {
-      email: {
-        endsWith: '@example.com',
-      },
-    },
-  });
+  // Set global test prisma for server context
+  ;(global as any).testPrisma = prisma
 
   // Ensure roles exist (don't delete them)
   await prisma.userRole.upsert({
     where: { role: 'user' },
     update: {},
     create: { role: 'user' },
-  });
+  })
 
   await prisma.userRole.upsert({
     where: { role: 'admin' },
     update: {},
     create: { role: 'admin' },
-  });
-});
+  })
+
+  // Start the test server
+  server.listen(4000)
+})
 
 afterAll(async () => {
-  await prisma.$disconnect();
-});
+  // Call the teardown script for cleanup
+  const teardown = (await import('./teardown')).default
+  await teardown()
+  server.close()
+})
 
-export { prisma };
+export { prisma }

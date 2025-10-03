@@ -20,9 +20,10 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 10000,
   extensionsToTreatAsEsm: ['.ts'],
-  transformIgnorePatterns: [], // Temporarily set to empty to ensure all files are transformed
+  transformIgnorePatterns: [], // Temporarily set to empty to ensure all files
+  // are transformed
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  globalTeardown: '<rootDir>/tests/teardown.ts',
-};
+  // globalTeardown: '<rootDir>/tests/teardown.ts',
+}

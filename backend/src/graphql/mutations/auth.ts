@@ -1,10 +1,10 @@
-import crypto from 'crypto';
+import crypto from 'crypto'
 
-import { builder } from '../../builder';
-import { prisma } from '../../client';
-import { emailService } from '../../services/emailService';
-import { comparePassword, hashPassword, signJwt } from '../../utils/auth';
-import { AuthPayload } from '../types/Auth';
+import { builder } from '../../builder'
+import { prisma } from '../../client'
+import { emailService } from '../../services/emailService'
+import { comparePassword, hashPassword, signJwt } from '../../utils/auth'
+import { AuthPayload } from '../types/Auth'
 
 builder.mutationFields((t) => ({
   signUp: t.field({
@@ -14,22 +14,24 @@ builder.mutationFields((t) => ({
       password: t.arg.string({ required: true }),
       name: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: { email: args.email },
-      });
+      })
 
       if (existingUser) {
-        throw new Error('User with this email already exists');
+        throw new Error('User with this email already exists')
       }
 
       // Hash the password
-      const hashedPassword = await hashPassword(args.password);
+      const hashedPassword = await hashPassword(args.password)
 
       // Generate verification code
-      const verificationCode = crypto.randomInt(100000, 999999).toString();
-      const verificationCodeExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const verificationCode = crypto.randomInt(100000, 999999).toString()
+      const verificationCodeExpiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ) // 24 hours
 
       // Create the user
       const user = await prisma.user.create({
@@ -40,13 +42,13 @@ builder.mutationFields((t) => ({
           verificationCode,
           verificationCodeExpiresAt,
         },
-      });
+      })
 
       // Send verification email
       try {
-        await emailService.sendVerificationEmail(user.email, verificationCode);
+        await emailService.sendVerificationEmail(user.email, verificationCode)
       } catch (error) {
-        console.error('Failed to send verification email:', error);
+        console.error('Failed to send verification email:', error)
         // Don't fail signup if email fails, but log it
       }
 
@@ -56,12 +58,12 @@ builder.mutationFields((t) => ({
         email: user.email,
         name: user.name,
         role: user.roleId,
-      });
+      })
 
       return {
         token,
         user,
-      };
+      }
     },
   }),
 
@@ -71,20 +73,20 @@ builder.mutationFields((t) => ({
       email: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       // Find the user
       const user = await prisma.user.findUnique({
         where: { email: args.email },
-      });
+      })
 
       if (!user) {
-        throw new Error('Invalid email or password');
+        throw new Error('Invalid email or password')
       }
 
       // Check password
-      const isValid = await comparePassword(args.password, user.password);
+      const isValid = await comparePassword(args.password, user.password)
       if (!isValid) {
-        throw new Error('Invalid email or password');
+        throw new Error('Invalid email or password')
       }
 
       // Generate JWT token
@@ -93,12 +95,12 @@ builder.mutationFields((t) => ({
         email: user.email,
         name: user.name,
         role: user.roleId,
-      });
+      })
 
       return {
         token,
         user,
-      };
+      }
     },
   }),
 
@@ -107,23 +109,23 @@ builder.mutationFields((t) => ({
     args: {
       email: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       const user = await prisma.user.findUnique({
         where: { email: args.email },
-      });
+      })
 
       if (!user) {
         // Don't reveal if email exists or not for security
-        return true;
+        return true
       }
 
       if (user.validatedAt) {
-        throw new Error('Email already verified');
+        throw new Error('Email already verified')
       }
 
       // Generate verification code
-      const verificationCode = crypto.randomInt(100000, 999999).toString();
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const verificationCode = crypto.randomInt(100000, 999999).toString()
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
       await prisma.user.update({
         where: { id: user.id },
@@ -131,10 +133,10 @@ builder.mutationFields((t) => ({
           verificationCode,
           verificationCodeExpiresAt: expiresAt,
         },
-      });
+      })
 
-      await emailService.sendVerificationEmail(user.email, verificationCode);
-      return true;
+      await emailService.sendVerificationEmail(user.email, verificationCode)
+      return true
     },
   }),
 
@@ -144,29 +146,29 @@ builder.mutationFields((t) => ({
       email: t.arg.string({ required: true }),
       code: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       const user = await prisma.user.findUnique({
         where: { email: args.email },
-      });
+      })
 
       if (!user) {
-        throw new Error('Invalid verification code');
+        throw new Error('Invalid verification code')
       }
 
       if (user.validatedAt) {
-        throw new Error('Email already verified');
+        throw new Error('Email already verified')
       }
 
       if (!user.verificationCode || !user.verificationCodeExpiresAt) {
-        throw new Error('No verification code found');
+        throw new Error('No verification code found')
       }
 
       if (user.verificationCode !== args.code) {
-        throw new Error('Invalid verification code');
+        throw new Error('Invalid verification code')
       }
 
       if (user.verificationCodeExpiresAt < new Date()) {
-        throw new Error('Verification code expired');
+        throw new Error('Verification code expired')
       }
 
       // Mark email as verified
@@ -177,7 +179,7 @@ builder.mutationFields((t) => ({
           verificationCode: null,
           verificationCodeExpiresAt: null,
         },
-      });
+      })
 
       // Generate JWT token
       const token = signJwt({
@@ -185,12 +187,12 @@ builder.mutationFields((t) => ({
         email: updatedUser.email,
         name: updatedUser.name,
         role: updatedUser.roleId,
-      });
+      })
 
       return {
         token,
         user: updatedUser,
-      };
+      }
     },
   }),
 
@@ -199,19 +201,19 @@ builder.mutationFields((t) => ({
     args: {
       email: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       const user = await prisma.user.findUnique({
         where: { email: args.email },
-      });
+      })
 
       if (!user) {
         // Don't reveal if email exists or not for security
-        return true;
+        return true
       }
 
       // Generate reset token
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      const resetToken = crypto.randomBytes(32).toString('hex')
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
       await prisma.user.update({
         where: { id: user.id },
@@ -219,10 +221,10 @@ builder.mutationFields((t) => ({
           passwordResetToken: resetToken,
           passwordResetTokenExpiresAt: expiresAt,
         },
-      });
+      })
 
-      await emailService.sendPasswordResetEmail(user.email, resetToken);
-      return true;
+      await emailService.sendPasswordResetEmail(user.email, resetToken)
+      return true
     },
   }),
 
@@ -232,7 +234,7 @@ builder.mutationFields((t) => ({
       token: t.arg.string({ required: true }),
       newPassword: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, _ctx) => {
       const user = await prisma.user.findFirst({
         where: {
           passwordResetToken: args.token,
@@ -240,14 +242,14 @@ builder.mutationFields((t) => ({
             gt: new Date(),
           },
         },
-      });
+      })
 
       if (!user) {
-        throw new Error('Invalid or expired reset token');
+        throw new Error('Invalid or expired reset token')
       }
 
       // Hash new password
-      const hashedPassword = await hashPassword(args.newPassword);
+      const hashedPassword = await hashPassword(args.newPassword)
 
       // Update password and clear reset token
       const updatedUser = await prisma.user.update({
@@ -257,7 +259,7 @@ builder.mutationFields((t) => ({
           passwordResetToken: null,
           passwordResetTokenExpiresAt: null,
         },
-      });
+      })
 
       // Generate JWT token
       const token = signJwt({
@@ -265,12 +267,12 @@ builder.mutationFields((t) => ({
         email: updatedUser.email,
         name: updatedUser.name,
         role: updatedUser.roleId,
-      });
+      })
 
       return {
         token,
         user: updatedUser,
-      };
+      }
     },
   }),
-}));
+}))

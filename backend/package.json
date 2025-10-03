@@ -10,7 +10,6 @@
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
     "generate": "prisma generate",
-    "pretest": "DATABASE_URL=\"file:./test.db\" prisma migrate deploy",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch --detectOpenHandles",
     "lint": "eslint .",

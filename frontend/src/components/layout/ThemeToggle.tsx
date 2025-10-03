@@ -1,36 +1,39 @@
-import Option from '@mui/joy/Option';
-import Select from '@mui/joy/Select';
-import { useColorScheme } from '@mui/joy/styles';
-import * as React from 'react';
-import { MdDarkMode, MdLightMode, MdSettingsBrightness } from 'react-icons/md';
+import { IconButton } from '@mui/joy'
+import * as React from 'react'
+import { MdDarkMode, MdLightMode } from 'react-icons/md'
+
+import { useMode } from '../../hooks/useMode'
 
 export default function ThemeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
+  const { mode, setMode } = useMode()
+  const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) return null;
+    setMounted(true)
+  }, [])
+  if (!mounted) {
+    return <IconButton size="sm" variant="outlined" color="neutral" disabled />
+  }
 
   return (
-    <Select
-      value={mode}
-      onChange={(_, newMode) => setMode(newMode)}
-      sx={{ width: 'max-content', minWidth: 120 }}
-      startDecorator={
-        mode === 'dark' ? (
-          <MdDarkMode />
-        ) : mode === 'light' ? (
-          <MdLightMode />
-        ) : (
-          <MdSettingsBrightness />
-        )
-      }
+    <IconButton
+      size="sm"
+      variant="outlined"
+      color="neutral"
+      onClick={() => {
+        setMode(mode === 'light' ? 'dark' : 'light')
+      }}
+      sx={[
+        mode === 'dark'
+          ? { '& > *:first-of-type': { display: 'none' } }
+          : { '& > *:first-of-type': { display: 'initial' } },
+        mode === 'light'
+          ? { '& > *:last-of-type': { display: 'none' } }
+          : { '& > *:last-of-type': { display: 'initial' } },
+      ]}
     >
-      <Option value='system'>System</Option>
-      <Option value='light'>Light</Option>
-      <Option value='dark'>Dark</Option>
-    </Select>
-  );
+      <MdDarkMode />
+      <MdLightMode />
+    </IconButton>
+  )
 }

@@ -1,39 +1,35 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import Typography from '@mui/joy/Typography';
-import { useForm } from 'react-hook-form';
-import { MdLogin } from 'react-icons/md';
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Box } from '@mui/joy'
+import { Button, Card, CardContent, Input, Typography } from '@mui/joy'
+import { useForm } from 'react-hook-form'
+import { MdLogin } from 'react-icons/md'
 // ...existing code...
-import { z } from 'zod';
+import { z } from 'zod'
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '@/components/ui/form'
 
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth'
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
-});
+})
 
 export const SignInForm = ({
   onSignIn,
-  showCard = true,
   title = 'Sign In',
 }: {
-  onSignIn: () => void;
-  showCard?: boolean;
-  title?: string;
+  onSignIn: () => void
+  title?: string
 }) => {
-  const { signIn, error } = useAuth();
-  console.log('SignInForm error:', error);
+  const { signIn, error } = useAuth()
+  console.log('SignInForm error:', error)
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -41,30 +37,30 @@ export const SignInForm = ({
       email: '',
       password: '',
     },
-  });
+  })
 
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
     try {
-      await signIn(values.email, values.password);
-      onSignIn();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+      await signIn(values.email, values.password)
+      onSignIn()
+    } catch {
       // Error handling is done in the useAuth hook
     }
-  };
+  }
 
   const formContent = (
-    <Form onSubmit={form.handleSubmit(onSubmit)}>
-      <div className='my-10'>
+    <Box sx={{ minWidth: 300, maxWidth: 400 }}>
+      <Form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
-          label='Email'
-          inputId='signin-email'
+          label="Email"
+          inputId="signin-email"
           children={
             <FormItem>
               <FormControl>
                 <Input
-                  placeholder='Enter your email'
-                  type='email'
+                  placeholder="Enter your email"
+                  type="email"
+                  variant="solid"
                   slotProps={{
                     input: {
                       ...form.register('email', { required: true }),
@@ -78,14 +74,15 @@ export const SignInForm = ({
           }
         />
         <FormField
-          label='Password'
-          inputId='signin-password'
+          label="Password"
+          inputId="signin-password"
           children={
-            <FormItem className='py-10'>
+            <FormItem className="py-10">
               <FormControl>
                 <Input
-                  type='password'
-                  placeholder='Enter your password'
+                  type="password"
+                  variant="solid"
+                  placeholder="Enter your password"
                   slotProps={{
                     input: {
                       ...form.register('password', { required: true }),
@@ -100,25 +97,24 @@ export const SignInForm = ({
             </FormItem>
           }
         />
-        <Button type='submit' className='mt-[10px]'>
-          <span className='font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]'>
+        <Button type="submit" className="mt-[10px]">
+          {/* eslint-disable-next-line max-len */}
+          <span className="font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]">
             Sign In&nbsp;
             <MdLogin size={20} />
           </span>
         </Button>
-        {error && <p className='text-red-500 text-sm mt-2'>{error}</p>}
-      </div>
-    </Form>
-  );
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      </Form>
+    </Box>
+  )
 
-  return showCard ? (
-    <Card className='w-full max-w-md'>
-      <Typography level='h4' sx={{ mb: 2 }}>
+  return (
+    <Card sx={{ minWidth: 300, maxWidth: 400 }} color="primary" variant="soft">
+      <Typography level="h4" sx={{ mb: 2 }}>
         {title}
       </Typography>
       <CardContent>{formContent}</CardContent>
     </Card>
-  ) : (
-    formContent
-  );
-};
+  )
+}

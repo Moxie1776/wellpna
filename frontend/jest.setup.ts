@@ -1,5 +1,6 @@
 // Polyfill for document.elementFromPoint for JSDOM
 if (typeof document !== 'undefined' && !document.elementFromPoint) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   document.elementFromPoint = function (_x, _y) {
     // Simple polyfill: always return the body
     return document.body;

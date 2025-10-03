@@ -1,34 +1,39 @@
-import { config } from 'dotenv';
+import { config } from 'dotenv'
 
-import { PrismaClient } from '../src/generated/prisma/client';
+import { prisma } from '../src/client'
 
-config();
-
-const prisma = new PrismaClient();
+config()
 
 async function main() {
-  // Create default user role
-  await prisma.userRole.upsert({
-    where: { role: 'user' },
-    update: {},
-    create: { role: 'user' },
-  });
+  try {
+    console.log('Seeding: Creating user role...')
+    const userRole = await prisma.userRole.upsert({
+      where: { role: 'user' },
+      update: {},
+      create: { role: 'user' },
+    })
+    console.log('User role result:', userRole)
 
-  // Create admin role
-  await prisma.userRole.upsert({
-    where: { role: 'admin' },
-    update: {},
-    create: { role: 'admin' },
-  });
+    console.log('Seeding: Creating admin role...')
+    const adminRole = await prisma.userRole.upsert({
+      where: { role: 'admin' },
+      update: {},
+      create: { role: 'admin' },
+    })
+    console.log('Admin role result:', adminRole)
 
-  console.log('Database seeded successfully');
+    console.log('Database seeded successfully')
+  } catch (error) {
+    console.error('Seeding error:', error)
+    throw error
+  }
 }
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })

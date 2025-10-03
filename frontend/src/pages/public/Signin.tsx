@@ -1,19 +1,32 @@
-import { useNavigate } from 'react-router-dom';
+import Card from '@mui/joy/Card'
+import CardContent from '@mui/joy/CardContent'
+import { useNavigate } from 'react-router-dom'
 
-import { SignInForm } from '@/components/public/SignInForm';
+import { SignInForm } from '@/components/public/SignInForm'
 
 const SignInPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleLogin = () => {
-    navigate('/');
-  };
+    navigate('/')
+  }
 
   return (
-    <div className='flex items-center justify-center h-screen'>
-      <SignInForm onSignIn={handleLogin} />
-    </div>
-  );
-};
+    <Card
+      color="primary"
+      variant="soft"
+      sx={{
+        minWidth: 300,
+        maxWidth: 400,
+        justifyContent: 'center',
+        justifyItems: 'center',
+      }}
+    >
+      <CardContent>
+        <SignInForm onSignIn={handleLogin} />
+      </CardContent>
+    </Card>
+  )
+}
 
-export default SignInPage;
+export default SignInPage

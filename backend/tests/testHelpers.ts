@@ -51,7 +51,8 @@ export async function createTestUserAndJwt(
   const roleId = overrides.roleId || 'user';
 
   // Clean up any existing test user with the same email or name
-  // This helps prevent conflicts if a previous test run didn't clean up properly
+  // This helps prevent conflicts if a previous test run didn't clean up
+  // properly
   await prisma.user.deleteMany({
     where: {
       OR: [{ email }, { name }],
