@@ -1,20 +1,15 @@
-/* eslint-disable max-len */
-import { Box, Card, CardContent, Sheet, Stack } from '@mui/joy'
+import { Box, Card, CardContent, Sheet, Stack, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
-import { useMode } from '@/hooks/useMode'
 
 const HomePage = () => {
   const navigate = useNavigate()
-  const { mode } = useMode()
 
   return (
     <Sheet
       sx={{
         varient: 'plain',
-        minHeight: '100vh',
-        minWidth: '100vw',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -37,18 +32,29 @@ const HomePage = () => {
             mb: 4,
           }}
         >
-          <h1
-            className="scroll-m-20 text-center text-4xl text-primary font-extrabold
-            tracking-tight text-balance"
+          <Typography
+            level="h1"
+            sx={{
+              fontSize: '2.25rem',
+              color: 'primary.main',
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              textWrap: 'balance',
+            }}
           >
             WellPNA
-          </h1>
-          <h3
-            className="scroll-m-20 text-2xl text-secondary font-semibold
-            tracking-tight"
+          </Typography>
+          <Typography
+            level="h3"
+            sx={{
+              fontSize: '1.5rem',
+              color: 'text.secondary',
+              fontWeight: 600,
+              letterSpacing: '-0.025em',
+            }}
           >
             Well Plug & Abandonment Solutions
-          </h3>
+          </Typography>
         </Box>
 
         {/* Main content with image and sign-in form */}
@@ -68,15 +74,12 @@ const HomePage = () => {
               justifyContent: 'center',
             }}
           >
-            <img
-              src="/src/assets/cybergedeon_no_shale_gas_red.svg"
-              alt="Well Symbol"
+            <svg
               width={300}
               height={300}
-              className={`w-80 h-80 max-w-[400px] max-h-[400px] opacity-90 ${
-                mode === 'dark' ? 'filter invert' : ''
-              }`}
-            />
+              color="white"
+              path="../../assets/cybergedeon_no_shale_gas_red.svg"
+            ></svg>
           </Box>
 
           {/* Right side - Signin Card */}
@@ -97,7 +100,7 @@ const HomePage = () => {
             >
               <CardContent>
                 <SignInForm
-                  title="Access your WellPNA account"
+                  title="Sign in to your account"
                   onSignIn={() => navigate('/dashboard')}
                 />
               </CardContent>

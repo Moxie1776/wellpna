@@ -105,3 +105,41 @@ export const colors = {
     dark: '#334155',
   },
 }
+
+export const darkModeOverrides = {
+  background: {
+    body: '#1a1a1a',
+    surface: '#1a1a1a',
+    popup: '#2d2d2d',
+    level1: '#2d2d2d',
+    level2: '#333333',
+    level3: '#404040',
+    tooltip: '#ffffff',
+    backdrop: 'rgba(0, 0, 0, 0.7)',
+  },
+  primary: {
+    softBg: '#2d2d2d',
+    softHoverBg: '#333333',
+    softActiveBg: '#404040',
+  },
+  neutral: {
+    softBg: '#2d2d2d',
+    softHoverBg: '#333333',
+    softActiveBg: '#404040',
+  },
+  danger: {
+    softBg: '#2d2d2d',
+    softHoverBg: '#333333',
+    softActiveBg: '#404040',
+  },
+  success: {
+    softBg: '#2d2d2d',
+    softHoverBg: '#333333',
+    softActiveBg: '#404040',
+  },
+  warning: {
+    softBg: '#2d2d2d',
+    softHoverBg: '#333333',
+    softActiveBg: '#404040',
+  },
+}

@@ -5,13 +5,18 @@ import '@fontsource/roboto/700.css'
 
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 
-import { colors } from '../lib/colors'
+import { colors, darkModeOverrides } from '../lib/colors'
 import { useModeStore } from '../store/theme'
 
 export const theme = extendTheme({
   colorSchemes: {
     light: { palette: colors },
-    dark: { palette: colors },
+    dark: {
+      palette: {
+        ...colors,
+        ...darkModeOverrides,
+      },
+    },
   },
   fontFamily: {
     display: 'Roboto, sans-serif',

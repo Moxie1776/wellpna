@@ -12,34 +12,51 @@ export default function Layout({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user
   return (
     <Sheet
+      variant="plain"
       sx={{
         display: 'flex',
         minHeight: '100vh',
+        maxHeight: '100vh',
         minWidth: '100vw',
+        maxWidth: '100vw',
         border: 'none',
         boxShadow: 'none',
       }}
     >
       <Sidebar isAuthenticated={isAuthenticated} />
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <header
-          style={{
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          component="header"
+          sx={{
+            variant: 'soft',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             height: 64,
             borderBottom: '1px solid',
             borderColor: 'divider',
             padding: '0 1rem',
-            gap: '1rem',
           }}
         >
           <Breadcrumbs />
-          <div />
           <ThemeToggle />
-        </header>
-        <main style={{ flex: 1, padding: '1rem', borderWidth: 0 }}>
+        </Box>
+        <Sheet
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           {children}
-        </main>
+        </Sheet>
       </Box>
     </Sheet>
   )

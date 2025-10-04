@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button,Card, CardContent, Input } from '@mui/joy'
-import Typography from '@mui/joy/Typography'
+import { Button, Input, Typography } from '@mui/joy'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -43,71 +42,67 @@ export const EmailVerificationForm = ({
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <Typography level="h4" sx={{ mb: 2 }}>
-        Verify Your Email
-      </Typography>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <FormField
-              label="Email"
-              inputId="email-input"
-              children={
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      id="email-input"
-                      placeholder="Enter your email"
-                      {...form.register('email')}
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {form.formState.errors.email?.message}
-                  </FormMessage>
-                </FormItem>
-              }
-            />
-            <FormField
-              label="Verification Code"
-              inputId="code-input"
-              children={
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="Enter 6-digit code"
-                      slotProps={{
-                        input: {
-                          ...form.register('code'),
-                          id: 'code-input',
-                        },
-                      }}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {form.formState.errors.code?.message}
-                  </FormMessage>
-                </FormItem>
-              }
-            />
-            <Button type="submit" disabled={loading}>
-              {/* eslint-disable-next-line max-len */}
-              <span className="font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]">
-                {loading ? 'Verifying...' : 'Verify Email'}
-              </span>
-            </Button>
-            <Button type="button" variant="outlined" onClick={handleResend}>
-              {/* eslint-disable-next-line max-len */}
-              <span className="font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]">
-                Resend Code
-              </span>
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={handleSubmit}>
+        <FormField
+          label="Email"
+          inputId="email-input"
+          children={
+            <FormItem>
+              <FormControl>
+                <Input
+                  id="email-input"
+                  placeholder="Enter your email"
+                  {...form.register('email')}
+                />
+              </FormControl>
+              <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+            </FormItem>
+          }
+        />
+        <FormField
+          label="Verification Code"
+          inputId="code-input"
+          children={
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Enter 6-digit code"
+                  slotProps={{
+                    input: {
+                      ...form.register('code'),
+                      id: 'code-input',
+                    },
+                  }}
+                  disabled={loading}
+                />
+              </FormControl>
+              <FormMessage>{form.formState.errors.code?.message}</FormMessage>
+            </FormItem>
+          }
+        />
+        <Button type="submit" disabled={loading}>
+          {}
+          <Typography
+            level="title-lg"
+            fontWeight="lg"
+            sx={{ display: 'flex', alignItems: 'center', gap: 2, p: '4px' }}
+          >
+            {loading ? 'Verifying...' : 'Verify Email'}
+          </Typography>
+        </Button>
+        <Button type="button" variant="outlined" onClick={handleResend}>
+          <Typography
+            level="title-lg"
+            fontWeight="lg"
+            sx={{ display: 'flex', alignItems: 'center', gap: 2, p: '4px' }}
+          >
+            Resend Code
+          </Typography>
+        </Button>
+      </form>
+    </Form>
   )
 }

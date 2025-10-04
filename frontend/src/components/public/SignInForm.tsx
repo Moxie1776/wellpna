@@ -77,7 +77,7 @@ export const SignInForm = ({
           label="Password"
           inputId="signin-password"
           children={
-            <FormItem className="py-10">
+            <FormItem sx={{ py: 10 }}>
               <FormControl>
                 <Input
                   type="password"
@@ -97,14 +97,27 @@ export const SignInForm = ({
             </FormItem>
           }
         />
-        <Button type="submit" className="mt-[10px]">
-          {/* eslint-disable-next-line max-len */}
-          <span className="font-semibold text-lg tracking-wide flex items-center gap-2 p-[4px]">
+        <Button type="submit" sx={{ mt: '10px' }}>
+          <Typography
+            level="body-lg"
+            sx={{
+              fontWeight: 'bold',
+              letterSpacing: '0.025em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              p: '4px',
+            }}
+          >
             Sign In&nbsp;
             <MdLogin size={20} />
-          </span>
+          </Typography>
         </Button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+        {error && (
+          <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
       </Form>
     </Box>
   )

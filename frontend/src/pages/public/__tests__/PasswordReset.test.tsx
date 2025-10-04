@@ -14,7 +14,7 @@ jest.mock('urql', () => ({
 }))
 
 // Mock useSnackbar
-jest.mock('@/hooks/useSnackbar', () => ({
+jest.mock('@/components/ui/snackbar', () => ({
   useSnackbar: () => ({
     showSnackbar: jest.fn(),
   }),

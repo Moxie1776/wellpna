@@ -135,11 +135,7 @@ const EmailVerificationPage = () => {
         Verify Your Email
       </Typography>
       <CardContent>
-        <Form
-          {...form}
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8"
-        >
+        <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
           <FormField label="Email" inputId="verify-email">
             <FormItem>
               {/* <FormLabel htmlFor='verify-email'>Email</FormLabel> */}

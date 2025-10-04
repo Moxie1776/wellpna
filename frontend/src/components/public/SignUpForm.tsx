@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Input } from '@mui/joy'
+import { Box, Button, Input } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
 import { useForm } from 'react-hook-form'
 // ...existing code...
@@ -46,7 +46,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
 
   return (
     <Form>
-      <div className="my-4">
+      <Box sx={{ my: 2 }}>
         <Typography level="h4" sx={{ mb: 2 }}>
           Sign Up
         </Typography>
@@ -116,12 +116,16 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
         <Button
           type="submit"
           onClick={form.handleSubmit(onSubmit)}
-          className="mt-4"
+          sx={{ mt: 4 }}
         >
           Sign Up
         </Button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-      </div>
+        {error && (
+          <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
+      </Box>
     </Form>
   )
 }

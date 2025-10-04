@@ -1,8 +1,9 @@
-import FormControl from '@mui/joy/FormControl';
-import FormHelperText from '@mui/joy/FormHelperText';
-import * as React from 'react';
+import FormControl from '@mui/joy/FormControl'
+import FormHelperText from '@mui/joy/FormHelperText'
+import FormLabel from '@mui/joy/FormLabel'
+import * as React from 'react'
 
-export { FormControl, FormHelperText };
+export { FormControl, FormHelperText, FormLabel }
 
 export const Form = (props: React.HTMLProps<HTMLFormElement>) => {
   // Only pass valid form props to <form>
@@ -25,15 +26,15 @@ export const Form = (props: React.HTMLProps<HTMLFormElement>) => {
     'aria-label',
     'aria-labelledby',
     // Add any other valid form props as needed
-  ];
-  const formProps: Record<string, any> = {};
+  ]
+  const formProps: Record<string, any> = {}
   Object.keys(props).forEach((key) => {
     if (allowed.includes(key)) {
-      formProps[key] = (props as any)[key];
+      formProps[key] = (props as any)[key]
     }
-  });
-  return <form {...formProps}>{props.children}</form>;
-};
+  })
+  return <form {...formProps}>{props.children}</form>
+}
 
 export const FormField = ({
   label,
@@ -41,34 +42,29 @@ export const FormField = ({
   children,
   ...rest
 }: {
-  label: string;
-  inputId: string;
-  children: React.ReactNode;
-  [key: string]: unknown;
+  label: string
+  inputId: string
+  children: React.ReactNode
+  [key: string]: unknown
 }) => (
   <FormControl {...rest}>
-    <label
-      htmlFor={inputId}
-      style={{ fontWeight: 500, marginBottom: 4, display: 'block' }}
-    >
-      {label}
-    </label>
+    <FormLabel htmlFor={inputId}>{label}</FormLabel>
     {children}
   </FormControl>
-);
+)
 
 export const FormItem = ({
   children,
   ...rest
 }: {
-  children: React.ReactNode;
-  [key: string]: unknown;
-}) => <div {...rest}>{children}</div>;
+  children: React.ReactNode
+  [key: string]: unknown
+}) => <div {...rest}>{children}</div>
 
 export const FormMessage = ({
   children,
   ...rest
 }: {
-  children: React.ReactNode;
-  [key: string]: unknown;
-}) => <FormHelperText {...rest}>{children}</FormHelperText>;
+  children: React.ReactNode
+  [key: string]: unknown
+}) => <FormHelperText {...rest}>{children}</FormHelperText>

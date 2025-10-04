@@ -33,13 +33,12 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
     <>
       <Box
         sx={{
-          variant: 'soft',
           padding: '1rem 1rem',
           fontWeight: 700,
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'var(--joy-palette-primary-500)',
+          backgroundColor: 'primary.main',
           gap: 8,
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -47,7 +46,12 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
         }}
       >
         {/* Theme toggle icon */}
-        <JoyIconButton variant="plain" color="neutral" size="sm" sx={{ mr: 1 }}>
+        <JoyIconButton
+          variant="plain"
+          color="neutral"
+          size="sm"
+          sx={{ mr: 1, color: '#fff' }}
+        >
           {isAuthenticated ? <MdDashboard size={24} /> : <MdHome size={24} />}
         </JoyIconButton>
         {/* Home/dashboard icon and clickable WellPnA */}
