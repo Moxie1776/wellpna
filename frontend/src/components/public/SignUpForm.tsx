@@ -1,25 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, Button, Input } from '@mui/joy'
+import { Box, Button } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
-import { useForm } from 'react-hook-form'
-// ...existing code...
+import React from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
+import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
+import { Form, FormControl, FormItem } from '@/components/ui/form'
+import passwordSchema from '@/utils/passwordSchema'
 
 import { useAuth } from '../../hooks/useAuth'
 import logger from '../../utils/logger'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.email({ message: 'Please enter a valid email address' }),
+  password: passwordSchema,
 })
 
 export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
@@ -33,7 +29,46 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
       email: '',
       password: '',
     },
+    mode: 'onChange',
   })
+
+  // Helper text state for name, email, and password
+  const [nameHelperText, setNameHelperText] = React.useState('Enter your name.')
+  const [emailHelperText, setEmailHelperText] = React.useState(
+    'Enter your email address.',
+  )
+  const [passwordHelperText, setPasswordHelperText] = React.useState(
+    'Enter your password.',
+  )
+
+  React.useEffect(() => {
+    if (form.formState.errors.name) {
+      setNameHelperText(
+        form.formState.errors.name.message || 'Enter your name.',
+      )
+    } else {
+      setNameHelperText('Enter your name.')
+    }
+    if (form.formState.errors.email) {
+      setEmailHelperText(
+        form.formState.errors.email.message || 'Enter your email address.',
+      )
+    } else {
+      setEmailHelperText('Enter your email address.')
+    }
+    if (form.formState.errors.password) {
+      setPasswordHelperText(
+        form.formState.errors.password.message || 'Enter your password.',
+      )
+    } else {
+      setPasswordHelperText('Enter your password.')
+    }
+  }, [
+    form.formState.errors.name,
+    form.formState.errors.email,
+    form.formState.errors.password,
+    form.formState.isSubmitted,
+  ])
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
@@ -46,87 +81,55 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   }
 
   return (
-    <Form>
-      <Box sx={{ my: 2 }}>
-        <Typography level="h4" sx={{ mb: 2 }}>
-          Sign Up
-        </Typography>
-        <FormField
-          label="Name"
-          inputId="signup-name"
-          variant="solid"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Enter your name"
-                  type="text"
-                  variant="solid"
-                  slotProps={{
-                    input: { ...form.register('name'), id: 'signup-name' },
-                  }}
-                />
-              </FormControl>
-              <FormMessage>{form.formState.errors.name?.message}</FormMessage>
-            </FormItem>
-          }
-        />
-        <FormField
-          label="Email"
-          inputId="signup-email"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Enter your email"
-                  type="email"
-                  variant="solid"
-                  slotProps={{
-                    input: { ...form.register('email'), id: 'signup-email' },
-                  }}
-                />
-              </FormControl>
-              <FormMessage>{form.formState.errors.email?.message}</FormMessage>
-            </FormItem>
-          }
-        />
-        <FormField
-          label="Password"
-          inputId="signup-password"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="password"
-                  variant="solid"
-                  placeholder="Enter your password"
-                  slotProps={{
-                    input: {
-                      ...form.register('password'),
-                      id: 'signup-password',
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormMessage>
-                {form.formState.errors.password?.message}
-              </FormMessage>
-            </FormItem>
-          }
-        />
-        <Button
-          type="submit"
-          onClick={form.handleSubmit(onSubmit)}
-          sx={{ mt: 4 }}
-        >
-          Sign Up
-        </Button>
-        {error && (
-          <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
-            {error}
+    <FormProvider {...form}>
+      <Form onSubmit={form.handleSubmit(onSubmit)}>
+        <Box sx={{ my: 2 }}>
+          <Typography level="h4" sx={{ mb: 2 }}>
+            Sign Up
           </Typography>
-        )}
-      </Box>
-    </Form>
+          <FormItem>
+            <FormControl>
+              <RHFInputJoy
+                name="name"
+                label="Name"
+                type="text"
+                helperText={nameHelperText}
+                disabled={form.formState.isSubmitting}
+              />
+            </FormControl>
+          </FormItem>
+          <FormItem>
+            <FormControl>
+              <RHFInputJoy
+                name="email"
+                label="Email"
+                type="email"
+                helperText={emailHelperText}
+                disabled={form.formState.isSubmitting}
+              />
+            </FormControl>
+          </FormItem>
+          <FormItem>
+            <FormControl>
+              <RHFInputJoy
+                name="password"
+                label="Password"
+                type="password"
+                helperText={passwordHelperText}
+                disabled={form.formState.isSubmitting}
+              />
+            </FormControl>
+          </FormItem>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            Sign Up
+          </Button>
+          {error && (
+            <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+        </Box>
+      </Form>
+    </FormProvider>
   )
 }

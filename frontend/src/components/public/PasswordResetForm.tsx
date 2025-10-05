@@ -1,28 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Input, Typography } from '@mui/joy'
-import { useForm } from 'react-hook-form'
+import { Button, Typography } from '@mui/joy'
+import React from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
+
+import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
+import { Form, FormControl, FormItem } from '@/components/ui/form'
+import { passwordSchema } from '@/utils/'
 
 const requestResetSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.email({ message: 'Please enter a valid email address' }),
 })
 
 const resetPasswordSchema = z
   .object({
     code: z.string().length(6, 'Code must be 6 digits'),
-    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
+    newPassword: passwordSchema,
+    confirmPassword: passwordSchema,
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
+    // eslint-disable-next-line quotes
     message: "Passwords don't match",
     path: ['confirmPassword'],
   })
@@ -47,105 +44,139 @@ export function PasswordResetForm({
   const requestForm = useForm<z.infer<typeof requestResetSchema>>({
     resolver: zodResolver(requestResetSchema),
     defaultValues: { email: defaultEmail },
+    mode: 'onChange',
   })
   const resetForm = useForm<z.infer<typeof resetPasswordSchema>>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { code: '', newPassword: '', confirmPassword: '' },
+    mode: 'onChange',
   })
 
+  // Helper text state for request and reset forms
+  const [emailHelperText, setEmailHelperText] = React.useState(
+    'Enter your email address.',
+  )
+  const [codeHelperText, setCodeHelperText] = React.useState(
+    'Enter 6-digit code.',
+  )
+  const [newPasswordHelperText, setNewPasswordHelperText] = React.useState(
+    'Enter new password.',
+  )
+  const [confirmPasswordHelperText, setConfirmPasswordHelperText] =
+    React.useState('Confirm new password.')
+
+  React.useEffect(() => {
+    if (requestForm.formState.errors.email) {
+      setEmailHelperText(
+        requestForm.formState.errors.email.message ||
+          'Enter your email address.',
+      )
+    } else {
+      setEmailHelperText('Enter your email address.')
+    }
+    if (resetForm.formState.errors.code) {
+      setCodeHelperText(
+        resetForm.formState.errors.code.message || 'Enter 6-digit code.',
+      )
+    } else {
+      setCodeHelperText('Enter 6-digit code.')
+    }
+    if (resetForm.formState.errors.newPassword) {
+      setNewPasswordHelperText(
+        resetForm.formState.errors.newPassword.message || 'Enter new password.',
+      )
+    } else {
+      setNewPasswordHelperText('Enter new password.')
+    }
+    if (resetForm.formState.errors.confirmPassword) {
+      setConfirmPasswordHelperText(
+        resetForm.formState.errors.confirmPassword.message ||
+          'Confirm new password.',
+      )
+    } else {
+      setConfirmPasswordHelperText('Confirm new password.')
+    }
+  }, [
+    requestForm.formState.errors.email,
+    resetForm.formState.errors.code,
+    resetForm.formState.errors.newPassword,
+    resetForm.formState.errors.confirmPassword,
+    requestForm.formState.isSubmitted,
+    resetForm.formState.isSubmitted,
+  ])
+
   return mode === 'request' ? (
-    <Form {...requestForm}>
-      <form onSubmit={requestForm.handleSubmit(onRequestReset!)}>
-        <FormField
-          label="Email"
-          inputId="reset-email-input"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  id="reset-email-input"
-                  placeholder="Enter your email"
-                  {...requestForm.register('email')}
-                />
-              </FormControl>
-              <FormMessage>
-                {requestForm.formState.errors.email?.message}
-              </FormMessage>
-            </FormItem>
-          }
-        />
+    <FormProvider {...requestForm}>
+      <Form
+        onSubmit={requestForm.handleSubmit(
+          (data) => onRequestReset && onRequestReset(data),
+        )}
+      >
+        <FormItem>
+          <FormControl>
+            <RHFInputJoy
+              name="email"
+              label="Email"
+              type="email"
+              helperText={emailHelperText}
+              disabled={loading}
+            />
+          </FormControl>
+        </FormItem>
         <Button type="submit" disabled={loading}>
           <Typography level="title-lg" fontWeight="lg">
             {loading ? 'Sending...' : 'Send Reset Link'}
           </Typography>
         </Button>
-      </form>
-    </Form>
+      </Form>
+    </FormProvider>
   ) : (
-    <Form {...resetForm}>
-      <form onSubmit={resetForm.handleSubmit(onResetPassword!)}>
-        <FormField
-          label="Verification Code"
-          inputId="reset-code-input"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  id="reset-code-input"
-                  placeholder="Enter 6-digit code"
-                  {...resetForm.register('code')}
-                />
-              </FormControl>
-              <FormMessage>
-                {resetForm.formState.errors.code?.message}
-              </FormMessage>
-            </FormItem>
-          }
-        />
-        <FormField
-          label="New Password"
-          inputId="reset-new-password-input"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  id="reset-new-password-input"
-                  type="password"
-                  placeholder="Enter new password"
-                  {...resetForm.register('newPassword')}
-                />
-              </FormControl>
-              <FormMessage>
-                {resetForm.formState.errors.newPassword?.message}
-              </FormMessage>
-            </FormItem>
-          }
-        />
-        <FormField
-          label="Confirm Password"
-          inputId="reset-confirm-password-input"
-          children={
-            <FormItem>
-              <FormControl>
-                <Input
-                  id="reset-confirm-password-input"
-                  type="password"
-                  placeholder="Confirm new password"
-                  {...resetForm.register('confirmPassword')}
-                />
-              </FormControl>
-              <FormMessage>
-                {resetForm.formState.errors.confirmPassword?.message}
-              </FormMessage>
-            </FormItem>
-          }
-        />
+    <FormProvider {...resetForm}>
+      <Form
+        onSubmit={resetForm.handleSubmit(
+          (data) => onResetPassword && onResetPassword(data),
+        )}
+      >
+        <FormItem>
+          <FormControl>
+            <RHFInputJoy
+              name="code"
+              label="Verification Code"
+              type="text"
+              helperText={codeHelperText}
+              disabled={loading}
+            />
+          </FormControl>
+        </FormItem>
+        <FormItem>
+          <FormControl>
+            <RHFInputJoy
+              name="newPassword"
+              label="New Password"
+              type="password"
+              helperText={newPasswordHelperText}
+              disabled={loading}
+            />
+          </FormControl>
+        </FormItem>
+        <FormItem>
+          <FormControl>
+            <RHFInputJoy
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              helperText={confirmPasswordHelperText}
+              disabled={loading}
+              placeholder="Confirm new password"
+            />
+          </FormControl>
+        </FormItem>
         <Button type="submit" disabled={loading}>
           <Typography level="title-lg" fontWeight="lg">
             {loading ? 'Resetting...' : 'Reset Password'}
           </Typography>
         </Button>
-      </form>
-    </Form>
+      </Form>
+    </FormProvider>
   )
 }

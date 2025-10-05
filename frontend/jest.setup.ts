@@ -24,6 +24,12 @@ if (typeof document !== 'undefined' && !document.elementFromPoint) {
   }
 }
 import '@testing-library/jest-dom'
+import { act } from '@testing-library/react'
+declare global {
+  // eslint-disable-next-line no-var
+  var act: (typeof import('@testing-library/react'))['act']
+}
+globalThis.act = act
 declare let global: typeof globalThis
 
 // Minimal TextEncoder/TextDecoder polyfill for Jest
@@ -34,7 +40,7 @@ if (typeof global.TextEncoder === 'undefined') {
       // Simple UTF-8 encoding polyfill
       const arr = []
       for (let i = 0; i < str.length; i++) {
-        let code = str.charCodeAt(i)
+        const code = str.charCodeAt(i)
         if (code < 0x80) {
           arr.push(code)
         } else if (code < 0x800) {

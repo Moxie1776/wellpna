@@ -23,7 +23,10 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
   // Filter links by auth
   const filteredLinks = appRoutes.filter((link) => {
     if (isAuthenticated) {
-      // Only show links that require auth or are general (not public auth routes)
+      // Hide Home when authenticated
+      if (link.label === 'Home') return false
+      // Only show links that require auth or are general
+      // (not public auth routes)
       return (
         link.requiresAuth ||
         (!link.requiresAuth &&

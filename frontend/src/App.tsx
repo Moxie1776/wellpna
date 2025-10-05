@@ -7,10 +7,11 @@ import { Route, Routes } from 'react-router-dom'
 import { Provider as UrqlProvider } from 'urql'
 
 import Layout from './components/layout/layout'
-import { client } from './lib/graphqlClient'
+import { appRoutes } from './lib/routes'
+import { ProtectedRoute } from './providers/ProtectedRouteProvider'
 import { SnackbarProvider } from './providers/SnackbarProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
-import { appRoutes } from './lib/routes'
+import { client } from './utils'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -19,15 +20,21 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <UrqlProvider value={client}>
           <SnackbarProvider>
             <Routes>
-              {appRoutes.map((route) => (
-                <Route
-                  key={route.href}
-                  path={route.href}
-                  element={
-                    <Layout>{route.page ? <route.page /> : null}</Layout>
-                  }
-                />
-              ))}
+              {appRoutes.map((route) => {
+                const element = route.page ? <route.page /> : null
+                const wrappedElement = route.requiresAuth ? (
+                  <ProtectedRoute>{element}</ProtectedRoute>
+                ) : (
+                  element
+                )
+                return (
+                  <Route
+                    key={route.href}
+                    path={route.href}
+                    element={<Layout>{wrappedElement}</Layout>}
+                  />
+                )
+              })}
             </Routes>
           </SnackbarProvider>
         </UrqlProvider>

@@ -21,7 +21,7 @@ export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
     className,
     style,
     id,
-    role,
+    role = 'form', // Default role to 'form' unless overridden
   } = props
 
   // Filter out any invalid props

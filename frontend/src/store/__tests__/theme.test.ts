@@ -16,6 +16,7 @@ Object.defineProperty(window, 'matchMedia', {
 })
 
 import { act } from '@testing-library/react'
+
 import { useModeStore } from '../theme'
 
 describe('useModeStore', () => {

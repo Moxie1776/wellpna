@@ -11,7 +11,7 @@ describe('Snackbar Theme Integration Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'Theme test', color: 'primary' })
-      }, [])
+      }, [showSnackbar])
       return null
     }
     render(
@@ -45,7 +45,7 @@ describe('Snackbar Theme Integration Tests', () => {
         const { showSnackbar } = useSnackbar()
         React.useEffect(() => {
           showSnackbar({ message: `${color} variant`, color })
-        }, [])
+        }, [showSnackbar])
         return null
       }
       const { unmount } = render(
@@ -64,7 +64,7 @@ describe('Snackbar Theme Integration Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'Consistent theme', color: 'primary' })
-      }, [])
+      }, [showSnackbar])
       return null
     }
     render(

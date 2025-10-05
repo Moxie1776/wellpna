@@ -18,7 +18,7 @@ describe('Snackbar Interactive Tests', () => {
         setTimeout(() => {
           showSnackbar({ message: 'Second message', color: 'danger' })
         }, 100)
-      }, [])
+      }, [showSnackbar])
       return null
     }
     render(
@@ -47,7 +47,7 @@ describe('Snackbar Interactive Tests', () => {
             showSnackbar({ message: 'Message 3', color: 'danger' })
           }, 100)
         }, 100)
-      }, [])
+      }, [showSnackbar])
       return null
     }
     render(
@@ -76,7 +76,7 @@ describe('Snackbar Interactive Tests', () => {
         setTimeout(() => {
           showSnackbar({ message: 'Second', color: 'warning' })
         }, 100)
-      }, [])
+      }, [showSnackbar])
       return null
     }
     render(

@@ -1,5 +1,6 @@
 import { useColorScheme } from '@mui/joy/styles'
 import * as React from 'react'
+
 import { useModeStore } from '../store/theme'
 
 // Custom hook to sync Joy UI color scheme with Zustand and expose palette

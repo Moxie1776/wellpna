@@ -5,6 +5,7 @@ import tsparser from '@typescript-eslint/parser'
 import { defineConfig } from 'eslint/config'
 import importPlugin from 'eslint-plugin-import'
 import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
 import path from 'path'
@@ -51,6 +52,7 @@ export default defineConfig([
       '@typescript-eslint': tseslint,
       'simple-import-sort': simpleImportSort,
       import: importPlugin,
+      'react-hooks': reactHooks, // Add react-hooks plugin
     },
     rules: {
       'linebreak-style': ['warn', 'unix'],
@@ -61,6 +63,8 @@ export default defineConfig([
       quotes: ['warn', 'single'],
       'react/no-children-prop': 'off',
       'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'error', // Enforce React hooks rules
+      'react-hooks/exhaustive-deps': 'warn', // Warn about missing dependencies
       semi: 'off',
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
@@ -71,13 +75,11 @@ export default defineConfig([
       '@typescript-eslint/explicit-module-boundary-types': 0,
       '@typescript-eslint/no-unused-vars': 'warn',
     },
-    overrides: [
-      {
-        files: ['**/__tests__/**/*.{js,ts,tsx}'],
-        rules: {
-          'max-len': 'off',
-        },
-      },
-    ],
+  },
+  {
+    files: ['**/__tests__/**/*.{js,ts,tsx}'],
+    rules: {
+      'max-len': 'off',
+    },
   },
 ])

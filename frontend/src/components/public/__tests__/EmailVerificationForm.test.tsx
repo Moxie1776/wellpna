@@ -1,0 +1,127 @@
+import '@testing-library/jest-dom'
+
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+import { EmailVerificationForm } from '../EmailVerificationForm'
+
+const mockOnVerify = jest.fn()
+const mockOnResendCode = jest.fn()
+
+beforeEach(() => {
+  mockOnVerify.mockReset()
+  mockOnResendCode.mockReset()
+})
+
+describe('EmailVerificationForm', () => {
+  it('renders form fields and buttons', () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+      />,
+    )
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Verification Code')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Verify Email' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Resend Code' }),
+    ).toBeInTheDocument()
+  })
+
+  it('renders with default email', () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+        defaultEmail="test@example.com"
+      />,
+    )
+    expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
+  })
+
+  it('shows validation errors for invalid email', async () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+      />,
+    )
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Email'), 'invalid-email')
+      await userEvent.tab(); // triggers blur for validation
+      await userEvent.type(screen.getByLabelText('Verification Code'), '123456')
+      await userEvent.click(screen.getByRole('button', { name: 'Verify Email' }))
+    })
+    await waitFor(() => {
+      expect(
+        screen.getByText('Please enter a valid email address'),
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('shows validation errors for invalid code', async () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+      />,
+    )
+    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+    await userEvent.type(screen.getByLabelText('Verification Code'), '12345')
+    await userEvent.click(screen.getByRole('button', { name: 'Verify Email' }))
+    await waitFor(() => {
+      expect(
+        screen.getByText('Code must be exactly 6 digits'),
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('calls onVerify with valid data on submit', async () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+      />,
+    )
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Verification Code'), '123456')
+      await userEvent.click(screen.getByRole('button', { name: 'Verify Email' }))
+    })
+    await waitFor(() => {
+      expect(mockOnVerify).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        code: '123456',
+      })
+    })
+  })
+
+  it('calls onResendCode with email on resend click', async () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+      />,
+    )
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.click(screen.getByRole('button', { name: 'Resend Code' }))
+    })
+    expect(mockOnResendCode).toHaveBeenCalledWith('test@example.com')
+  })
+
+  it('disables code input and submit button when loading', () => {
+    render(
+      <EmailVerificationForm
+        onVerify={mockOnVerify}
+        onResendCode={mockOnResendCode}
+        loading={true}
+      />,
+    )
+    expect(screen.getByLabelText('Verification Code')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Verifying...' })).toBeDisabled()
+  })
+})

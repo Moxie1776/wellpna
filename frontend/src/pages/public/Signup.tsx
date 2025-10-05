@@ -7,7 +7,7 @@ const SignupPage = () => {
   const navigate = useNavigate()
 
   const handleSignup = () => {
-    navigate('/login')
+    navigate('/verify-email')
   }
 
   return (

@@ -1,8 +1,11 @@
 import '@testing-library/jest-dom'
+
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
 import { SignUpForm } from '../../../components/public/SignUpForm'
 import { useAuth } from '../../../hooks/useAuth'
+import passwordSchema from '../../../utils/passwordSchema'
 
 jest.mock('../../../hooks/useAuth', () => ({ useAuth: jest.fn() }))
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
@@ -41,17 +44,20 @@ describe('SignUpForm', () => {
       token: 'test-token',
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
     })
+    // Use a valid password according to passwordSchema
+    const validPassword = 'Password123!'
+    expect(passwordSchema.safeParse(validPassword).success).toBe(true)
     render(<SignUpForm onSignup={mockOnSignup} />)
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
-      await userEvent.type(screen.getByLabelText('Password'), 'password123')
+      await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
     await waitFor(() => {
       expect(mockSignUp).toHaveBeenCalledWith(
         'test@example.com',
-        'password123',
+        validPassword,
         'Test User',
       )
       expect(mockOnSignup).toHaveBeenCalled()
@@ -69,11 +75,13 @@ describe('SignUpForm', () => {
       loading: false,
       error: errorMessage,
     } as any)
+    const validPassword = 'Password123!'
+    expect(passwordSchema.safeParse(validPassword).success).toBe(true)
     render(<SignUpForm onSignup={mockOnSignup} />)
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
-      await userEvent.type(screen.getByLabelText('Password'), 'password123')
+      await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
     await waitFor(() => {

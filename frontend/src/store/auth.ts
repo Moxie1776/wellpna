@@ -1,32 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { gql } from 'urql'
 
-const SIGN_IN_MUTATION = gql`
-  mutation SignIn($email: String!, $password: String!) {
-    signIn(email: $email, password: $password) {
-      token
-      user {
-        id
-        email
-        name
-      }
-    }
-  }
-`
-
-const SIGN_UP_MUTATION = gql`
-  mutation SignUp($email: String!, $password: String!, $name: String!) {
-    signUp(email: $email, password: $password, name: $name) {
-      token
-      user {
-        id
-        email
-        name
-      }
-    }
-  }
-`
+import { SIGN_IN_MUTATION } from '../graphql/mutations/signInMutation'
+import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
+import client from '../utils/graphqlClient'
 
 interface AuthState {
   token: string | null
@@ -65,28 +42,17 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         set({ loading: true, error: null })
         try {
-          // Note: In a real implementation, you'd need to inject the urql client
-          // For now, this is a placeholder - the actual implementation would use the client
-          const response = await fetch('/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              query: SIGN_IN_MUTATION.loc?.source?.body,
-              variables: { email, password },
-            }),
-          })
-          const result = await response.json()
-
-          if (result.errors) {
-            set({ error: result.errors[0].message, loading: false })
+          const result = await client
+            .mutation(SIGN_IN_MUTATION, { email, password })
+            .toPromise()
+          if (result.error) {
+            set({ error: result.error.message, loading: false })
             return null
           }
-
           if (!result.data?.signIn) {
             set({ error: 'No data returned from sign in', loading: false })
             return null
           }
-
           const { token, user } = result.data.signIn
           localStorage.setItem('token', token)
           set({ token, user, loading: false })
@@ -106,26 +72,17 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email: string, password: string, name: string) => {
         set({ loading: true, error: null })
         try {
-          const response = await fetch('/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              query: SIGN_UP_MUTATION.loc?.source?.body,
-              variables: { email, password, name },
-            }),
-          })
-          const result = await response.json()
-
-          if (result.errors) {
-            set({ error: result.errors[0].message, loading: false })
+          const result = await client
+            .mutation(SIGN_UP_MUTATION, { email, password, name })
+            .toPromise()
+          if (result.error) {
+            set({ error: result.error.message, loading: false })
             return null
           }
-
           if (!result.data?.signUp) {
             set({ error: 'No data returned from sign up', loading: false })
             return null
           }
-
           const { token, user } = result.data.signUp
           localStorage.setItem('token', token)
           set({ token, user, loading: false })
