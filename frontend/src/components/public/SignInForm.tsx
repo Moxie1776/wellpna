@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form'
 
 import { useAuth } from '../../hooks/useAuth'
+import logger from '../../utils/logger'
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -29,7 +30,7 @@ export const SignInForm = ({
   title?: string
 }) => {
   const { signIn, error } = useAuth()
-  console.log('SignInForm error:', error)
+  logger.debug('SignInForm error:', error)
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),

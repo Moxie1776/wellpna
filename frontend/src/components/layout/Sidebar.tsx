@@ -4,10 +4,10 @@ import * as React from 'react'
 import { MdDashboard, MdHome, MdMenu } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 
-import { useIsMobile } from '@/hooks/use-mobile'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsMobile } from '@/hooks/useMobile'
 import { useMode } from '@/hooks/useMode'
-import { appRoutes } from '@/routes'
+import { appRoutes } from '@/lib/routes'
 
 export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { signOut } = useAuth()
@@ -22,7 +22,20 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   // Filter links by auth
   const filteredLinks = appRoutes.filter((link) => {
-    if (link.requiresAuth) return isAuthenticated
+    if (isAuthenticated) {
+      // Only show links that require auth or are general (not public auth routes)
+      return (
+        link.requiresAuth ||
+        (!link.requiresAuth &&
+          ![
+            'Sign In',
+            'Sign Up',
+            'Password Reset',
+            'Email Verification',
+          ].includes(link.label))
+      )
+    }
+    // Unauthenticated: show only links that do not require auth
     return !link.requiresAuth
   })
 
@@ -52,7 +65,11 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
           size="sm"
           sx={{ mr: 1, color: '#fff' }}
         >
-          {isAuthenticated ? <MdDashboard size={24} /> : <MdHome size={24} />}
+          {isAuthenticated ? (
+            <MdDashboard size={24} data-testid="sidebar-dashboard-icon" />
+          ) : (
+            <MdHome size={24} data-testid="sidebar-home-icon" />
+          )}
         </JoyIconButton>
         {/* Home/dashboard icon and clickable WellPnA */}
         WellPnA
@@ -91,16 +108,16 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
         })}
       </nav>
       {isAuthenticated && (
-        <div style={{ padding: '1rem' }}>
-          <Button
-            variant="outlined"
-            color="neutral"
-            fullWidth
-            onClick={signOut}
-          >
-            Logout
-          </Button>
-        </div>
+        <Button
+          variant="outlined"
+          color="neutral"
+          fullWidth
+          onClick={signOut}
+          role="button"
+          sx={{ padding: '1rem' }}
+        >
+          Logout
+        </Button>
       )}
     </>
   )

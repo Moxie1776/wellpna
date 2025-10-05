@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form'
 
 import { useAuth } from '../../hooks/useAuth'
+import logger from '../../utils/logger'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -23,7 +24,7 @@ const signupSchema = z.object({
 
 export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   const { signUp, error } = useAuth()
-  console.log('SignupForm error:', error)
+  logger.debug('SignupForm error:', error)
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),

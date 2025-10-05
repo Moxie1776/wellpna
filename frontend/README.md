@@ -86,6 +86,46 @@ The frontend project follows a standard React/Vite structure, with key directori
 
 The frontend uses TypeScript for type safety and follows React best practices. Components are styled using Tailwind CSS with the project's defined color scheme.
 
+## Testing SOP & Best Practices
+
+### Purpose
+Tests should verify only the actions and rendering of the component or page under test. Avoid testing implementation details of imported providers, layout, or child components.
+
+### Guidelines
+
+- **Isolate tests:** Each test file should focus on the public API and user-facing behavior of its component/page.
+- **Mock dependencies:** Use mocks for hooks, context, and services as needed, but do not assert on their internals.
+- **Avoid layout/provider assertions:** Do not test layout, provider, or child component internals in page/component tests.
+- **Use shared helpers:** Move common setup and mocking logic to test helpers to reduce duplication.
+- **Keep tests readable:** Prefer clear, concise assertions that match user interactions and visible output.
+
+### Example Structure
+
+```tsx
+// ...imports...
+import { MyPage } from '../MyPage'
+
+describe('MyPage', () => {
+    it('renders expected fields and buttons', () => {
+        render(<MyPage />)
+        expect(screen.getByLabelText('Email')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
+    })
+
+    it('calls action when submitted', async () => {
+        // ...simulate user input and submit...
+        // ...assert action called with correct args...
+    })
+})
+```
+
+### Do NOT
+- Assert on layout or provider internals (e.g., ThemeProvider, SnackbarProvider, urql Provider)
+- Test child component implementation details
+- Duplicate setup logic across multiple test files
+
+For more details, see `TEST_SIMPLIFICATION.md`.
+
 ## Color Scheme
 
 The application uses a consistent color scheme:

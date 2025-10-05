@@ -26,12 +26,14 @@ export default function ThemeToggle() {
         }}
         sx={[
           {
-            backgroundColor: mode === 'light' ? '#2E4A7D' : '#FFD700',
-            borderColor: mode === 'light' ? '#2E4A7D' : '#FFD700',
+            backgroundColor: mode === 'light' ? '#2E4A7D' : '#ffd900a5',
+            borderColor: mode === 'light' ? '#2E4A7D' : '#ffd900a5',
             color: mode === 'light' ? '#ffffff' : '#000000',
             '&:hover': {
-              backgroundColor: mode === 'light' ? '#000080' : '#FFED4E',
-              borderColor: mode === 'light' ? '#000080' : '#FFED4E',
+              backgroundColor:
+                mode === 'light' ? '#000080' : 'rgba(255, 237, 78, 0.69)',
+              borderColor:
+                mode === 'light' ? '#000080' : '#rgba(255, 237, 78, 0.69)',
             },
           },
           mode === 'dark'
@@ -42,8 +44,8 @@ export default function ThemeToggle() {
             : { '& > *:last-of-type': { display: 'initial' } },
         ]}
       >
-        <MdDarkMode />
-        <MdLightMode />
+        <MdDarkMode data-testid="MdDarkMode" />
+        <MdLightMode data-testid="MdLightMode" />
       </IconButton>
     </Tooltip>
   )

@@ -1,103 +1,83 @@
- 
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { SignUpForm } from '../../../components/public/SignUpForm'
+import { useAuth } from '../../../hooks/useAuth'
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+jest.mock('../../../hooks/useAuth', () => ({ useAuth: jest.fn() }))
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 
-import { SignUpForm } from '../../../components/public/SignUpForm';
-import { useAuth } from '../../../hooks/useAuth';
+const mockSignUp = jest.fn()
+const mockOnSignup = jest.fn()
 
-// Mock useAuth hook instead of low-level urql
-jest.mock('../../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
-}));
+beforeEach(() => {
+  mockSignUp.mockReset()
+  mockOnSignup.mockReset()
+  mockUseAuth.mockReturnValue({
+    signUp: mockSignUp,
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    getCurrentUser: jest.fn(),
+    loading: false,
+    error: null,
+  } as any)
+})
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+afterEach(() => {
+  jest.clearAllMocks()
+})
 
-describe('SignupForm', () => {
-  const mockSignUp = jest.fn();
-  const mockOnSignup = jest.fn();
+describe('SignUpForm', () => {
+  it('renders form fields and button', () => {
+    render(<SignUpForm onSignup={mockOnSignup} />)
+    expect(screen.getByLabelText('Name')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument()
+  })
 
-  beforeEach(() => {
-    mockSignUp.mockReset();
-    mockOnSignup.mockReset();
-    mockUseAuth.mockReturnValue({
-      signIn: jest.fn(),
-      signOut: jest.fn(),
-      signUp: mockSignUp,
-      getCurrentUser: jest.fn(),
-      loading: false,
-      error: null,
-    } as any);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  // Rendering tests
-  it('renders the signup form fields and button', () => {
-    render(<SignUpForm onSignup={mockOnSignup} />);
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument();
-  });
-
-  // Form submission success tests
-  it('calls signUp when form is submitted', async () => {
+  it('calls signUp when submitted', async () => {
     mockSignUp.mockResolvedValueOnce({
       token: 'test-token',
       user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    });
-    render(<SignUpForm onSignup={mockOnSignup} />);
-    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
-    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+    })
+    render(<SignUpForm onSignup={mockOnSignup} />)
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Name'), 'Test User')
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Password'), 'password123')
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
+    })
     await waitFor(() => {
       expect(mockSignUp).toHaveBeenCalledWith(
         'test@example.com',
         'password123',
-        'Test User'
-      );
-    });
-  });
+        'Test User',
+      )
+      expect(mockOnSignup).toHaveBeenCalled()
+    })
+  })
 
-  it('calls onSignup after successful signUp', async () => {
-    mockSignUp.mockResolvedValueOnce({
-      token: 'test-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    });
-    render(<SignUpForm onSignup={mockOnSignup} />);
-    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
-    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
-    await waitFor(() => {
-      expect(mockOnSignup).toHaveBeenCalled();
-    });
-  });
-
-  // Error handling tests
   it('shows error message when signUp fails', async () => {
-    const errorMessage = 'Email already exists';
-    mockSignUp.mockRejectedValueOnce(new Error(errorMessage));
+    const errorMessage = 'Email already exists'
+    mockSignUp.mockRejectedValueOnce(new Error(errorMessage))
     mockUseAuth.mockReturnValue({
+      signUp: mockSignUp,
       signIn: jest.fn(),
       signOut: jest.fn(),
-      signUp: mockSignUp,
       getCurrentUser: jest.fn(),
       loading: false,
       error: errorMessage,
-    } as any);
-    render(<SignUpForm onSignup={mockOnSignup} />);
-    await userEvent.type(screen.getByLabelText('Name'), 'Test User');
-    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+    } as any)
+    render(<SignUpForm onSignup={mockOnSignup} />)
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Name'), 'Test User')
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Password'), 'password123')
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
+    })
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
-    });
-  });
-});
+      expect(screen.getByText(errorMessage)).toBeInTheDocument()
+    })
+  })
+})

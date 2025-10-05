@@ -5,35 +5,47 @@ import * as React from 'react'
 
 export { FormControl, FormHelperText, FormLabel }
 
-export const Form = (props: React.HTMLProps<HTMLFormElement>) => {
-  // Only pass valid form props to <form>
-  const allowed = [
-    'acceptCharset',
-    'action',
-    'autoComplete',
-    'encType',
-    'method',
-    'name',
-    'noValidate',
-    'target',
-    'onSubmit',
-    'onReset',
-    'className',
-    'style',
-    'children',
-    'id',
-    'role',
-    'aria-label',
-    'aria-labelledby',
-    // Add any other valid form props as needed
-  ]
-  const formProps: Record<string, any> = {}
-  Object.keys(props).forEach((key) => {
-    if (allowed.includes(key)) {
-      formProps[key] = (props as any)[key]
-    }
-  })
-  return <form {...formProps}>{props.children}</form>
+export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
+  // Only allow valid form props and event handlers
+  const {
+    children,
+    action,
+    method,
+    target,
+    autoComplete,
+    encType,
+    name,
+    noValidate,
+    onSubmit,
+    onReset,
+    className,
+    style,
+    id,
+    role,
+  } = props
+
+  // Filter out any invalid props
+  const allowedProps: React.FormHTMLAttributes<HTMLFormElement> = {
+    action,
+    method,
+    target,
+    autoComplete,
+    encType,
+    name,
+    noValidate,
+    onSubmit,
+    onReset,
+    className,
+    style,
+    id,
+    role,
+  }
+
+  return (
+    <form data-testid="form" {...allowedProps}>
+      {children}
+    </form>
+  )
 }
 
 export const FormField = ({
@@ -47,8 +59,10 @@ export const FormField = ({
   children: React.ReactNode
   [key: string]: unknown
 }) => (
-  <FormControl {...rest}>
-    <FormLabel htmlFor={inputId}>{label}</FormLabel>
+  <FormControl data-testid="form-control" {...rest}>
+    <FormLabel data-testid="form-label" htmlFor={inputId}>
+      {label}
+    </FormLabel>
     {children}
   </FormControl>
 )
@@ -67,4 +81,8 @@ export const FormMessage = ({
 }: {
   children: React.ReactNode
   [key: string]: unknown
-}) => <FormHelperText {...rest}>{children}</FormHelperText>
+}) => (
+  <FormHelperText data-testid="form-helper-text" {...rest}>
+    {children}
+  </FormHelperText>
+)

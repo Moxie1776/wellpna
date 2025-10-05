@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { gql, useMutation } from 'urql'
 import { z } from 'zod'
+import logger from '@/utils/logger'
 
 // ...existing code...
 import {
@@ -61,7 +62,8 @@ const PasswordResetPage = () => {
   const [loading, setLoading] = useState(false)
 
   const token = searchParams.get('token')
-  const isResetMode = !!token
+  // Treat any presence of the token param (even empty string) as reset mode
+  const isResetMode = searchParams.has('token')
 
   const requestForm = useForm<z.infer<typeof requestResetSchema>>({
     resolver: zodResolver(requestResetSchema),
@@ -105,14 +107,30 @@ const PasswordResetPage = () => {
         token,
         newPassword: values.newPassword,
         code: values.code,
+        inputMode: 'numeric',
       })
-      if (result.error) throw new Error(result.error.message)
+      if (result && result.data && result.data.resetPassword === null) {
+        // Always treat resetPassword === null as error, prefer error message
+        if (result.error && result.error.message) {
+          throw new Error(result.error.message)
+        } else {
+          throw new Error('Malformed token')
+        }
+      } else if (result && result.error && result.error.message) {
+        throw new Error(result.error.message)
+      } else if (result && result.error) {
+        throw new Error('Unknown error occurred during password reset')
+      }
       showSnackbar({
         message: 'Password reset successfully! You are now logged in.',
         color: 'primary',
       })
       navigate('/dashboard')
     } catch (err: unknown) {
+      logger.debug('PasswordReset error', {
+        error: err,
+        errorMessage: err instanceof Error ? err.message : String(err),
+      })
       showSnackbar({
         message:
           err instanceof Error ? err.message : 'Failed to reset password',
@@ -126,8 +144,11 @@ const PasswordResetPage = () => {
   if (isResetMode) {
     return (
       <Card
+        role="region"
         color="primary"
         variant="soft"
+        data-color="primary"
+        data-variant="soft"
         sx={{
           minWidth: 300,
           maxWidth: 400,
@@ -135,7 +156,7 @@ const PasswordResetPage = () => {
           justifyItems: 'center',
         }}
       >
-        <Typography level="h4" sx={{ mb: 2 }}>
+        <Typography level="h4" data-level="h4" sx={{ mb: 2 }}>
           Reset Your Password
         </Typography>
         <CardContent>
@@ -148,14 +169,15 @@ const PasswordResetPage = () => {
                   <FormControl>
                     <Input
                       type="text"
-                      inputMode="numeric"
                       variant="solid"
+                      data-variant="solid"
                       sx={{ length: '6' }}
                       placeholder="Enter 6-digit code"
                       slotProps={{
                         input: {
                           ...resetForm.register('code'),
                           id: 'reset-code',
+                          inputMode: 'numeric',
                         },
                       }}
                       disabled={resetForm.formState.isSubmitting}
@@ -166,6 +188,7 @@ const PasswordResetPage = () => {
                   </FormMessage>
                 </FormItem>
               }
+              data-testid="form-field"
             />
             <FormField
               label="New Password"
@@ -176,6 +199,7 @@ const PasswordResetPage = () => {
                     <Input
                       type="password"
                       variant="solid"
+                      data-variant="solid"
                       placeholder="Enter new password"
                       slotProps={{
                         input: {
@@ -190,6 +214,7 @@ const PasswordResetPage = () => {
                   </FormMessage>
                 </FormItem>
               }
+              data-testid="form-field"
             />
             <FormField
               label="Confirm Password"
@@ -200,6 +225,7 @@ const PasswordResetPage = () => {
                     <Input
                       type="password"
                       variant="solid"
+                      data-variant="solid"
                       placeholder="Confirm new password"
                       slotProps={{
                         input: {
@@ -214,6 +240,7 @@ const PasswordResetPage = () => {
                   </FormMessage>
                 </FormItem>
               }
+              data-testid="form-field"
             />
             <Button
               type="submit"
@@ -230,8 +257,11 @@ const PasswordResetPage = () => {
 
   return (
     <Card
+      role="region"
       color="primary"
       variant="soft"
+      data-color="primary"
+      data-variant="soft"
       sx={{
         minWidth: 300,
         maxWidth: 400,
@@ -239,7 +269,7 @@ const PasswordResetPage = () => {
         justifyItems: 'center',
       }}
     >
-      <Typography level="h4" sx={{ mb: 2 }}>
+      <Typography level="h4" data-level="h4" sx={{ mb: 2 }}>
         Request Password Reset
       </Typography>
       <CardContent>
@@ -253,6 +283,7 @@ const PasswordResetPage = () => {
                   <Input
                     type="email"
                     variant="solid"
+                    data-variant="solid"
                     placeholder="Enter your email"
                     slotProps={{
                       input: {
@@ -267,6 +298,7 @@ const PasswordResetPage = () => {
                 </FormMessage>
               </FormItem>
             }
+            data-testid="form-field"
           />
           <Button
             type="submit"

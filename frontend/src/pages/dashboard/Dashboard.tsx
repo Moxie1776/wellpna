@@ -2,13 +2,18 @@ import { Button, Sheet, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../hooks/useAuth'
+import logger from '../../utils/logger'
 
 export const Dashboard = () => {
   const { signOut } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    signOut()
+  const handleLogout = async () => {
+    try {
+      await signOut()
+    } catch (err) {
+      logger.error('Dashboard logout error', err)
+    }
     navigate('/login')
   }
 

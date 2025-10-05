@@ -44,8 +44,6 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        // react: 'readonly',
-        // React: 'readonly',
       },
     },
     plugins: {
@@ -73,5 +71,13 @@ export default defineConfig([
       '@typescript-eslint/explicit-module-boundary-types': 0,
       '@typescript-eslint/no-unused-vars': 'warn',
     },
+    overrides: [
+      {
+        files: ['**/__tests__/**/*.{js,ts,tsx}'],
+        rules: {
+          'max-len': 'off',
+        },
+      },
+    ],
   },
 ])

@@ -10,7 +10,7 @@ import Layout from './components/layout/layout'
 import { client } from './lib/graphqlClient'
 import { SnackbarProvider } from './providers/SnackbarProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
-import { appRoutes } from './routes'
+import { appRoutes } from './lib/routes'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

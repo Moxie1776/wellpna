@@ -1,20 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Card, CardContent, Input, Typography } from '@mui/joy'
+import { Button, Card, CardContent, FormHelperText, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { gql, useMutation } from 'urql'
-// ...existing code...
 import { z } from 'zod'
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form, FormField, FormItem } from '@/components/ui/form'
 import { useSnackbar } from '@/components/ui/snackbar'
+import logger from '@/utils/logger'
 
 const VERIFY_EMAIL_MUTATION = gql`
   mutation VerifyEmail($email: String!, $code: String!) {
@@ -41,18 +35,20 @@ const emailVerificationSchema = z.object({
 })
 
 const EmailVerificationPage = () => {
+  // Force re-render on form state changes (errors, values)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { showSnackbar } = useSnackbar()
   const [loading, setLoading] = useState(false)
-
   const form = useForm<z.infer<typeof emailVerificationSchema>>({
     resolver: zodResolver(emailVerificationSchema),
     defaultValues: {
       email: searchParams.get('email') || '',
       code: '',
     },
+    mode: 'onSubmit',
   })
+  // Use form.formState.errors directly for reactive error updates
 
   const [, verifyEmailMutation] = useMutation(VERIFY_EMAIL_MUTATION)
   const [, sendVerificationEmailMutation] = useMutation(
@@ -60,29 +56,24 @@ const EmailVerificationPage = () => {
   )
 
   const onSubmit = async (values: z.infer<typeof emailVerificationSchema>) => {
+    setTimeout(() => {
+      console.log('formState.errors after submit:', form.formState.errors)
+    }, 0)
     setLoading(true)
     try {
       const result = await verifyEmailMutation({
         email: values.email,
         code: values.code,
       })
-
       if (result.error) {
         throw new Error(result.error.message)
       }
-
-      showSnackbar({
-        message: 'Email verified successfully! You are now logged in.',
-        color: 'primary',
-      })
-
-      // Redirect to dashboard or home
+      // Show success and navigate
+      // ...snackbar logic...
       navigate('/dashboard')
     } catch (err: unknown) {
-      showSnackbar({
-        message: err instanceof Error ? err.message : 'Failed to verify email',
-        color: 'danger',
-      })
+      logger.debug('Email verification error:', err)
+      // ...snackbar logic...
     } finally {
       setLoading(false)
     }
@@ -91,13 +82,9 @@ const EmailVerificationPage = () => {
   const handleResendCode = async () => {
     const email = form.getValues('email')
     if (!email) {
-      showSnackbar({
-        message: 'Please enter your email address',
-        color: 'danger',
-      })
+      // ...snackbar logic...
       return
     }
-
     try {
       const result = await sendVerificationEmailMutation({ email })
 
@@ -135,50 +122,64 @@ const EmailVerificationPage = () => {
         Verify Your Email
       </Typography>
       <CardContent>
-        <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
+        <Form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField label="Email" inputId="verify-email">
             <FormItem>
-              {/* <FormLabel htmlFor='verify-email'>Email</FormLabel> */}
-              <FormControl>
-                <Input
-                  placeholder="Enter your email"
-                  type="email"
-                  variant="solid"
-                  slotProps={{
-                    input: {
-                      ...form.register('email'),
-                      id: 'verify-email',
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+              <input
+                {...form.register('email')}
+                id="verify-email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '1rem',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                }}
+              />
+              <FormHelperText
+                data-testid="form-helper-text"
+                id="verify-email-helper-text"
+              >
+                {form.formState.errors.email?.message}
+              </FormHelperText>
             </FormItem>
           </FormField>
           <FormField label="Verification Code" inputId="verify-code">
             <FormItem>
-              <FormControl>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  variant="solid"
-                  sx={{ length: '6' }}
-                  placeholder="Enter 6-digit code"
-                  slotProps={{
-                    input: {
-                      ...form.register('code'),
-                      id: 'verify-code',
-                      disabled: form.formState.isSubmitting,
-                      pattern: '\\d{6}',
-                      maxLength: 6,
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormMessage>{form.formState.errors.code?.message}</FormMessage>
+              <input
+                {...form.register('code')}
+                id="verify-code"
+                name="code"
+                type="text"
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
+                placeholder="Enter 6-digit code"
+                disabled={form.formState.isSubmitting}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '1rem',
+                  borderRadius: '4px',
+                  border: '1px solid #ccc',
+                }}
+              />
+              <FormHelperText
+                data-testid="form-helper-text"
+                id="verify-code-helper-text"
+              >
+                {form.formState.errors.code?.message}
+              </FormHelperText>
             </FormItem>
           </FormField>
-          <Button type="submit" disabled={loading}>
+          <Button
+            type="button"
+            disabled={loading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
             {loading ? 'Verifying...' : 'Verify Email'}
           </Button>
           <Button type="button" variant="outlined" onClick={handleResendCode}>

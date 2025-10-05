@@ -1,10 +1,20 @@
 import { Box, Card, CardContent, Sheet, Stack, Typography } from '@mui/joy'
+import { useColorScheme } from '@mui/joy/styles'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
 
 const HomePage = () => {
   const navigate = useNavigate()
+  const { mode } = useColorScheme()
+  const primaryColor =
+    mode === 'dark'
+      ? 'var(--joy-palette-primary-light)'
+      : 'var(--joy-palette-primary-dark)'
+  const secondaryColor =
+    mode === 'dark'
+      ? 'var(--joy-palette-secondary-light)'
+      : 'var(--joy-palette-secondary-dark)'
 
   return (
     <Sheet
@@ -35,11 +45,7 @@ const HomePage = () => {
           <Typography
             level="h1"
             sx={{
-              fontSize: '2.25rem',
-              color: 'primary.main',
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-              textWrap: 'balance',
+              color: primaryColor,
             }}
           >
             WellPNA
@@ -47,10 +53,7 @@ const HomePage = () => {
           <Typography
             level="h3"
             sx={{
-              fontSize: '1.5rem',
-              color: 'text.secondary',
-              fontWeight: 600,
-              letterSpacing: '-0.025em',
+              color: secondaryColor,
             }}
           >
             Well Plug & Abandonment Solutions
@@ -74,12 +77,18 @@ const HomePage = () => {
               justifyContent: 'center',
             }}
           >
-            <svg
+            <img
+              className="filter-green"
+              src={
+                mode == 'light'
+                  ? '/cybergedeon_no_shale_gas_black.svg'
+                  : '/cybergedeon_no_shale_gas_white.svg'
+              }
+              alt="No Shale Gas"
               width={300}
               height={300}
-              color="white"
-              path="../../assets/cybergedeon_no_shale_gas_red.svg"
-            ></svg>
+              // style={{ display: 'block' }}
+            />
           </Box>
 
           {/* Right side - Signin Card */}
