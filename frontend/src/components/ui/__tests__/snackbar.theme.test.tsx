@@ -11,7 +11,7 @@ describe('Snackbar Theme Integration Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'Theme test', color: 'primary' })
-      }, [showSnackbar])
+      }, []) // Remove showSnackbar from deps to avoid infinite loop
       return null
     }
     render(
@@ -23,7 +23,7 @@ describe('Snackbar Theme Integration Tests', () => {
     expect(snackbar).toHaveAttribute('data-variant', 'soft')
   })
 
-  it('supports different color variants', () => {
+  describe('color variants', () => {
     const colors: import('../snackbar').SnackbarColor[] = [
       'primary',
       'primary.main',
@@ -40,22 +40,25 @@ describe('Snackbar Theme Integration Tests', () => {
       'secondary',
       'secondary.main',
     ]
+
     colors.forEach((color) => {
-      const TestWithSnackbar = () => {
-        const { showSnackbar } = useSnackbar()
-        React.useEffect(() => {
-          showSnackbar({ message: `${color} variant`, color })
-        }, [showSnackbar])
-        return null
-      }
-      const { unmount } = render(
-        <SnackbarProvider>
-          <TestWithSnackbar />
-        </SnackbarProvider>,
-      )
-      const snackbar = screen.getByTestId('snackbar')
-      expect(snackbar).toHaveAttribute('data-color', color)
-      unmount()
+      it(`supports ${color} color variant`, () => {
+        const TestWithSnackbar = () => {
+          const { showSnackbar } = useSnackbar()
+          React.useEffect(() => {
+            showSnackbar({ message: `${color} variant`, color })
+          }, []) // Remove showSnackbar from deps to avoid infinite loop
+          return null
+        }
+        const { unmount } = render(
+          <SnackbarProvider>
+            <TestWithSnackbar />
+          </SnackbarProvider>,
+        )
+        const snackbar = screen.getByTestId('snackbar')
+        expect(snackbar).toHaveAttribute('data-color', color)
+        unmount()
+      })
     })
   })
 
@@ -63,8 +66,12 @@ describe('Snackbar Theme Integration Tests', () => {
     const TestWithSnackbar = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
-        showSnackbar({ message: 'Consistent theme', color: 'primary' })
-      }, [showSnackbar])
+        showSnackbar({
+          message: 'Consistent theme',
+          color: 'primary',
+          autoHideDuration: 500,
+        })
+      }, []) // Remove showSnackbar from deps to avoid infinite loop
       return null
     }
     render(
@@ -74,6 +81,6 @@ describe('Snackbar Theme Integration Tests', () => {
     )
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toHaveAttribute('data-variant', 'soft')
-    expect(snackbar).toHaveAttribute('data-autohideduration', '3000')
+    expect(snackbar).toHaveAttribute('data-autohideduration', '500')
   })
 })

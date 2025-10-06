@@ -1,12 +1,12 @@
 import { Box, Card, CardContent, Sheet, Stack, Typography } from '@mui/joy'
-import { useColorScheme } from '@mui/joy/styles'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
+import { useModeStore } from '@/store/theme'
 
 const HomePage = () => {
   const navigate = useNavigate()
-  const { mode } = useColorScheme()
+  const { mode } = useModeStore()
   const primaryColor =
     mode === 'dark'
       ? 'var(--joy-palette-primary-light)'

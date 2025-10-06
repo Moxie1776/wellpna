@@ -111,8 +111,12 @@ describe('AppSidebar', () => {
         </TestWrapper>,
       )
       expect(screen.getByText('WellPnA')).toBeInTheDocument()
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      // Home should NOT be present for authenticated users
+      expect(screen.queryByText('Home')).not.toBeInTheDocument()
+      // Dashboard should be present with href '/dashboard'
+      const dashboardLink = screen.getByText('Dashboard').closest('a')
+      expect(dashboardLink).toBeInTheDocument()
+      expect(dashboardLink).toHaveAttribute('href', '/dashboard')
       expect(screen.getByText('Logout')).toBeInTheDocument()
       expect(screen.queryByText('Sign In')).not.toBeInTheDocument()
       expect(screen.queryByText('Sign Up')).not.toBeInTheDocument()
@@ -197,8 +201,12 @@ describe('AppSidebar', () => {
           <AppSidebar isAuthenticated={true} />
         </TestWrapper>,
       )
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      // Home should NOT be present for authenticated users
+      expect(screen.queryByText('Home')).not.toBeInTheDocument()
+      // Dashboard should be present with href '/dashboard'
+      const dashboardLink = screen.getByText('Dashboard').closest('a')
+      expect(dashboardLink).toBeInTheDocument()
+      expect(dashboardLink).toHaveAttribute('href', '/dashboard')
       expect(screen.queryByText('Sign In')).not.toBeInTheDocument()
       expect(screen.queryByText('Sign Up')).not.toBeInTheDocument()
     })
@@ -368,8 +376,12 @@ describe('AppSidebar', () => {
           <AppSidebar isAuthenticated={true} />
         </TestWrapper>,
       )
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      // Should show Dashboard with href="/"
+      const dashboardLink = screen.getByText('Dashboard').closest('a')
+      expect(dashboardLink).toBeInTheDocument()
+      expect(dashboardLink).toHaveAttribute('href', '/dashboard')
+      // Should NOT show Home
+      expect(screen.queryByText('Home')).not.toBeInTheDocument()
       expect(screen.queryByText('Sign In')).not.toBeInTheDocument()
     })
 

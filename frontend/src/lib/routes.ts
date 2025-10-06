@@ -24,8 +24,8 @@ import { Dashboard } from '../pages/dashboard/Dashboard'
 import EmailVerificationPage from '../pages/public/EmailVerification'
 import HomePage from '../pages/public/Home'
 import PasswordResetPage from '../pages/public/PasswordReset'
-import SignInPage from '../pages/public/Signin'
-import SignupPage from '../pages/public/Signup'
+import SignInPage from '../pages/public/SignIn'
+import SignupPage from '../pages/public/SignUp'
 
 export const appRoutes: AppRoute[] = [
   {

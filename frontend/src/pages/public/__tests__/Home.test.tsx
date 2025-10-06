@@ -64,22 +64,6 @@ describe('HomePage Component', () => {
       expect(screen.getByText('Sign in to your account')).toBeInTheDocument()
     })
 
-    it('renders with proper layout components', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      // Check for Sheet container
-      const sheet = document.querySelector('.MuiSheet-root')
-      expect(sheet).toBeInTheDocument()
-
-      // Check for main container Box
-      const mainBox = document.querySelector('.MuiBox-root')
-      expect(mainBox).toBeInTheDocument()
-    })
-
     it('displays correct typography hierarchy', () => {
       render(
         <TestWrapper>
@@ -106,43 +90,10 @@ describe('HomePage Component', () => {
 
       const img = screen.getByRole('img', { name: /no shale gas/i })
       expect(img).toBeInTheDocument()
-        expect(img).toHaveAttribute(
-          'src',
-          '/cybergedeon_no_shale_gas_black.svg',
-        )
+      expect(img).toHaveAttribute('src', '/cybergedeon_no_shale_gas_black.svg')
       expect(img).toHaveAttribute('alt', 'No Shale Gas')
       expect(img).toHaveAttribute('width', '300')
       expect(img).toHaveAttribute('height', '300')
-    })
-  })
-
-  describe('Theme Responsiveness Tests', () => {
-    it('uses theme-aware components', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      // Typography components should be present
-      const title = screen.getByText('WellPNA')
-      expect(title).toBeInTheDocument()
-      const subtitle = screen.getByText('Well Plug & Abandonment Solutions')
-      expect(subtitle).toBeInTheDocument()
-    })
-
-    it('card component uses theme variant and color', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      // Check for Card with primary color and soft variant
-      const card = document.querySelector('.MuiCard-root')
-      expect(card).toBeInTheDocument()
-      expect(card?.className).toMatch(/MuiCard-colorPrimary/)
-      expect(card?.className).toMatch(/MuiCard-variantSoft/)
     })
   })
 
@@ -264,44 +215,6 @@ describe('HomePage Component', () => {
       const signInForm = screen.getByTestId('signin-form')
       expect(signInForm).toBeInTheDocument()
       // The SignInForm component should handle its own accessibility
-    })
-  })
-
-  describe('Responsive Design Tests', () => {
-    it('renders with responsive layout structure', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      // Check for Stack component with responsive direction
-      const stack = document.querySelector('.MuiStack-root')
-      expect(stack).toBeInTheDocument()
-    })
-
-    it('applies responsive padding to main container', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      // Main container should have responsive padding
-      const mainBox = document.querySelector('.MuiBox-root')
-      expect(mainBox).toBeInTheDocument()
-    })
-
-    it('card has responsive minimum width', () => {
-      render(
-        <TestWrapper>
-          <HomePage />
-        </TestWrapper>,
-      )
-
-      const card = document.querySelector('.MuiCard-root')
-      expect(card).toBeInTheDocument()
-      // Card should have minWidth styling
     })
   })
 

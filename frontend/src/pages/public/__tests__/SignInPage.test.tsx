@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 
 import { ThemeProvider } from '../../../providers/ThemeProvider'
-import SignInPage from '../Signin'
+import SignInPage from '../SignIn'
 
 // Mock react-router-dom
 const mockNavigate = jest.fn()

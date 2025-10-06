@@ -1,3 +1,15 @@
+// Mock import.meta for ES module compatibility
+Object.defineProperty(global, 'import', {
+  value: {
+    meta: {
+      env: {
+        VITE_GRAPHQL_ENDPOINT: 'http://localhost:4000/graphql',
+        // Add other env vars as needed
+      },
+    },
+  },
+  writable: false,
+})
 // Mock window.matchMedia for Joy UI/MUI tests
 if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = function (query) {

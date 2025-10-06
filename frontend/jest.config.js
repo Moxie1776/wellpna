@@ -4,7 +4,7 @@ export default {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
-  '^@fontsource/roboto/.*\\.css$': 'identity-obj-proxy',
+    '^@fontsource/roboto/.*\\.css$': 'identity-obj-proxy',
   },
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
   transform: {
@@ -13,7 +13,7 @@ export default {
       {
         tsconfig: {
           jsx: 'react-jsx',
-          module: 'CommonJS',
+          module: 'ES2020',
           esModuleInterop: true,
           types: ['jest', '@testing-library/jest-dom'],
         },
@@ -21,4 +21,4 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-};
+}

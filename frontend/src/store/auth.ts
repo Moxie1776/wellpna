@@ -46,7 +46,10 @@ export const useAuthStore = create<AuthState>()(
             .mutation(SIGN_IN_MUTATION, { email, password })
             .toPromise()
           if (result.error) {
-            set({ error: result.error.message, loading: false })
+            set({
+              error: result.error.message || 'Authentication failed',
+              loading: false,
+            })
             return null
           }
           if (!result.data?.signIn) {
@@ -76,7 +79,10 @@ export const useAuthStore = create<AuthState>()(
             .mutation(SIGN_UP_MUTATION, { email, password, name })
             .toPromise()
           if (result.error) {
-            set({ error: result.error.message, loading: false })
+            set({
+              error: result.error.message || 'Authentication failed',
+              loading: false,
+            })
             return null
           }
           if (!result.data?.signUp) {

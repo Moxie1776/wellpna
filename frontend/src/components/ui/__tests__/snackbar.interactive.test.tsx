@@ -14,11 +14,19 @@ describe('Snackbar Interactive Tests', () => {
     const TestWithMultiple = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
-        showSnackbar({ message: 'First message', color: 'primary' })
+        showSnackbar({
+          message: 'First message',
+          color: 'primary',
+          autoHideDuration: 100,
+        })
         setTimeout(() => {
-          showSnackbar({ message: 'Second message', color: 'danger' })
+          showSnackbar({
+            message: 'Second message',
+            color: 'danger',
+            autoHideDuration: 100,
+          })
         }, 100)
-      }, [showSnackbar])
+      }, [])
       return null
     }
     render(
@@ -40,14 +48,26 @@ describe('Snackbar Interactive Tests', () => {
     const TestWithRapid = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
-        showSnackbar({ message: 'Message 1', color: 'primary' })
+        showSnackbar({
+          message: 'Message 1',
+          color: 'primary',
+          autoHideDuration: 100,
+        })
         setTimeout(() => {
-          showSnackbar({ message: 'Message 2', color: 'warning' })
+          showSnackbar({
+            message: 'Message 2',
+            color: 'warning',
+            autoHideDuration: 100,
+          })
           setTimeout(() => {
-            showSnackbar({ message: 'Message 3', color: 'danger' })
+            showSnackbar({
+              message: 'Message 3',
+              color: 'danger',
+              autoHideDuration: 100,
+            })
           }, 100)
         }, 100)
-      }, [showSnackbar])
+      }, [])
       return null
     }
     render(
@@ -72,11 +92,19 @@ describe('Snackbar Interactive Tests', () => {
     const TestWithState = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
-        showSnackbar({ message: 'First', color: 'primary' })
+        showSnackbar({
+          message: 'First',
+          color: 'primary',
+          autoHideDuration: 100,
+        })
         setTimeout(() => {
-          showSnackbar({ message: 'Second', color: 'warning' })
+          showSnackbar({
+            message: 'Second',
+            color: 'warning',
+            autoHideDuration: 100,
+          })
         }, 100)
-      }, [showSnackbar])
+      }, [])
       return null
     }
     render(

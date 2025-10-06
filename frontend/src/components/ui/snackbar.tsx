@@ -23,6 +23,7 @@ export type SnackbarColor =
 export interface SnackbarMessage {
   message: string
   color: SnackbarColor
+  autoHideDuration?: number
 }
 
 export const SnackbarContext = React.createContext<{
@@ -59,11 +60,11 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
         onClose={() => setOpen(false)}
         color={baseColor as any}
         variant="soft"
-        autoHideDuration={10000}
+        autoHideDuration={snackbar?.autoHideDuration ?? 10000}
         data-testid="snackbar"
         data-color={colorValue}
         data-variant="soft"
-        data-autohideduration="3000"
+        data-autohideduration={String(snackbar?.autoHideDuration ?? 10000)}
         role="alert"
         aria-live="assertive"
         sx={sxProps}
