@@ -143,3 +143,41 @@ export const darkModeOverrides = {
     softActiveBg: '#404040',
   },
 }
+
+export const lightModeOverrides = {
+  background: {
+    body: '#ffffff',
+    surface: '#ffffff',
+    popup: '#f1f5f9',
+    level1: '#e2e8f0',
+    level2: '#cbd5e1',
+    level3: '#94a3b8',
+    tooltip: '#0f172a',
+    backdrop: 'rgba(0, 0, 0, 0.2)',
+  },
+  primary: {
+    softBg: '#f8f9fa',
+    softHoverBg: '#e9ecef',
+    softActiveBg: '#dee2e6',
+  },
+  neutral: {
+    softBg: '#f8f9fa',
+    softHoverBg: '#e9ecef',
+    softActiveBg: '#dee2e6',
+  },
+  danger: {
+    softBg: '#f8f9fa',
+    softHoverBg: '#e9ecef',
+    softActiveBg: '#dee2e6',
+  },
+  success: {
+    softBg: '#f8f9fa',
+    softHoverBg: '#e9ecef',
+    softActiveBg: '#dee2e6',
+  },
+  warning: {
+    softBg: '#f8f9fa',
+    softHoverBg: '#e9ecef',
+    softActiveBg: '#dee2e6',
+  },
+}

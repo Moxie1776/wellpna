@@ -54,7 +54,7 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'primary.main',
+          backgroundColor: '#012d6c',
           gap: 8,
           borderBottom: '1px solid',
           borderColor: 'divider',

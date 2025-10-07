@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Typography } from '@mui/joy'
+import { Button } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -47,16 +47,16 @@ export const EmailVerificationForm = ({
 
   // Helper text state for email and code
   const [emailHelperText, setEmailHelperText] = useState(
-    'Enter your email address.'
+    'Enter your email address.',
   )
   const [codeHelperText, setCodeHelperText] = useState(
-    'Enter the code sent to your email.'
+    'Enter the code sent to your email.',
   )
 
   useEffect(() => {
     if (form.formState.errors.email) {
       setEmailHelperText(
-        form.formState.errors.email.message || 'Enter your email address.'
+        form.formState.errors.email.message || 'Enter your email address.',
       )
     } else {
       setEmailHelperText('Enter your email address.')
@@ -64,7 +64,7 @@ export const EmailVerificationForm = ({
     if (form.formState.errors.code) {
       setCodeHelperText(
         form.formState.errors.code.message ||
-          'Enter the code sent to your email.'
+          'Enter the code sent to your email.',
       )
     } else {
       setCodeHelperText('Enter the code sent to your email.')
@@ -85,7 +85,6 @@ export const EmailVerificationForm = ({
               label="Email"
               type="email"
               helperText={emailHelperText}
-              disabled={loading}
             />
           </FormControl>
         </FormItem>
@@ -96,27 +95,19 @@ export const EmailVerificationForm = ({
               label="Verification Code"
               type="text"
               helperText={codeHelperText}
-              disabled={loading}
             />
           </FormControl>
         </FormItem>
         <Button type="submit" disabled={loading}>
-          <Typography
-            level="title-lg"
-            fontWeight="lg"
-            sx={{ display: 'flex', alignItems: 'center', gap: 2, p: '4px' }}
-          >
-            {loading ? 'Verifying...' : 'Verify Email'}
-          </Typography>
+          {loading ? 'Verifying...' : 'Verify Email'}
         </Button>
-        <Button type="button" variant="outlined" onClick={handleResend}>
-          <Typography
-            level="title-lg"
-            fontWeight="lg"
-            sx={{ display: 'flex', alignItems: 'center', gap: 2, p: '4px' }}
-          >
-            Resend Code
-          </Typography>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={handleResend}
+          disabled={loading}
+        >
+          Resend Code
         </Button>
       </Form>
     </FormProvider>

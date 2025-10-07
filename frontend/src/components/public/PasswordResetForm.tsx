@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Typography } from '@mui/joy'
+import { Button } from '@mui/joy'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -119,14 +119,11 @@ export function PasswordResetForm({
               label="Email"
               type="email"
               helperText={emailHelperText}
-              disabled={loading}
             />
           </FormControl>
         </FormItem>
-        <Button type="submit" disabled={loading}>
-          <Typography level="title-lg" fontWeight="lg">
-            {loading ? 'Sending...' : 'Send Reset Link'}
-          </Typography>
+        <Button type="submit">
+          {loading ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </Form>
     </FormProvider>
@@ -144,7 +141,6 @@ export function PasswordResetForm({
               label="Verification Code"
               type="text"
               helperText={codeHelperText}
-              // disabled={loading}
             />
           </FormControl>
         </FormItem>
@@ -155,7 +151,6 @@ export function PasswordResetForm({
               label="New Password"
               type="password"
               helperText={newPasswordHelperText}
-              // disabled={loading}
             />
           </FormControl>
         </FormItem>
@@ -166,15 +161,12 @@ export function PasswordResetForm({
               label="Confirm Password"
               type="password"
               helperText={confirmPasswordHelperText}
-              // disabled={loading}
               placeholder="Confirm new password"
             />
           </FormControl>
         </FormItem>
-        <Button type="submit" disabled={loading}>
-          <Typography level="title-lg" fontWeight="lg">
-            {loading ? 'Resetting...' : 'Reset Password'}
-          </Typography>
+        <Button type="submit">
+          {loading ? 'Resetting...' : 'Reset Password'}
         </Button>
       </Form>
     </FormProvider>

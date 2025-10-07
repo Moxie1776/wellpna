@@ -3,14 +3,20 @@ import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 
+import { CssBaseline } from '@mui/joy'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 
-import { colors, darkModeOverrides } from '../lib/colors'
+import { colors, darkModeOverrides, lightModeOverrides } from '../lib/colors'
 import { useModeStore } from '../store/theme'
 
 export const theme = extendTheme({
   colorSchemes: {
-    light: { palette: colors },
+    light: {
+      palette: {
+        ...colors,
+        ...lightModeOverrides,
+      },
+    },
     dark: {
       palette: {
         ...colors,
@@ -28,6 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { mode } = useModeStore()
   return (
     <CssVarsProvider theme={theme} {...({ mode } as any)}>
+      <CssBaseline />
       {children}
     </CssVarsProvider>
   )

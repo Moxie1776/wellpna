@@ -2,11 +2,13 @@ import { Box, Card, CardContent, Sheet, Stack, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
+import { useIsMobile } from '@/hooks/useMobile'
 import { useModeStore } from '@/store/theme'
 
 const HomePage = () => {
   const navigate = useNavigate()
   const { mode } = useModeStore()
+  const isMobile = useIsMobile()
   const primaryColor =
     mode === 'dark'
       ? 'var(--joy-palette-primary-light)'
@@ -79,15 +81,9 @@ const HomePage = () => {
           >
             <img
               className="filter-green"
-              src={
-                mode == 'light'
-                  ? '/cybergedeon_no_shale_gas_black.svg'
-                  : '/cybergedeon_no_shale_gas_white.svg'
-              }
-              alt="No Shale Gas"
-              width={300}
-              height={300}
-              // style={{ display: 'block' }}
+              src="/villahermosa2.2-removebg-preview.png"
+              alt="villahermosa2.2"
+              style={{ maxWidth: isMobile ? '300px' : '555px', height: 'auto' }}
             />
           </Box>
 
