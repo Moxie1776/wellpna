@@ -14,11 +14,13 @@ class EmailService {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ethereal.email',
       port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: process.env.SMTP_USERNAME
+        ? {
+            user: process.env.SMTP_USERNAME,
+            pass: process.env.SMTP_PASSWORD,
+          }
+        : undefined,
     })
   }
 
@@ -67,12 +69,9 @@ class EmailService {
 
   async sendPasswordResetEmail(
     email: string,
-    resetToken: string,
+    resetCode: string,
   ): Promise<void> {
     const subject = 'Reset Your Password - WellPNA'
-    const resetUrl = `${
-      process.env.FRONTEND_URL || 'http://localhost:3000'
-    }/reset-password?token=${resetToken}`
     const html = `
       <div style="
         font-family: Arial, sans-serif;
@@ -81,17 +80,18 @@ class EmailService {
       ">
         <h2>Password Reset Request</h2>
         <p>You requested a password reset for your WellPNA account.</p>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetUrl}" style="
-          background-color: #007bff;
-          color: white;
-          padding: 10px 20px;
-          text-decoration: none;
-          border-radius: 5px;
-          display: inline-block;
+        <p>Please enter the following code to reset your password:</p>
+        <div style="
+          background-color: #f4f4f4;
+          padding: 20px;
+          text-align: center;
+          font-size: 24px;
+          font-weight: bold;
           margin: 20px 0;
-        ">Reset Password</a>
-        <p>This link will expire in 1 hour.</p>
+        ">
+          ${resetCode}
+        </div>
+        <p>This code will expire in 1 hour.</p>
         <p>If you didn't request this reset, please ignore this email.</p>
       </div>
     `
@@ -99,5 +99,4 @@ class EmailService {
     await this.sendEmail({ to: email, subject, html })
   }
 }
-
 export const emailService = new EmailService()

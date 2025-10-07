@@ -3,6 +3,7 @@ import { Box, Button, Typography } from '@mui/joy'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { MdLogin } from 'react-icons/md'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
@@ -24,6 +25,7 @@ export const SignInForm = ({
   title?: string
 }) => {
   const { signIn, error } = useAuth()
+  const navigate = useNavigate()
   logger.debug('SignInForm error:', error)
 
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -68,7 +70,13 @@ export const SignInForm = ({
     try {
       await signIn(values.email, values.password)
       onSignIn()
-    } catch {
+    } catch (error: any) {
+      // Check if email is not verified
+      if (error?.message?.includes('Email not verified')) {
+        navigate(
+          `/email-verification?email=${encodeURIComponent(values.email)}`,
+        )
+      }
       // Error handling is done in the useAuth hook
     }
   }

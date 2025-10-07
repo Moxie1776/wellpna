@@ -11,6 +11,7 @@ describe('Snackbar Error Handling Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: '', color: 'primary' })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }
@@ -44,6 +45,7 @@ describe('Snackbar Error Handling Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'Malformed color', color: 'danger' })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }

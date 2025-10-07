@@ -10,64 +10,64 @@ After the initial phase, the application will be extended to include features fo
 
 ## Project Structure
 
-This project is organized into two main subdirectories:
+This project is organized into three main directories:
+
+### Root (`/`)
+
+- **README.md**: This overview document
+- **wellpna.code-workspace**: VS Code workspace configuration
+- **INTEGRATION_TESTING.md**: Integration testing guidelines
+- **PROJECT_OUTLINE.md**: High-level project planning and roadmap
 
 ### Backend (`/backend`)
 
 The backend is a Node.js/TypeScript application that provides the data processing, storage, and API services for the system.
 
 **Purpose:**
-
-- Data ingestion from PDF and Excel files
-  - Example pdf and excel files exist in `backend/data/`
-- Database storage and management
+- Data ingestion from PDF and Excel files (examples in `backend/data/`)
+- Database storage and management (SQLite with Prisma)
 - GraphQL API for frontend consumption
 - Data parsing and extraction from files
-- Export pdf and excel reports
-- User authentication
+- Export PDF and Excel reports
+- User authentication with JWT
 
 **Major Libraries Used:**
-
 - Node.js - JavaScript runtime
-- TypeScript - Type safety for JavaScript
+- TypeScript - Type safety
 - Prisma - Database ORM
-- GraphQL Yoga - GraphQL server implementation
+- GraphQL Yoga - GraphQL server
 - Pothos - Code-first GraphQL schema builder
-- SQLite - Database
 - bcryptjs - Password hashing
-- jsonwebtoken - JWT implementation
+- jsonwebtoken - JWT handling
 - nodemailer - Email sending
 - winston - Logging
 
-For detailed information about the backend, see [backend/README.md](backend/README.md).
+For detailed backend structure and development guidelines, see [backend/README.md](backend/README.md).
 
 ### Frontend (`/frontend`)
 
 The frontend is a React application that provides the user interface for data visualization and management.
 
 **Purpose:**
-
-- User authentication interface (login/signup/user management) integrated with the backend GraphQL API
+- User authentication interface integrated with backend GraphQL API
 - Dashboard for viewing well data
 - Wellbore diagram generation and visualization
 - Data management interfaces for wells and related entities
-  - Import pdf and excel files
-  - View and edit well data
-  - Generate adhoc WBD's (Wellbore Diagrams) in svg/pdf format
-  - Possibly generate regulatory forms in the future
-- In the future, implement automated bidding features
+- Import/export PDF and Excel files
+- Generate ad-hoc WBD's (Wellbore Diagrams) in SVG/PDF format
 
 **Major Libraries Used:**
-
 - React - UI library
-- TypeScript - Type safety for JavaScript
-- urql - GraphQL client for API communication (lightweight alternative to Apollo Client)
-  - All libraries are fully open source with permissive licenses (MIT/Apache 2.0) suitable for commercial use in oil & gas companies
-  - Note: GraphQL Yoga and Pothos are server-side libraries (not clients) used for building the backend GraphQL API
-- Tailwind CSS - Utility-first CSS framework
-- Joy UI - React component library for building beautiful and accessible user interfaces.
-- React Router - Routing library
+- TypeScript - Type safety
+- urql - GraphQL client
+- Joy UI - Component library for accessible interfaces
+- React Router - Routing
 - Zustand - State management
+- React Hook Form - Form handling
+- Zod - Schema validation
+- Jest + React Testing Library - Testing
+
+For detailed frontend structure and development guidelines, see [frontend/README.md](frontend/README.md).
 
 ## Code Quality and Linting
 

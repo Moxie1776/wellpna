@@ -144,7 +144,7 @@ export function PasswordResetForm({
               label="Verification Code"
               type="text"
               helperText={codeHelperText}
-              disabled={loading}
+              // disabled={loading}
             />
           </FormControl>
         </FormItem>
@@ -155,7 +155,7 @@ export function PasswordResetForm({
               label="New Password"
               type="password"
               helperText={newPasswordHelperText}
-              disabled={loading}
+              // disabled={loading}
             />
           </FormControl>
         </FormItem>
@@ -166,7 +166,7 @@ export function PasswordResetForm({
               label="Confirm Password"
               type="password"
               helperText={confirmPasswordHelperText}
-              disabled={loading}
+              // disabled={loading}
               placeholder="Confirm new password"
             />
           </FormControl>

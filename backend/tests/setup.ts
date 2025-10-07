@@ -1,12 +1,45 @@
 import { afterAll, beforeAll, jest } from '@jest/globals'
 import { config } from 'dotenv'
-import dotenv from 'dotenv'
+import { createServer } from 'net'
 
 import { prisma } from '../src/client'
 import { server } from '../src/server'
+import logger from './utils/logger'
+
+const checkPortInUse = (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const testServer = createServer()
+      .once('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(true) // Port is in use
+        } else {
+          resolve(false)
+        }
+      })
+      .once('listening', () => {
+        testServer.close()
+        resolve(false) // Port is free
+      })
+      .listen(port)
+  })
+}
 
 // Load test environment variables
-dotenv.config()
+config()
+
+// Suppress console.log and console.error in tests globally
+// Use logger.info, logger.debug, etc. for debugging instead
+const originalLog = console.log
+const originalError = console.error
+beforeAll(() => {
+  console.log = jest.fn()
+  console.error = jest.fn()
+})
+
+afterAll(() => {
+  console.log = originalLog
+  console.error = originalError
+})
 
 // Mock nodemailer
 // Renamed to avoid conflict with the mock target
@@ -51,8 +84,15 @@ beforeAll(async () => {
     create: { role: 'admin' },
   })
 
-  // Start the test server
-  server.listen(4000)
+  // Check if server is already running on port 4000
+  const portInUse = await checkPortInUse(4000)
+  if (!portInUse) {
+    // Start the test server if not already running
+    server.listen(4000)
+    logger.info('Started test server on port 4000')
+  } else {
+    logger.info('Using existing server running on port 4000')
+  }
 })
 
 afterAll(async () => {

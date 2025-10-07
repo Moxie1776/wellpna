@@ -166,7 +166,7 @@ describe('PasswordResetForm', () => {
         screen.getByRole('button', { name: 'Reset Password' }),
       )
       await waitFor(() => {
-        expect(screen.getByText("Passwords don't match")).toBeInTheDocument()
+        expect(screen.getByText('Passwords don\'t match')).toBeInTheDocument()
       })
     })
 

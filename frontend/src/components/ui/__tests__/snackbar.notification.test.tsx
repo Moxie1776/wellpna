@@ -23,6 +23,7 @@ describe('Snackbar Notification Types Tests', () => {
             message: `${expected} message`,
             color: color as import('../snackbar').SnackbarColor,
           })
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])
         return null
       }

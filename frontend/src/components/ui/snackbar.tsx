@@ -1,4 +1,3 @@
-// auto-sort-ignore-next
 import Snackbar from '@mui/joy/Snackbar'
 import * as React from 'react'
 

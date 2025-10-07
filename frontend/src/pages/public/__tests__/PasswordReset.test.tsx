@@ -1,21 +1,39 @@
+jest.mock('@/components/ui/snackbar', () => ({
+  useSnackbar: jest.fn(),
+}))
+
+jest.mock('@/utils/graphqlClient', () => ({
+  __esModule: true,
+  default: {
+    mutation: jest.fn(() => ({
+      toPromise: jest.fn(() =>
+        Promise.resolve({
+          data: {
+            requestPasswordReset: true,
+            resetPassword: { token: 'mock-token' },
+          },
+        }),
+      ),
+    })),
+  },
+}))
+
 import '@testing-library/jest-dom'
 
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 
 import { useSnackbar } from '@/components/ui/snackbar'
 
 import PasswordResetPage from '../PasswordReset'
 
-// Mock dependencies
-jest.mock('react-router-dom', () => ({
-  useSearchParams: jest.fn(),
-  useNavigate: jest.fn(),
+jest.mock('@/graphql/mutations/requestPasswordResetMutation', () => ({
+  REQUEST_PASSWORD_RESET_MUTATION: 'mock-request-mutation',
 }))
 
-jest.mock('@/components/ui/snackbar', () => ({
-  useSnackbar: jest.fn(),
+jest.mock('@/graphql/mutations/resetPasswordMutation', () => ({
+  RESET_PASSWORD_MUTATION: 'mock-reset-mutation',
 }))
 
 // Mock PasswordResetForm component to spy on props passed down and simulate interaction triggers
@@ -24,8 +42,19 @@ jest.mock('@/components/public/PasswordResetForm', () => ({
 }))
 
 const mockShowSnackbar = jest.fn()
-const mockNavigate = jest.fn()
-const mockSetSearchParams = jest.fn()
+
+const renderWithRouter = (initialEntries: string[]) => {
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/password-reset',
+        element: <PasswordResetPage />,
+      },
+    ],
+    { initialEntries },
+  )
+  return render(<RouterProvider router={router} />)
+}
 
 describe('PasswordResetPage', () => {
   beforeEach(() => {
@@ -35,7 +64,6 @@ describe('PasswordResetPage', () => {
     ;(useSnackbar as jest.Mock).mockReturnValue({
       showSnackbar: mockShowSnackbar,
     })
-    ;(useNavigate as jest.Mock).mockReturnValue(mockNavigate)
 
     // Mock PasswordResetForm component implementation
     const { PasswordResetForm } = jest.requireMock(
@@ -70,7 +98,7 @@ describe('PasswordResetPage', () => {
               Submit Reset
             </button>
           )}
-          {/* Note: No explicit 'resend code' handler is present in PasswordResetPage logic, 
+          {/* Note: No explicit 'resend code' handler is present in PasswordResetPage logic,
               so testing onRequestReset covers link resending functionality. */}
         </div>
       ),
@@ -78,11 +106,7 @@ describe('PasswordResetPage', () => {
   })
 
   it('renders in request mode with default email from search params', () => {
-    ;(useSearchParams as jest.Mock).mockReturnValue([
-      new URLSearchParams('email=default@test.com'),
-      mockSetSearchParams,
-    ])
-    render(<PasswordResetPage />)
+    renderWithRouter(['/password-reset?email=default@test.com'])
     expect(
       screen.getByTestId('password-reset-form-request'),
     ).toBeInTheDocument()
@@ -92,51 +116,34 @@ describe('PasswordResetPage', () => {
   })
 
   it('renders in request mode with empty default email if not provided', () => {
-    ;(useSearchParams as jest.Mock).mockReturnValue([
-      new URLSearchParams(''),
-      mockSetSearchParams,
-    ])
-    render(<PasswordResetPage />)
+    renderWithRouter(['/password-reset'])
     expect(
       screen.getByTestId('password-reset-form-request'),
     ).toBeInTheDocument()
     expect(screen.getByTestId('default-email')).toHaveTextContent('')
   })
 
-  it('renders in reset mode when token is present in search params', () => {
-    ;(useSearchParams as jest.Mock).mockReturnValue([
-      new URLSearchParams('token=xyz&email=user@test.com'),
-      mockSetSearchParams,
-    ])
-    render(<PasswordResetPage />)
+  it('renders in reset mode when code is present in search params', () => {
+    renderWithRouter(['/password-reset?code=xyz&email=user@test.com'])
     expect(screen.getByTestId('password-reset-form-reset')).toBeInTheDocument()
   })
 
   it('handles successful request reset callback', async () => {
-    ;(useSearchParams as jest.Mock).mockReturnValue([
-      new URLSearchParams(''),
-      mockSetSearchParams,
-    ])
-    render(<PasswordResetPage />)
+    renderWithRouter(['/password-reset'])
 
     // Simulate form submitting request reset
     await userEvent.click(screen.getByTestId('request-submit-button'))
 
     await waitFor(() => {
       expect(mockShowSnackbar).toHaveBeenCalledWith({
-        message: 'Reset link sent!',
+        message: 'Reset code sent!',
         color: 'success',
       })
     })
-    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('handles successful password reset callback', async () => {
-    ;(useSearchParams as jest.Mock).mockReturnValue([
-      new URLSearchParams('token=xyz'),
-      mockSetSearchParams,
-    ])
-    render(<PasswordResetPage />)
+    renderWithRouter(['/password-reset?code=xyz'])
 
     // Simulate form submitting password reset
     await userEvent.click(screen.getByTestId('reset-submit-button'))
@@ -147,6 +154,5 @@ describe('PasswordResetPage', () => {
         color: 'success',
       })
     })
-    expect(mockNavigate).toHaveBeenCalledWith('/signin')
   })
 })

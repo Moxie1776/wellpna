@@ -11,6 +11,7 @@ describe('Snackbar Accessibility Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'ARIA test', color: 'primary' })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }
@@ -29,6 +30,7 @@ describe('Snackbar Accessibility Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'ARIA label test', color: 'primary' })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }

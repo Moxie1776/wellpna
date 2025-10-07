@@ -11,7 +11,8 @@ describe('Snackbar Theme Integration Tests', () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
         showSnackbar({ message: 'Theme test', color: 'primary' })
-      }, []) // Remove showSnackbar from deps to avoid infinite loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [])
       return null
     }
     render(
@@ -47,7 +48,8 @@ describe('Snackbar Theme Integration Tests', () => {
           const { showSnackbar } = useSnackbar()
           React.useEffect(() => {
             showSnackbar({ message: `${color} variant`, color })
-          }, []) // Remove showSnackbar from deps to avoid infinite loop
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+          }, [])
           return null
         }
         const { unmount } = render(
@@ -71,7 +73,8 @@ describe('Snackbar Theme Integration Tests', () => {
           color: 'primary',
           autoHideDuration: 500,
         })
-      }, []) // Remove showSnackbar from deps to avoid infinite loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [])
       return null
     }
     render(

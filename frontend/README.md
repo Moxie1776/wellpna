@@ -7,130 +7,283 @@ The WellPNA frontend is a React application that provides the user interface for
 ## Technology Stack
 
 - React with TypeScript
-- React Admin - Admin dashboard framework
-- Tailwind CSS - Utility-first CSS framework
-- shadcn/ui - UI component library
+- Joy UI - Component library for accessible interfaces
 - React Router - Routing library
 - Zustand - State management
-
-## Component Architecture
-
-### Frontend Components
-
-- **Pages** (`src/pages/`): Top-level page components
-- **Components** (`src/components/`): Reusable UI components
-- **Services** (`src/services/`): Client-side service functions
-- **Providers** (`src/providers/`): Data and authentication providers for React Admin
-
-## Key Features
-
-- User authentication interface (login/signup/user management)
-- Dashboard for viewing well data
-- Wellbore diagram generation and visualization
-- Data management interfaces for wells and related entities
-  - Import PDF and Excel files
-  - View and edit well data
-  - Generate ad-hoc WBD's (Wellbore Diagrams) in SVG/PDF format
-  - Possibly generate regulatory forms in the future
- ## Project Structure
- 
- The frontend project follows a standard React/Vite structure, with key directories organized as follows:
- 
- -   **`public/`**: Static assets that are served directly by the web server (e.g., `vite.svg`).
- -   **`src/`**: Contains the main application source code.
-     -   **`assets/`**: Images and other static assets used within components.
-     -   **`components/`**: Reusable UI components. This includes:
-         -   **`ui/`**: Presentational components, often from a UI library like shadcn/ui.
-         -   **`public/`**: Components related to public-facing pages (e.g., authentication forms).
-     -   **`hooks/`**: Custom React hooks.
-     -   **`lib/`**: Utility functions and client configurations (e.g., GraphQL client).
-     -   **`pages/`**: Top-level route components.
-     -   **`providers/`**: React context providers (e.g., theme, toast).
-     -   **`services/`**: API client functions or business logic services.
-     -   **`store/`**: State management logic (e.g., Zustand stores).
-     -   **`utils/`**: General utility functions.
- -   **`vite.config.ts`**: Vite build configuration.
- -   **`tsconfig.*.json`**: TypeScript configuration files for different build targets.
- -   **`.env*` files**: Environment variable configuration.
- 
- ## Setup
-- In the future, implement automated bidding features
+- urql - GraphQL client
+- React Hook Form + Zod - Form handling and validation
+- Jest + React Testing Library - Testing framework
 
 ## Project Structure
 
-The frontend project follows a standard React/Vite structure, with key directories organized as follows:
+The frontend follows a feature-based architecture with clear separation of concerns:
 
--   **`public/`**: Static assets that are served directly by the web server (e.g., `vite.svg`).
--   **`src/`**: Contains the main application source code.
-    -   **`assets/`**: Images and other static assets used within components.
-    -   **`components/`**: Reusable UI components. This includes:
-        -   **`ui/`**: installed shadcn components via `npx shadcn-ui add`
-        -   **`public/`**: Components related to public-facing pages (e.g., authentication forms).
-    -   **`hooks/`**: Custom React hooks.
-    -   **`lib/`**: Utility functions and client configurations (e.g., GraphQL client).
-    -   **`pages/`**: Top-level route components.
-    -   **`providers/`**: React context providers (e.g., theme, toast).
-    -   **`services/`**: API client functions or business logic services.
-    -   **`store/`**: State management logic (e.g., Zustand stores).
-    -   **`utils/`**: General utility functions.
--   **`vite.config.ts`**: Vite build configuration.
--   **`tsconfig.*.json`**: TypeScript configuration files for different build targets.
--   **`.env*` files**: Environment variable configuration.
+### Core Directories
+
+- **`src/`**: Main application source code
+  - **`components/`**: Reusable UI components
+    - **`ui/`**: Base UI components (forms, snackbar, etc.)
+    - **`layout/`**: Layout components (sidebar, breadcrumbs, etc.)
+    - **`public/`**: Public-facing form components (SignInForm, SignUpForm, etc.)
+    - **`hook-form/`**: React Hook Form integrations
+  - **`pages/`**: Top-level route components
+    - **`public/`**: Public pages (Home, SignIn, SignUp, etc.)
+    - **`dashboard/`**: Protected dashboard pages
+  - **`providers/`**: React context providers (Theme, Snackbar, etc.)
+  - **`hooks/`**: Custom React hooks (useAuth, useMobile, etc.)
+  - **`store/`**: Zustand state stores (auth, theme)
+  - **`utils/`**: Utility functions (JWT helpers, logger, etc.)
+  - **`lib/`**: Configuration and shared code (routes, GraphQL client, colors)
+  - **`graphql/`**: GraphQL queries and mutations
+
+### File Organization Rules
+
+- **Components**: Place in appropriate subfolder (`ui/`, `layout/`, `public/`, etc.)
+- **Pages**: One component per file in `pages/public/` or `pages/dashboard/`
+- **Tests**: Mirror source structure in `__tests__/` directories
+- **Types**: Define interfaces/types in component files or shared types file
+
+## Adding New Features
+
+### Adding a New Page
+
+1. **Create Page Component** in `src/pages/` (public or dashboard)
+   ```tsx
+   // src/pages/dashboard/NewFeature.tsx
+   const NewFeaturePage = () => {
+     return (
+       <div>
+         <h1>New Feature</h1>
+         {/* Page content */}
+       </div>
+     )
+   }
+   export default NewFeaturePage
+   ```
+
+2. **Add Route** in `src/lib/routes.ts`
+   ```tsx
+   import NewFeaturePage from '../pages/dashboard/NewFeature'
+   // ... existing imports
+
+   export const appRoutes: AppRoute[] = [
+     // ... existing routes
+     {
+       label: 'New Feature',
+       href: '/new-feature',
+       icon: MdStar, // Import from react-icons/md
+       requiresAuth: true,
+       page: NewFeaturePage,
+     },
+   ]
+   ```
+
+3. **Add Tests** in `src/pages/dashboard/__tests__/NewFeature.test.tsx`
+   ```tsx
+   import { render, screen } from '@testing-library/react'
+   import NewFeaturePage from '../NewFeature'
+
+   describe('NewFeaturePage', () => {
+     it('renders page content', () => {
+       render(<NewFeaturePage />)
+       expect(screen.getByText('New Feature')).toBeInTheDocument()
+     })
+   })
+   ```
+
+### Adding a New Component
+
+1. **Create Component** in appropriate `src/components/` subfolder
+   ```tsx
+   // src/components/ui/NewComponent.tsx
+   interface NewComponentProps {
+     title: string
+   }
+
+   export const NewComponent = ({ title }: NewComponentProps) => {
+     return <div>{title}</div>
+   }
+   ```
+
+2. **Add Tests** in `src/components/ui/__tests__/NewComponent.test.tsx`
+   ```tsx
+   import { render, screen } from '@testing-library/react'
+   import { NewComponent } from '../NewComponent'
+
+   describe('NewComponent', () => {
+     it('renders title', () => {
+       render(<NewComponent title="Test Title" />)
+       expect(screen.getByText('Test Title')).toBeInTheDocument()
+     })
+   })
+   ```
+
+### Using Snackbar Notifications
+
+Import and use the `useSnackbar` hook:
+
+```tsx
+import { useSnackbar } from '@/components/ui/snackbar'
+
+const MyComponent = () => {
+  const { showSnackbar } = useSnackbar()
+
+  const handleSuccess = () => {
+    showSnackbar({
+      message: 'Operation successful!',
+      color: 'success',
+      autoHideDuration: 5000, // Optional, defaults to 10000ms
+    })
+  }
+
+  const handleError = () => {
+    showSnackbar({
+      message: 'Something went wrong',
+      color: 'danger',
+    })
+  }
+
+  return (
+    <button onClick={handleSuccess}>Success</button>
+    <button onClick={handleError}>Error</button>
+  )
+}
+```
+
+**Available Colors:**
+- `primary` / `primary.main`
+- `secondary` / `secondary.main`
+- `success` / `success.main`
+- `warning` / `warning.main`
+- `danger` / `danger.main`
+- `info` / `info.main`
+- `neutral` / `neutral.main`
+
+### Form Handling with React Hook Form + Zod
+
+```tsx
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
+import { Form, FormControl, FormItem } from '@/components/ui/form'
+
+const schema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2),
+})
+
+const MyForm = () => {
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { email: '', name: '' },
+  })
+
+  const onSubmit = (data: z.infer<typeof schema>) => {
+    console.log(data)
+  }
+
+  return (
+    <Form onSubmit={form.handleSubmit(onSubmit)}>
+      <FormItem>
+        <FormControl>
+          <RHFInputJoy name="email" label="Email" type="email" />
+        </FormControl>
+      </FormItem>
+      <FormItem>
+        <FormControl>
+          <RHFInputJoy name="name" label="Name" />
+        </FormControl>
+      </FormItem>
+      <button type="submit">Submit</button>
+    </Form>
+  )
+}
+```
+
+### State Management with Zustand
+
+```tsx
+// src/store/myStore.ts
+import { create } from 'zustand'
+
+interface MyState {
+  count: number
+  increment: () => void
+}
+
+export const useMyStore = create<MyState>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+}))
+```
+
+```tsx
+// Usage in component
+import { useMyStore } from '@/store/myStore'
+
+const Counter = () => {
+  const { count, increment } = useMyStore()
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  )
+}
+```
 
 ## Setup
 
 1. Install dependencies: `npm install`
-2. Start the development server: `npm run dev`
+2. Start development server: `npm run dev`
 
-## Development
+## Development Guidelines
 
-The frontend uses TypeScript for type safety and follows React best practices. Components are styled using Tailwind CSS with the project's defined color scheme.
+- Use TypeScript for all new code
+- Follow Joy UI component patterns
+- Test all components and pages
+- Use the established color scheme and design tokens
+- Keep components small and focused on single responsibilities
 
-## Testing SOP & Best Practices
+## Testing Best Practices
 
-### Purpose
-Tests should verify only the actions and rendering of the component or page under test. Avoid testing implementation details of imported providers, layout, or child components.
+### Console Output in Tests
+- **Console suppression**: `console.log` and `console.error` are suppressed globally in Jest tests to keep test output clean
+- **Debugging**: Use the winston logger for debugging instead: `logger.info()`, `logger.debug()`, `logger.error()`, etc.
+- **Important errors**: Critical test failures and assertion errors will still appear in test output
 
-### Guidelines
+### Component Tests
+- Test user-facing behavior, not implementation details
+- Mock external dependencies (hooks, stores, API calls)
+- Focus on rendering and user interactions
+- Avoid testing child component internals
 
-- **Isolate tests:** Each test file should focus on the public API and user-facing behavior of its component/page.
-- **Mock dependencies:** Use mocks for hooks, context, and services as needed, but do not assert on their internals.
-- **Avoid layout/provider assertions:** Do not test layout, provider, or child component internals in page/component tests.
-- **Use shared helpers:** Move common setup and mocking logic to test helpers to reduce duplication.
-- **Keep tests readable:** Prefer clear, concise assertions that match user interactions and visible output.
+### Page Tests
+- Test page-level composition and routing
+- Mock child components and providers
+- Verify correct data flow and navigation
 
-### Example Structure
-
+### Example Test Structure
 ```tsx
-// ...imports...
-import { MyPage } from '../MyPage'
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Expected Text')).toBeInTheDocument()
+  })
 
-describe('MyPage', () => {
-    it('renders expected fields and buttons', () => {
-        render(<MyPage />)
-        expect(screen.getByLabelText('Email')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument()
-    })
-
-    it('calls action when submitted', async () => {
-        // ...simulate user input and submit...
-        // ...assert action called with correct args...
-    })
+  it('handles user interaction', async () => {
+    render(<MyComponent />)
+    await userEvent.click(screen.getByRole('button'))
+    expect(mockFunction).toHaveBeenCalled()
+  })
 })
 ```
 
-### Do NOT
-- Assert on layout or provider internals (e.g., ThemeProvider, SnackbarProvider, urql Provider)
-- Test child component implementation details
-- Duplicate setup logic across multiple test files
-
-For more details, see `TEST_SIMPLIFICATION.md`.
-
 ## Color Scheme
 
-The application uses a consistent color scheme:
+- **Primary:** #012d6c (Dark Blue)
+- **Secondary:** #c51230 (Red)
 
-- **Primary Color:** #012d6c (Dark Blue)
-- **Secondary Color:** #c51230 (Red)
-
-These colors are defined in `tailwind.config.js` and can be used as `text-primary`, `bg-primary`, etc.
+Use Joy UI color tokens: `primary`, `secondary`, etc.

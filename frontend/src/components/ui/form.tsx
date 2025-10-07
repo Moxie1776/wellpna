@@ -6,7 +6,6 @@ import * as React from 'react'
 export { FormControl, FormHelperText, FormLabel }
 
 export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
-  // Only allow valid form props and event handlers
   const {
     children,
     action,
@@ -24,7 +23,6 @@ export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
     role = 'form', // Default role to 'form' unless overridden
   } = props
 
-  // Filter out any invalid props
   const allowedProps: React.FormHTMLAttributes<HTMLFormElement> = {
     action,
     method,

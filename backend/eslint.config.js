@@ -20,7 +20,13 @@ const compat = new FlatCompat({
 
 export default defineConfig([
   {
-    ignores: ['**/node_modules/*', '**/out/*', '**/logs/*', '**/dist/*'],
+    ignores: [
+      '**/node_modules/*',
+      '**/out/*',
+      '**/logs/*',
+      '**/dist/*',
+      '**/src/generated/*',
+    ],
   },
   ...compat.extends(
     'eslint:recommended',

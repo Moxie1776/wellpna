@@ -1,28 +1,100 @@
 // InputOTP removed, use Input directly
 import { Card, CardContent } from '@mui/joy'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { PasswordResetForm } from '@/components/public/PasswordResetForm'
 import { useSnackbar } from '@/components/ui/snackbar'
+// eslint-disable-next-line max-len
+import { REQUEST_PASSWORD_RESET_MUTATION } from '@/graphql/mutations/requestPasswordResetMutation'
+// eslint-disable-next-line max-len
+import { RESET_PASSWORD_MUTATION } from '@/graphql/mutations/resetPasswordMutation'
+import client from '@/utils/graphqlClient'
 
 const PasswordResetPage = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { showSnackbar } = useSnackbar()
-  const isResetMode = searchParams.has('token')
+  const isResetMode = searchParams.has('code')
   const defaultEmail = searchParams.get('email') || ''
+  const [loading, setLoading] = useState(false)
+  const [hasRequestedReset, setHasRequestedReset] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_requestEmail, setRequestEmail] = useState('')
 
-  const handleRequestReset = (_values: { email: string }) => {
-    showSnackbar({ message: 'Reset link sent!', color: 'success' })
+  const handleRequestReset = async (values: { email: string }) => {
+    setLoading(true)
+    try {
+      const result = await client
+        .mutation(REQUEST_PASSWORD_RESET_MUTATION, { email: values.email })
+        .toPromise()
+
+      if (result.error) {
+        showSnackbar({
+          message: result.error.message || 'Failed to send reset code',
+          color: 'danger',
+        })
+        return
+      }
+
+      showSnackbar({ message: 'Reset code sent!', color: 'success' })
+      setLoading(false)
+      setHasRequestedReset(true)
+      setRequestEmail(values.email)
+    } catch (error: any) {
+      showSnackbar({
+        message: error.message || 'An error occurred',
+        color: 'danger',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleResetPassword = (_values: {
+  const handleResetPassword = async (values: {
     code: string
     newPassword: string
     confirmPassword: string
   }) => {
-    showSnackbar({ message: 'Password reset successful!', color: 'success' })
-    navigate('/signin')
+    if (values.newPassword !== values.confirmPassword) {
+      showSnackbar({ message: 'Passwords do not match', color: 'warning' })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await client
+        .mutation(RESET_PASSWORD_MUTATION, {
+          code: values.code,
+          newPassword: values.newPassword,
+        })
+        .toPromise()
+
+      if (result.error) {
+        showSnackbar({
+          message: result.error.message || 'Reset failed',
+          color: 'danger',
+        })
+        return
+      }
+
+      if (result.data?.resetPassword) {
+        const { token } = result.data.resetPassword
+        localStorage.setItem('token', token)
+        showSnackbar({
+          message: 'Password reset successful!',
+          color: 'success',
+        })
+        navigate('/dashboard')
+      }
+    } catch (error: any) {
+      showSnackbar({
+        message: error.message || 'An error occurred',
+        color: 'danger',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -34,10 +106,11 @@ const PasswordResetPage = () => {
     >
       <CardContent>
         <PasswordResetForm
-          mode={isResetMode ? 'reset' : 'request'}
+          mode={isResetMode || hasRequestedReset ? 'reset' : 'request'}
           defaultEmail={defaultEmail}
           onRequestReset={handleRequestReset}
           onResetPassword={handleResetPassword}
+          loading={loading}
         />
       </CardContent>
     </Card>

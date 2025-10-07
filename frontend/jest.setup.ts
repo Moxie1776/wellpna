@@ -29,19 +29,43 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
 }
 // Polyfill for document.elementFromPoint for JSDOM
 if (typeof document !== 'undefined' && !document.elementFromPoint) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   document.elementFromPoint = function (_x, _y) {
     // Simple polyfill: always return the body
     return document.body
   }
 }
 import '@testing-library/jest-dom'
+
 import { act } from '@testing-library/react'
 declare global {
-  // eslint-disable-next-line no-var
   var act: (typeof import('@testing-library/react'))['act']
 }
 globalThis.act = act
+
+// Suppress console.log and console.error in tests globally
+// Use logger.info, logger.debug, etc. for debugging instead
+const originalLog = console.log
+const originalError = console.error
+beforeAll(() => {
+  console.log = jest.fn()
+  console.error = (...args) => {
+    // Allow specific important errors but suppress React act() warnings
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: An update to') &&
+      args[0].includes('inside a test was not wrapped in act(...)')
+    ) {
+      return
+    }
+    // Suppress all other console.error messages in tests
+    return
+  }
+})
+
+afterAll(() => {
+  console.log = originalLog
+  console.error = originalError
+})
 declare let global: typeof globalThis
 
 // Minimal TextEncoder/TextDecoder polyfill for Jest
@@ -115,6 +139,17 @@ if (typeof global.TextDecoder === 'undefined') {
         }
       }
       return str
+    }
+  }
+  // Polyfill for Request for react-router
+  if (typeof global.Request === 'undefined') {
+    ;(global as any).Request = class Request {
+      constructor(input: string | URL, init?: RequestInit) {
+        ;(this as any).url = typeof input === 'string' ? input : input.href
+        ;(this as any).method = init?.method || 'GET'
+        ;(this as any).headers = new Headers(init?.headers)
+        ;(this as any).body = init?.body
+      }
     }
   }
 }

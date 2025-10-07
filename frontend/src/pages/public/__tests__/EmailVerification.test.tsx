@@ -1,3 +1,23 @@
+jest.mock('@/components/ui/snackbar', () => ({
+  useSnackbar: jest.fn(),
+}))
+
+jest.mock('@/utils/graphqlClient', () => ({
+  __esModule: true,
+  default: {
+    mutation: jest.fn(() => ({
+      toPromise: jest.fn(() =>
+        Promise.resolve({
+          data: {
+            verifyEmail: true,
+            sendVerificationEmail: true,
+          },
+        }),
+      ),
+    })),
+  },
+}))
+
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -10,10 +30,6 @@ import EmailVerificationPage from '../EmailVerification'
 jest.mock('react-router-dom', () => ({
   useSearchParams: jest.fn(),
   useNavigate: jest.fn(),
-}))
-
-jest.mock('@/components/ui/snackbar', () => ({
-  useSnackbar: jest.fn(),
 }))
 
 // Mock EmailVerificationForm component to spy on props passed down and simulate interaction triggers

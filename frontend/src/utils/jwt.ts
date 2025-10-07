@@ -70,3 +70,25 @@ export function isValidJWTFormat(token: string): boolean {
   const base64urlRegex = /^[A-Za-z0-9-_]+$/
   return parts.every((part) => base64urlRegex.test(part) && part.length > 0)
 }
+
+/**
+ * Hashes a password using SHA-256
+ * @param password - The plain text password
+ * @returns Promise resolving to the hashed password as a hex string
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * Validates if a stored token is valid and not expired
+ * @param token - The JWT token string
+ * @returns true if token is valid and not expired, false otherwise
+ */
+export function isValidToken(token: string): boolean {
+  return isValidJWTFormat(token) && !isTokenExpired(token)
+}

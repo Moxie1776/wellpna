@@ -2,6 +2,12 @@ import { act } from '@testing-library/react'
 
 import { useAuthStore } from '../auth'
 
+// Mock JWT utilities
+jest.mock('../../utils/jwt', () => ({
+  hashPassword: jest.fn((password: string) => Promise.resolve(password)), // Return password as-is for testing
+  isValidToken: jest.fn((token: string) => token && token.length > 0),
+}))
+
 // Mock urql client for all tests
 jest.mock('../../utils/graphqlClient', () => {
   return {
@@ -69,6 +75,9 @@ jest.mock('../../utils/graphqlClient', () => {
               }
               if (_variables.email === 'network@example.com') {
                 throw new Error('Network error')
+              }
+              if (_variables.email === 'unverified@example.com') {
+                throw new Error('Email not verified')
               }
               // Default
               return {
@@ -331,6 +340,21 @@ describe('useAuthStore', () => {
         expect(state.user).toBe(null)
         expect(state.loading).toBe(false)
         expect(state.error).toBe('Network error')
+      })
+
+      it('should handle unverified email error during sign in', async () => {
+        const { signIn } = useAuthStore.getState()
+
+        const result = await act(async () => {
+          return await signIn('unverified@example.com', 'password')
+        })
+
+        const state = useAuthStore.getState()
+        expect(result).toBe(null)
+        expect(state.token).toBe(null)
+        expect(state.user).toBe(null)
+        expect(state.loading).toBe(false)
+        expect(state.error).toBe('Email not verified')
       })
     })
   })
@@ -691,6 +715,35 @@ describe('useAuthStore', () => {
 
       const user = getCurrentUser()
       expect(user).toBe(null)
+    })
+  })
+
+  describe('isTokenValid Tests', () => {
+    it('should return true when a valid token exists in localStorage', () => {
+      localStorageMock.getItem.mockReturnValue('valid-token')
+
+      const { isTokenValid } = useAuthStore.getState()
+
+      const result = isTokenValid()
+      expect(result).toBe(true)
+    })
+
+    it('should return false when no token exists in localStorage', () => {
+      localStorageMock.getItem.mockReturnValue(null)
+
+      const { isTokenValid } = useAuthStore.getState()
+
+      const result = isTokenValid()
+      expect(result).toBe(false)
+    })
+
+    it('should return false when an invalid token exists in localStorage', () => {
+      localStorageMock.getItem.mockReturnValue('')
+
+      const { isTokenValid } = useAuthStore.getState()
+
+      const result = isTokenValid()
+      expect(result).toBe(false)
     })
   })
 })

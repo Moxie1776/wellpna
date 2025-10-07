@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 import { SIGN_IN_MUTATION } from '../graphql/mutations/signInMutation'
 import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
 import client from '../utils/graphqlClient'
+import { isValidToken } from '../utils/jwt'
 
 interface AuthState {
   token: string | null
@@ -16,6 +17,7 @@ interface AuthState {
   signOut: () => void
   signUp: (email: string, password: string, name: string) => Promise<any>
   getCurrentUser: () => { id: number; email: string } | null
+  isTokenValid: () => boolean
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
@@ -38,6 +40,10 @@ export const useAuthStore = create<AuthState>()(
         }
         const state = get()
         return state.user
+      },
+      isTokenValid: () => {
+        const token = localStorage.getItem('token')
+        return token ? isValidToken(token) : false
       },
       signIn: async (email: string, password: string) => {
         set({ loading: true, error: null })
@@ -76,7 +82,11 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null })
         try {
           const result = await client
-            .mutation(SIGN_UP_MUTATION, { email, password, name })
+            .mutation(SIGN_UP_MUTATION, {
+              email,
+              password,
+              name,
+            })
             .toPromise()
           if (result.error) {
             set({

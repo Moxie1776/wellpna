@@ -26,6 +26,7 @@ describe('Snackbar Interactive Tests', () => {
             autoHideDuration: 100,
           })
         }, 100)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }
@@ -67,6 +68,7 @@ describe('Snackbar Interactive Tests', () => {
             })
           }, 100)
         }, 100)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }
@@ -104,6 +106,7 @@ describe('Snackbar Interactive Tests', () => {
             autoHideDuration: 100,
           })
         }, 100)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
     }

@@ -36,6 +36,7 @@ describe('Snackbar Provider Tests', () => {
         if (renderCount === 1) {
           showSnackbar({ message: 'State test', color: 'primary' })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return <div>Renders: {renderCount}</div>
     }

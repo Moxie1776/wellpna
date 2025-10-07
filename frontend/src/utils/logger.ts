@@ -16,7 +16,9 @@
 const logger = {
   error: (message: string, ...args: any[]) => {
     console.error(`[ERROR] ${message}`, ...args)
-    // writeErrorLog(`${message} ${args.map((a) => JSON.stringify(a)).join(' ')}`)
+    // writeErrorLog(`${message} ${
+    //   args.map((a) => JSON.stringify(a)).join(' ')
+    // }`)
   },
   warn: (message: string, ...args: any[]) => {
     console.warn(`[WARN] ${message}`, ...args)
