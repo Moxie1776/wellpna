@@ -15,12 +15,10 @@ const emailVerificationSchema = z.object({
 export const EmailVerificationForm = ({
   onVerify,
   onResendCode,
-  loading = false,
   defaultEmail = '',
 }: {
   onVerify: (values: { email: string; code: string }) => void
   onResendCode: (email: string) => void
-  loading?: boolean
   defaultEmail?: string
 }) => {
   const form = useForm<z.infer<typeof emailVerificationSchema>>({
@@ -73,6 +71,7 @@ export const EmailVerificationForm = ({
     form.formState.errors.email,
     form.formState.errors.code,
     form.formState.isSubmitted,
+    form.formState.isLoading,
   ])
 
   return (
@@ -98,14 +97,14 @@ export const EmailVerificationForm = ({
             />
           </FormControl>
         </FormItem>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Verifying...' : 'Verify Email'}
+        <Button type="submit" disabled={form.formState.isLoading}>
+          {form.formState.isLoading ? 'Verifying...' : 'Verify Email'}
         </Button>
         <Button
           type="button"
           variant="outlined"
           onClick={handleResend}
-          disabled={loading}
+          disabled={form.formState.isLoading}
         >
           Resend Code
         </Button>

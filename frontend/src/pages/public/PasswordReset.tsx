@@ -17,13 +17,11 @@ const PasswordResetPage = () => {
   const { showSnackbar } = useSnackbar()
   const isResetMode = searchParams.has('code')
   const defaultEmail = searchParams.get('email') || ''
-  const [loading, setLoading] = useState(false)
   const [hasRequestedReset, setHasRequestedReset] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_requestEmail, setRequestEmail] = useState('')
 
   const handleRequestReset = async (values: { email: string }) => {
-    setLoading(true)
     try {
       const result = await client
         .mutation(REQUEST_PASSWORD_RESET_MUTATION, { email: values.email })
@@ -38,7 +36,6 @@ const PasswordResetPage = () => {
       }
 
       showSnackbar({ message: 'Reset code sent!', color: 'success' })
-      setLoading(false)
       setHasRequestedReset(true)
       setRequestEmail(values.email)
     } catch (error: any) {
@@ -47,7 +44,7 @@ const PasswordResetPage = () => {
         color: 'danger',
       })
     } finally {
-      setLoading(false)
+      //
     }
   }
 
@@ -61,7 +58,6 @@ const PasswordResetPage = () => {
       return
     }
 
-    setLoading(true)
     try {
       const result = await client
         .mutation(RESET_PASSWORD_MUTATION, {
@@ -93,7 +89,7 @@ const PasswordResetPage = () => {
         color: 'danger',
       })
     } finally {
-      setLoading(false)
+      //
     }
   }
 
@@ -110,7 +106,6 @@ const PasswordResetPage = () => {
           defaultEmail={defaultEmail}
           onRequestReset={handleRequestReset}
           onResetPassword={handleResetPassword}
-          loading={loading}
         />
       </CardContent>
     </Card>

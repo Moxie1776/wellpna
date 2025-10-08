@@ -239,6 +239,34 @@ const Counter = () => {
 1. Install dependencies: `npm install`
 2. Start development server: `npm run dev`
 
+## Building for Production
+
+Run `npm run build` to build the app for production. The build artifacts will be stored in the `dist/` directory.
+
+## Deployment
+
+### AWS Amplify (Recommended for React SPAs)
+
+1. Go to AWS Amplify Console
+2. Connect your GitHub repository
+3. Amplify will automatically detect the build settings and handle SPA routing
+4. Set environment variables for production (e.g., `VITE_GRAPHQL_ENDPOINT`)
+
+### AWS S3 + CloudFront
+
+1. Build the app: `npm run build`
+2. Upload the `dist/` folder contents to an S3 bucket
+3. Configure CloudFront distribution:
+   - Set the S3 bucket as origin
+   - Add error page rule: Error code 404 -> /index.html (HTTP 200)
+4. Set environment variables in CloudFront or use build-time replacement
+
+### Environment Variables
+
+For production deployment, ensure `VITE_GRAPHQL_ENDPOINT` points to your deployed GraphQL API.
+
+Example: `VITE_GRAPHQL_ENDPOINT=https://your-api.example.com/graphql`
+
 ## Development Guidelines
 
 - Use TypeScript for all new code

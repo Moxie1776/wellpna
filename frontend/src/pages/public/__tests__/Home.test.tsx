@@ -88,12 +88,10 @@ describe('HomePage Component', () => {
         </TestWrapper>,
       )
 
-      const img = screen.getByRole('img', { name: /no shale gas/i })
+      const img = screen.getByRole('img', { name: /villahermosa/i })
       expect(img).toBeInTheDocument()
-      expect(img).toHaveAttribute('src', '/cybergedeon_no_shale_gas_black.svg')
-      expect(img).toHaveAttribute('alt', 'No Shale Gas')
-      expect(img).toHaveAttribute('width', '300')
-      expect(img).toHaveAttribute('height', '300')
+      expect(img).toHaveAttribute('src', '/villahermosa2.2-removebg-preview.png')
+      expect(img).toHaveAttribute('alt', 'villahermosa2.2')
     })
   })
 

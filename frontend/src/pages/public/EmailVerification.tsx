@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@mui/joy'
-import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 // eslint-disable-next-line max-len
@@ -15,10 +14,8 @@ const EmailVerificationPage = () => {
   const navigate = useNavigate()
   const { showSnackbar } = useSnackbar()
   const defaultEmail = searchParams.get('email') || ''
-  const [loading, setLoading] = useState(false)
 
   const handleVerify = async (values: { email: string; code: string }) => {
-    setLoading(true)
     try {
       const result = await client
         .mutation(VERIFY_EMAIL_MUTATION, {
@@ -47,7 +44,7 @@ const EmailVerificationPage = () => {
         color: 'danger',
       })
     } finally {
-      setLoading(false)
+      //
     }
   }
 
@@ -94,7 +91,6 @@ const EmailVerificationPage = () => {
           defaultEmail={defaultEmail}
           onVerify={handleVerify}
           onResendCode={handleResendCode}
-          loading={loading}
         />
       </CardContent>
     </Card>

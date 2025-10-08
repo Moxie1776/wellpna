@@ -26,13 +26,11 @@ const resetPasswordSchema = z
 
 export function PasswordResetForm({
   mode,
-  loading = false,
   defaultEmail = '',
   onRequestReset,
   onResetPassword,
 }: {
   mode: 'request' | 'reset'
-  loading?: boolean
   defaultEmail?: string
   onRequestReset?: (values: { email: string }) => void
   onResetPassword?: (values: {
@@ -102,7 +100,9 @@ export function PasswordResetForm({
     resetForm.formState.errors.newPassword,
     resetForm.formState.errors.confirmPassword,
     requestForm.formState.isSubmitted,
+    requestForm.formState.isLoading,
     resetForm.formState.isSubmitted,
+    resetForm.formState.isLoading,
   ])
 
   return mode === 'request' ? (
@@ -122,8 +122,8 @@ export function PasswordResetForm({
             />
           </FormControl>
         </FormItem>
-        <Button type="submit">
-          {loading ? 'Sending...' : 'Send Reset Link'}
+        <Button type="submit" disabled={requestForm.formState.isLoading}>
+          {requestForm.formState.isLoading ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </Form>
     </FormProvider>
@@ -165,8 +165,8 @@ export function PasswordResetForm({
             />
           </FormControl>
         </FormItem>
-        <Button type="submit">
-          {loading ? 'Resetting...' : 'Reset Password'}
+        <Button type="submit" disabled={resetForm.formState.isLoading}>
+          {resetForm.formState.isLoading ? 'Resetting...' : 'Reset Password'}
         </Button>
       </Form>
     </FormProvider>
