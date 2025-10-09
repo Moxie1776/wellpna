@@ -158,6 +158,7 @@ describe('reset mode', () => {
       screen.getByRole('button', { name: 'Reset Password' }),
     )
     await waitFor(() => {
+      // eslint-disable-next-line quotes
       expect(screen.getByText("Passwords don't match")).toBeInTheDocument()
     })
   })
