@@ -5,8 +5,6 @@ import {
   useJWT,
 } from '@graphql-yoga/plugin-jwt'
 import dotenv from 'dotenv'
-import express from 'express'
-import { createProxyMiddleware } from 'http-proxy-middleware'
 import { createYoga } from 'graphql-yoga'
 
 import { prisma } from './client'
@@ -56,24 +54,8 @@ export const yoga = createYoga<GraphQLContext>({
   },
 })
 
-// Create Express app
-const app = express()
-
-// Apply GraphQL Yoga middleware to Express
-app.use(yoga.graphqlEndpoint, yoga.requestListener)
-
-// Proxy all other requests to the frontend dev server
-app.use(
-  '/',
-  createProxyMiddleware({
-    target: 'http://localhost:5173', // Vite dev server default port
-    changeOrigin: true,
-    ws: true, // Support WebSocket for hot reloading
-  })
-)
-
 // Pass it into a server to hook into request handlers.
-export const server = createServer(app)
+export const server = createServer(yoga)
 
 // Start the server and you're done!
 // Only start if this file is run directly (not imported)
@@ -82,7 +64,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.info(`
 🚀 Server ready at: http://127.0.0.1:4000
 ⭐️ See sample queries: http://localhost:4000/graphql
-🔗 Frontend proxied to: http://localhost:5173
     `)
     logger.info('Server started on port 4000')
   })
