@@ -1,13 +1,5 @@
-// RHFInputJoyPassword.tsx
-// React Hook Form Joy UI Input for password fields
-import {
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-  InputProps,
-} from '@mui/joy'
-import React from 'react'
+// Joy UI
+import { FormHelperText, FormLabel, Input, InputProps } from '@mui/joy'
 import { Controller, useFormContext } from 'react-hook-form'
 
 interface Props extends InputProps {
@@ -16,35 +8,34 @@ interface Props extends InputProps {
   helperText?: React.ReactNode
 }
 
-export default function RHFInputJoyPassword({
-  label,
-  name,
-  type = 'password',
-  helperText,
-  ...other
-}: Props) {
+export default function HFInput(props: Props) {
+  const { label, name, type, helperText, onChange, ...other } = props
   const { control } = useFormContext()
-
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <FormControl error={!!error}>
+        <>
           {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
           <Input
             {...field}
             type={type}
-            error={!!error}
+            id={name}
+            name={name}
             slotProps={{ input: { id: name, name } }}
+            onChange={(e) => {
+              field.onChange(e)
+              if (onChange) onChange(e)
+            }}
             {...other}
           />
           {(!!error || helperText) && (
-            <FormHelperText>
-              {error ? error.message : helperText}
+            <FormHelperText sx={{ mx: 0 }} color={error ? 'danger' : undefined}>
+              {error ? error?.message : helperText}
             </FormHelperText>
           )}
-        </FormControl>
+        </>
       )}
     />
   )

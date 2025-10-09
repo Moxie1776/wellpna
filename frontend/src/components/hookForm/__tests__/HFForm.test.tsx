@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../form'
+} from '../HFForm'
 
 describe('Form Components', () => {
   beforeEach(() => {

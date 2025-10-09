@@ -24,6 +24,7 @@ This project is organized into three main directories:
 The backend is a Node.js/TypeScript application that provides the data processing, storage, and API services for the system.
 
 **Purpose:**
+
 - Data ingestion from PDF and Excel files (examples in `backend/data/`)
 - Database storage and management (SQLite with Prisma)
 - GraphQL API for frontend consumption
@@ -32,6 +33,7 @@ The backend is a Node.js/TypeScript application that provides the data processin
 - User authentication with JWT
 
 **Major Libraries Used:**
+
 - Node.js - JavaScript runtime
 - TypeScript - Type safety
 - Prisma - Database ORM
@@ -49,6 +51,7 @@ For detailed backend structure and development guidelines, see [backend/README.m
 The frontend is a React application that provides the user interface for data visualization and management.
 
 **Purpose:**
+
 - User authentication interface integrated with backend GraphQL API
 - Dashboard for viewing well data
 - Wellbore diagram generation and visualization
@@ -57,6 +60,7 @@ The frontend is a React application that provides the user interface for data vi
 - Generate ad-hoc WBD's (Wellbore Diagrams) in SVG/PDF format
 
 **Major Libraries Used:**
+
 - React - UI library
 - TypeScript - Type safety
 - urql - GraphQL client
@@ -80,23 +84,23 @@ Both the backend and frontend projects are configured with ESLint and Prettier t
 - **Prettier:** Used for code formatting to ensure consistent code style.
   - Configuration files: `backend/.prettierrc` and `frontend/.prettierrc`
 
-To run linting and fix issues:
+To run linting and fix issues from the root directory:
 
-- **Backend:**
-  - `npm run lint`
-  - `npm run lint:fix`
-- **Frontend:**
-  - `npm run lint`
-  - `npm run lint:fix`
+- **Both projects**: `npm run lint` / `npm run lint:fix`
+- **Backend only**: `npm run lint:backend`
+- **Frontend only**: `npm run lint:frontend`
 
-To run formatting and check formatting:
+To run formatting and check formatting from the root directory:
 
-- **Backend:**
-  - `npm run format`
-  - `npm run format:check`
-- **Frontend:**
-  - `npm run format`
-  - `npm run format:check`
+- **Both projects**: `npm run format` / `npm run format:check`
+- **Backend only**: `npm run format:backend`
+- **Frontend only**: `npm run format:frontend`
+
+To run tests from the root directory:
+
+- **Both projects**: `npm test`
+- **Backend only**: `npm run test:backend`
+- **Frontend only**: `npm run test:frontend`
 
 ## Color Scheme
 
@@ -107,18 +111,54 @@ The application uses a consistent color scheme across both frontend and backend 
 
 These colors should be used project-wide for consistency.
 
+## Security Considerations
+
+### Production Deployment
+
+- **Environment Variables**: Use strong, cryptographically secure values for `JWT_SECRET` and database credentials. Never use placeholder values like "your-secret-key" in production.
+- **AWS Deployment**: For AWS deployments, use AWS Systems Manager Parameter Store or AWS Secrets Manager to manage environment variables instead of .env files.
+- **Code Review**: Before making the project public or deploying to production, audit all configuration files for hardcoded sensitive data including API keys, passwords, and personal information.
+
+### Data Protection
+
+- Sensitive data files (such as those in the `data/` directory) are excluded from version control via `.gitignore`.
+- Environment files (`.env*`) are properly ignored to prevent accidental commits of secrets.
+
 ## Getting Started
 
-1. Set up the backend:
-   - Navigate to the `backend` directory
-   - Install dependencies: `npm install`
-   - Set up the database: `npx prisma migrate dev`
-   - Start the server: `npm run dev`
+### Local Development
 
-2. Set up the frontend:
-   - Navigate to the `frontend` directory
-   - Install dependencies: `npm install`
-   - Start the development server: `npm run dev`
+1. Install all dependencies:
+    ```bash
+    npm run install:all
+    ```
+
+2. Set up the database:
+    ```bash
+    cd backend
+    npx prisma migrate dev
+    cd ..
+    ```
+
+3. Start both servers:
+    ```bash
+    npm start
+    ```
+    This will start both the backend GraphQL server (port 4000) and frontend dev server (port 5173), with the backend proxying frontend requests.
+
+### Individual Server Development
+
+- **Backend only**: `npm run dev:backend`
+- **Frontend only**: `npm run dev:frontend`
+
+### AWS Beanstalk Deployment
+
+The application is configured to run both frontend and backend on a single Beanstalk environment:
+
+1. The backend serves the GraphQL API at `/graphql`
+2. All other requests are proxied to the frontend development server
+3. Use `npm run build:backend` for production builds
+4. The root `package.json` provides deployment scripts
 
 ## Development
 

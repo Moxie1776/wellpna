@@ -2,9 +2,6 @@
   "folders": [
     {
       "path": "."
-    },
-    {
-      "path": "../enbridge/client_react/src/components/hook-form"
     }
   ],
   "settings": {

@@ -5,8 +5,8 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
-import { Form, FormControl, FormItem } from '@/components/ui/form'
+import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
+import HFInput from '@/components/hookForm/HFInput'
 import passwordSchema from '@/utils/passwordSchema'
 
 import { useAuth } from '../../hooks/useAuth'
@@ -71,11 +71,19 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   ])
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    logger.debug('SignUpForm submit', values)
     try {
       await signUp(values.email, values.password, values.name)
+      logger.debug(
+        'SignUpForm signUp callback called',
+        values.email,
+        values.password,
+        values.name,
+      )
       onSignup()
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      logger.debug('SignUpForm onSignup callback called')
     } catch (err) {
+      logger.debug('SignUpForm error in submit', err)
       // Error handling is done in the useAuth hook
     }
   }
@@ -89,7 +97,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
           </Typography>
           <FormItem>
             <FormControl>
-              <RHFInputJoy
+              <HFInput
                 name="name"
                 label="Name"
                 type="text"
@@ -100,7 +108,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
           </FormItem>
           <FormItem>
             <FormControl>
-              <RHFInputJoy
+              <HFInput
                 name="email"
                 label="Email"
                 type="email"
@@ -111,7 +119,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
           </FormItem>
           <FormItem>
             <FormControl>
-              <RHFInputJoy
+              <HFInput
                 name="password"
                 label="Password"
                 type="password"

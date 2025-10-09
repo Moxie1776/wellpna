@@ -6,8 +6,8 @@ import { MdLogin } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
-import { Form, FormControl, FormItem } from '@/components/ui/form'
+import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
+import HFInput from '@/components/hookForm/HFInput'
 
 import { useAuth } from '../../hooks/useAuth'
 import logger from '../../utils/logger'
@@ -67,10 +67,18 @@ export const SignInForm = ({
   ])
 
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
+    logger.debug('SignInForm submit', values)
     try {
       await signIn(values.email, values.password)
+      logger.debug(
+        'SignInForm signIn callback called',
+        values.email,
+        values.password,
+      )
       onSignIn()
+      logger.debug('SignInForm onSignIn callback called')
     } catch (error: any) {
+      logger.debug('SignInForm error in submit', error)
       // Check if email is not verified
       if (error?.message?.includes('Email not verified')) {
         navigate(
@@ -90,7 +98,7 @@ export const SignInForm = ({
         <Form onSubmit={form.handleSubmit(onSubmit)}>
           <FormItem>
             <FormControl>
-              <RHFInputJoy
+              <HFInput
                 name="email"
                 label="Email"
                 type="email"
@@ -101,7 +109,7 @@ export const SignInForm = ({
           </FormItem>
           <FormItem>
             <FormControl>
-              <RHFInputJoy
+              <HFInput
                 name="password"
                 label="Password"
                 type="password"

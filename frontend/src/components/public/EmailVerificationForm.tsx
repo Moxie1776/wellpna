@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
-import { Form, FormControl, FormItem } from '@/components/ui/form'
+import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
+import HFInput from '@/components/hookForm/HFInput'
+
+import logger from '../../utils/logger'
 
 const emailVerificationSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -31,15 +33,16 @@ export const EmailVerificationForm = ({
   })
 
   const onSubmit = form.handleSubmit((data) => {
+    logger.debug('EmailVerificationForm submit', data)
     onVerify({
       email: data.email,
       code: data.code,
     })
-    form.setFocus('email')
   })
 
   const handleResend = () => {
     const email = form.getValues('email')
+    logger.debug('EmailVerificationForm resend', email)
     onResendCode(email)
   }
 
@@ -79,7 +82,7 @@ export const EmailVerificationForm = ({
       <Form onSubmit={onSubmit}>
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="email"
               label="Email"
               type="email"
@@ -89,7 +92,7 @@ export const EmailVerificationForm = ({
         </FormItem>
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="code"
               label="Verification Code"
               type="text"

@@ -4,9 +4,11 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
-import { Form, FormControl, FormItem } from '@/components/ui/form'
+import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
+import HFInput from '@/components/hookForm/HFInput'
 import { passwordSchema } from '@/utils/'
+
+import logger from '../../utils/logger'
 
 const requestResetSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -108,13 +110,20 @@ export function PasswordResetForm({
   return mode === 'request' ? (
     <FormProvider {...requestForm}>
       <Form
-        onSubmit={requestForm.handleSubmit(
-          (data) => onRequestReset && onRequestReset(data),
-        )}
+        onSubmit={requestForm.handleSubmit((data) => {
+          logger.debug('PasswordResetForm request mode submit', data)
+          if (onRequestReset) {
+            onRequestReset(data)
+            logger.debug(
+              'PasswordResetForm onRequestReset callback called',
+              data,
+            )
+          }
+        })}
       >
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="email"
               label="Email"
               type="email"
@@ -130,13 +139,20 @@ export function PasswordResetForm({
   ) : (
     <FormProvider {...resetForm}>
       <Form
-        onSubmit={resetForm.handleSubmit(
-          (data) => onResetPassword && onResetPassword(data),
-        )}
+        onSubmit={resetForm.handleSubmit((data) => {
+          logger.debug('PasswordResetForm reset mode submit', data)
+          if (onResetPassword) {
+            onResetPassword(data)
+            logger.debug(
+              'PasswordResetForm onResetPassword callback called',
+              data,
+            )
+          }
+        })}
       >
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="code"
               label="Verification Code"
               type="text"
@@ -146,7 +162,7 @@ export function PasswordResetForm({
         </FormItem>
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="newPassword"
               label="New Password"
               type="password"
@@ -156,7 +172,7 @@ export function PasswordResetForm({
         </FormItem>
         <FormItem>
           <FormControl>
-            <RHFInputJoy
+            <HFInput
               name="confirmPassword"
               label="Confirm Password"
               type="password"
