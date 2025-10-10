@@ -11,8 +11,8 @@ interface JwtSecretData {
 }
 
 import {
-  SecretsManagerClient,
   GetSecretValueCommand,
+  SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager'
 
 class SecretsManager {
@@ -65,12 +65,15 @@ class SecretsManager {
   async getDatabaseUrl(): Promise<string> {
     const dbCredentials = await this.getDatabaseCredentials()
     const encodedPassword = encodeURIComponent(dbCredentials.password)
-    return `postgresql://${dbCredentials.username}:${encodedPassword}@${dbCredentials.host}:${dbCredentials.port}/${dbCredentials.dbname}?sslmode=require`
+    return `postgresql://${dbCredentials.username}:${encodedPassword}@${
+      dbCredentials.host
+    }:${dbCredentials.port}/${dbCredentials.dbname}?sslmode=require`
   }
 
   async getJwtSecret(): Promise<string> {
     const jwtData: JwtSecretData = await this.getSecret(
-      'arn:aws:secretsmanager:us-east-2:747034604465:secret:wellpna/jwt/secret-RERkFY',
+      'arn:aws:secretsmanager:us-east-2:747034604465:secret:' +
+        'wellpna/jwt/secret-RERkFY',
     )
     return jwtData.jwt_secret
   }

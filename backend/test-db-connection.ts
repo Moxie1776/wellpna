@@ -24,7 +24,8 @@ async function testDatabaseConnection() {
       console.log('   Total users:', userCount)
     } catch (error) {
       console.log(
-        "⚠️  Users table not accessible (this is expected if migrations haven't run)",
+        '⚠️  Users table not accessible ' +
+          '(this is expected if migrations haven\'t run)',
       )
       console.log(
         '   Error:',
