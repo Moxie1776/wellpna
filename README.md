@@ -116,7 +116,7 @@ These colors should be used project-wide for consistency.
 ### Production Deployment
 
 - **Environment Variables**: Use strong, cryptographically secure values for `JWT_SECRET` and database credentials. Never use placeholder values like "your-secret-key" in production.
-- **AWS Deployment**: For AWS deployments, use AWS Systems Manager Parameter Store or AWS Secrets Manager to manage environment variables instead of .env files.
+- **AWS Secrets Manager**: The backend automatically retrieves database credentials and JWT secrets from AWS Secrets Manager. Configure AWS credentials before deployment.
 - **Code Review**: Before making the project public or deploying to production, audit all configuration files for hardcoded sensitive data including API keys, passwords, and personal information.
 
 ### Data Protection
@@ -129,21 +129,26 @@ These colors should be used project-wide for consistency.
 ### Local Development
 
 1. Install all dependencies:
+
     ```bash
     npm run install:all
     ```
 
-2. Set up the database:
+2. Set up AWS credentials and database secrets:
+
     ```bash
     cd backend
+    npm run setup-db  # Fetches database URL from AWS Secrets Manager
     npx prisma migrate dev
     cd ..
     ```
 
 3. Start both servers:
+
     ```bash
     npm start
     ```
+
     This will start both the backend GraphQL server (port 4000) and frontend dev server (port 5173), with the backend proxying frontend requests.
 
 ### Individual Server Development

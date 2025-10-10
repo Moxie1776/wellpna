@@ -67,7 +67,7 @@ class SecretsManager {
     const encodedPassword = encodeURIComponent(dbCredentials.password)
     return `postgresql://${dbCredentials.username}:${encodedPassword}@${
       dbCredentials.host
-    }:${dbCredentials.port}/${dbCredentials.dbname}?sslmode=require`
+    }:${dbCredentials.port}/${dbCredentials.dbname}?schema=public`
   }
 
   async getJwtSecret(): Promise<string> {

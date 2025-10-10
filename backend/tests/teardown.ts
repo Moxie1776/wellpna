@@ -15,7 +15,7 @@ export default async function teardown() {
   try {
     // Clean up all test users (those with @example.com emails)
     // This helps prevent the database from accumulating test data
-    const deletedUsers = await prisma.user.deleteMany({
+    const deletedUsers = await (await prisma).user.deleteMany({
       where: {
         email: {
           endsWith: '@example.com',
@@ -27,6 +27,6 @@ export default async function teardown() {
   } catch (error) {
     logger.error(`Global teardown: Error cleaning up test users - ${error}`)
   } finally {
-    await prisma.$disconnect()
+    await (await prisma).$disconnect()
   }
 }

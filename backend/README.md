@@ -76,9 +76,11 @@ Unlike the frontend, the backend is a Node.js server and cannot be deployed as s
 
 1. Build the app: `npm run build`
 2. Create a `Procfile` in the root directory:
+
    ```
    web: npm start
    ```
+
 3. Zip the entire project (including `dist/`, `node_modules/`, etc.)
 4. Upload to Elastic Beanstalk as a Node.js application
 5. Configure environment variables (DATABASE_URL, JWT_SECRET, etc.)
@@ -99,9 +101,32 @@ Unlike the frontend, the backend is a Node.js server and cannot be deployed as s
 ### Environment Variables
 
 Required for production:
-- `DATABASE_URL`: PostgreSQL connection string
-- `JWT_SECRET`: Secret key for JWT signing
+
+- `DATABASE_URL`: PostgreSQL connection string (automatically set by setup-db script)
+- `JWT_SECRET`: Secret key for JWT signing (automatically retrieved from AWS Secrets Manager)
 - `NODE_ENV`: Set to 'production'
+
+### AWS Secrets Manager Integration
+
+The application uses AWS Secrets Manager to securely store database credentials and JWT secrets. The `setup-db` script automatically retrieves these secrets and sets the required environment variables.
+
+**Before running the application:**
+
+1. Ensure AWS credentials are configured (via AWS CLI, environment variables, or IAM roles)
+2. Run `npm run setup-db` to fetch secrets and set DATABASE_URL
+3. Start the application with `npm run dev` or `npm start`
+
+The setup script fetches:
+
+- Database credentials from `arn:aws:secretsmanager:us-east-2:747034604465:secret:wellpna/database/app-credentials-t2medS`
+- JWT secret from `arn:aws:secretsmanager:us-east-2:747034604465:secret:wellpna/jwt/secret-RERkFY`
+
+**Available Scripts:**
+
+- `npm run setup-db`: Fetch AWS secrets and set DATABASE_URL
+- `npm run dev`: Run setup-db then start development server
+- `npm start`: Run setup-db then start production server
+- `npm run generate`: Run setup-db then generate Prisma client
 
 ### Database
 
