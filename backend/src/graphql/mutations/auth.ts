@@ -56,7 +56,7 @@ builder.mutationFields((t) => ({
       }
 
       // Generate JWT token (but user needs to verify email first)
-      const token = signJwt({
+      const token = await signJwt({
         id: user.id,
         email: user.email,
         name: user.name,
@@ -119,7 +119,7 @@ builder.mutationFields((t) => ({
       }
 
       // Generate JWT token
-      const token = signJwt({
+      const token = await signJwt({
         id: user.id,
         email: user.email,
         name: user.name,
@@ -211,7 +211,7 @@ builder.mutationFields((t) => ({
       })
 
       // Generate JWT token
-      const token = signJwt({
+      const token = await signJwt({
         id: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,
@@ -291,7 +291,7 @@ builder.mutationFields((t) => ({
       })
 
       // Generate JWT token
-      const token = signJwt({
+      const token = await signJwt({
         id: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,

@@ -9,7 +9,7 @@ import { createYoga } from 'graphql-yoga'
 
 import { prisma } from './client'
 import { schema } from './schema'
-import { JWT_SECRET } from './utils/constants'
+import { getJwtSecret } from './utils/constants'
 import logger from './utils/logger'
 
 // Load environment variables first
@@ -27,29 +27,59 @@ export interface GraphQLContext {
   }
 }
 
+// Initialize JWT secret
+let jwtSecret: string
+let yogaInstance: ReturnType<typeof createYoga<GraphQLContext>> | null = null
+
 // Create a Yoga instance with a GraphQL schema.
-export const yoga = createYoga<GraphQLContext>({
-  schema,
-  graphiql: true,
-  maskedErrors: false, // Show actual error messages in development/tests
-  plugins: [
-    useJWT({
-      signingKeyProviders: [createInlineSigningKeyProvider(JWT_SECRET)],
-      tokenVerification: {
-        algorithms: ['HS256'],
-      },
-      extendContext: true, // Injects ctx.jwt
-      reject: {
-        missingToken: false,
-        invalidToken: false,
-      },
-    }),
-  ],
-  context: async ({ request }) => {
-    return {
-      req: request,
-      prisma: (global as any).testPrisma || prisma,
-      logger,
+// Note: JWT secret will be initialized asynchronously
+const createYogaInstance = async () => {
+  if (!jwtSecret) {
+    jwtSecret = await getJwtSecret()
+  }
+
+  return createYoga<GraphQLContext>({
+    schema,
+    graphiql: true,
+    maskedErrors: false, // Show actual error messages in development/tests
+    plugins: [
+      useJWT({
+        signingKeyProviders: [createInlineSigningKeyProvider(jwtSecret)],
+        tokenVerification: {
+          algorithms: ['HS256'],
+        },
+        extendContext: true, // Injects ctx.jwt
+        reject: {
+          missingToken: false,
+          invalidToken: false,
+        },
+      }),
+    ],
+    context: async ({ request }) => {
+      return {
+        req: request,
+        prisma: (global as any).testPrisma || prisma,
+        logger,
+      }
+    },
+  })
+}
+
+// Export a getter that ensures yoga is initialized
+export const getYoga = async () => {
+  if (!yogaInstance) {
+    yogaInstance = await createYogaInstance()
+  }
+  return yogaInstance
+}
+
+// For backward compatibility, we'll initialize on first access
+export const yoga = new Proxy({} as any, {
+  get(target, prop) {
+    return async (...args: any[]) => {
+      const instance = await getYoga()
+      const value = (instance as any)[prop]
+      return typeof value === 'function' ? value.apply(instance, args) : value
     }
   },
 })

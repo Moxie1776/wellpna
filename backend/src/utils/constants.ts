@@ -1,1 +1,10 @@
-export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import secretManager from './secret'
+
+let jwtSecret: string | null = null
+
+export const getJwtSecret = async (): Promise<string> => {
+  if (!jwtSecret) {
+    jwtSecret = await secretManager.getJwtSecret()
+  }
+  return jwtSecret
+}

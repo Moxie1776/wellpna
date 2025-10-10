@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from './constants';
+import { getJwtSecret } from './constants';
 
 export interface JwtPayload {
   id: string;
@@ -21,13 +21,15 @@ export const comparePassword = async (
   return bcrypt.compare(password, hash);
 };
 
-export const signJwt = (payload: object, options?: jwt.SignOptions) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '14d', ...options });
+export const signJwt = async (payload: object, options?: jwt.SignOptions): Promise<string> => {
+  const secret = await getJwtSecret();
+  return jwt.sign(payload, secret, { expiresIn: '14d', ...options });
 };
 
-export const verifyToken = (token: string): JwtPayload => {
+export const verifyToken = async (token: string): Promise<JwtPayload> => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const secret = await getJwtSecret();
+    const decoded = jwt.verify(token, secret) as JwtPayload;
     return decoded;
   } catch {
     throw new Error('Invalid token');
