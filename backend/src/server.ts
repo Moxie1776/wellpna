@@ -60,11 +60,11 @@ export const server = createServer(yoga)
 // Start the server and you're done!
 // Only start if this file is run directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}`) {
-  server.listen(4000, () => {
+  server.listen(4000, '0.0.0.0', () => {
     console.info(`
-🚀 Server ready at: http://127.0.0.1:4000
-⭐️ See sample queries: http://localhost:4000/graphql
+🚀 Server ready at: http://0.0.0.0:4000
+⭐️ See sample queries: http://0.0.0.0:4000/graphql
     `)
-    logger.info('Server started on port 4000')
+    logger.info('Server started on 0.0.0.0:4000')
   })
 }

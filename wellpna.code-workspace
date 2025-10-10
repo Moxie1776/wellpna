@@ -7,15 +7,20 @@
   "settings": {
     "sqltools.connections": [
       {
+        "pgOptions": {
+          "ssl": {
+            "rejectUnauthorized": true
+          }
+        },
         "ssh": "Disabled",
         "previewLimit": 50,
         "server": "localhost",
         "port": 5432,
         "driver": "PostgreSQL",
-        "name": "localhost-testdb",
-        "database": "testdb",
-        "username": "wexpython",
-        "password": "333StateSt!"
+        "name": "localhost-ssh",
+        "database": "postgres",
+        "username": "postgres",
+        "password": ">i.(XUgSuWQ3)oUcxDc7]7V(kWM>"
       }
     ]
   }
