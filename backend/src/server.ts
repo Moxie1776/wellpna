@@ -52,6 +52,17 @@ export const yoga = createYoga<GraphQLContext>({
       logger,
     }
   },
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'https://wellpna.com',
+      'https://www.wellpna.com',
+      'https://3.17.67.172',
+    ],
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
 })
 
 // Pass it into a server to hook into request handlers.
