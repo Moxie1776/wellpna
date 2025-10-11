@@ -13,7 +13,7 @@ export default {
       {
         tsconfig: {
           jsx: 'react-jsx',
-          module: 'ES2020',
+          module: 'ESNext',
           esModuleInterop: true,
           types: ['jest', '@testing-library/jest-dom'],
         },
@@ -21,4 +21,9 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 }
