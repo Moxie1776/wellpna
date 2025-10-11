@@ -1,19 +1,11 @@
 import { cacheExchange, createClient, fetchExchange } from 'urql'
 
-// Only use process.env for environment variables in shared code
-function getGraphQLEndpoint() {
-  if (
-    typeof process !== 'undefined' &&
-    process.env &&
-    process.env.VITE_GRAPHQL_ENDPOINT
-  ) {
-    return process.env.VITE_GRAPHQL_ENDPOINT
-  }
-  return 'http://localhost:4000/graphql'
-}
+// Use Vite's built-in environment variable handling
+const graphQLEndpoint =
+  import.meta.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
 
 const client = createClient({
-  url: getGraphQLEndpoint(),
+  url: graphQLEndpoint,
   exchanges: [cacheExchange, fetchExchange],
   fetchOptions: () => {
     const token =

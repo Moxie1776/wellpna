@@ -1,9 +1,33 @@
+import { afterAll, beforeAll, jest } from '@jest/globals'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+
+// Load environment variables from .env file for tests
+try {
+  const envPath = resolve(__dirname, '.env')
+  const envContent = readFileSync(envPath, 'utf-8')
+  const envVars = envContent.split('\n').reduce(
+    (acc, line) => {
+      const [key, value] = line.split('=')
+      if (key && value) {
+        acc[key.trim()] = value.trim()
+      }
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+
+  process.env = { ...process.env, ...envVars }
+} catch {
+  //
+}
+
 // Mock import.meta for ES module compatibility
 Object.defineProperty(global, 'import', {
   value: {
     meta: {
       env: {
-        VITE_GRAPHQL_ENDPOINT: 'http://localhost:4000/graphql',
+        VITE_GRAPHQL_ENDPOINT: process.env.VITE_GRAPHQL_ENDPOINT,
         // Add other env vars as needed
       },
     },

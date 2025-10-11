@@ -59,9 +59,6 @@ export const yoga = createYoga<GraphQLContext>({
       'https://www.wellpna.com',
       'https://3.17.67.172',
     ],
-    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
   },
 })
 
