@@ -7,10 +7,9 @@
   "scripts": {
     "build": "npm -s run generate && tsc && npx tsc-esm-fix dist && npm run build:schema && node scripts/fix-prisma-client.cjs",
     "build:schema": "tsx src/schema/index.ts",
-    "setup-db": "tsx scripts/setup-db-url.js",
-    "start": "npm run setup-db && tsx src/server.ts",
-    "dev": "npm run setup-db && tsx watch src/server.ts",
-    "generate": "npm run setup-db && prisma generate",
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
+    "generate": "prisma generate",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch --detectOpenHandles",
     "lint": "eslint .",

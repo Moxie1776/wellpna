@@ -7,3 +7,5 @@ logs
 test-secrets.ts
 
 /src/generated/prisma
+scripts/print*
+scripts/set-db-url.js
