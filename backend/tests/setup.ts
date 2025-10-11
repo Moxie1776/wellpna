@@ -31,16 +31,9 @@ config()
 // Use logger.info, logger.debug, etc. for debugging instead
 const originalLog = console.log
 const originalError = console.error
-beforeAll(async () => {
+beforeAll(() => {
   console.log = jest.fn()
   console.error = jest.fn()
-
-  // Set DATABASE_URL from AWS secret for tests if not already set
-  if (!process.env.DATABASE_URL) {
-    const { default: secretManager } = await import('../src/utils/secret')
-    const dbUrl = await secretManager.getDatabaseUrl()
-    process.env.DATABASE_URL = dbUrl
-  }
 })
 
 afterAll(() => {
@@ -79,17 +72,13 @@ beforeAll(async () => {
   ;(global as any).testPrisma = prisma
 
   // Ensure roles exist (don't delete them)
-  await (
-    await prisma
-  ).userRole.upsert({
+  await prisma.userRole.upsert({
     where: { role: 'user' },
     update: {},
     create: { role: 'user' },
   })
 
-  await (
-    await prisma
-  ).userRole.upsert({
+  await prisma.userRole.upsert({
     where: { role: 'admin' },
     update: {},
     create: { role: 'admin' },
