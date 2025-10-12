@@ -70,69 +70,6 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  signIn: t.field({
-    type: AuthPayload,
-    args: {
-      email: t.arg.string({ required: true }),
-      password: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, args, _ctx) => {
-      // Find the user
-      const user = await prisma.user.findUnique({
-        where: { email: args.email },
-      })
-
-      if (!user) {
-        throw new Error('Invalid email or password')
-      }
-
-      // Check password
-      const isValid = await comparePassword(args.password, user.password)
-      if (!isValid) {
-        throw new Error('Invalid email or password')
-      }
-
-      // Check if email is validated
-      if (!user.validatedAt) {
-        // Generate verification code
-        const verificationCode = generate6DigitCode()
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            verificationCode,
-            verificationCodeExpiresAt: expiresAt,
-          },
-        })
-
-        // Send verification email
-        try {
-          await emailService.sendVerificationEmail(user.email, verificationCode)
-        } catch (error) {
-          console.error('Failed to send verification email:', error)
-        }
-
-        throw new Error(
-          'Email not verified. Verification code sent to your email.',
-        )
-      }
-
-      // Generate JWT token
-      const token = signJwt({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.roleId,
-      })
-
-      return {
-        token,
-        user,
-      }
-    },
-  }),
-
   sendVerificationEmail: t.field({
     type: 'Boolean',
     args: {

@@ -44,7 +44,7 @@ export const appRoutes: AppRoute[] = [
   },
   {
     label: 'Sign In',
-    href: '/login',
+    href: '/signin',
     icon: MdLogin,
     requiresAuth: false,
     page: SignInPage,

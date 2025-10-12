@@ -137,7 +137,7 @@ describe('AppSidebar', () => {
       expect(homeLink).toBeInTheDocument()
       expect(signInLink).toBeInTheDocument()
       expect(homeLink).toHaveAttribute('href', '/')
-      expect(signInLink).toHaveAttribute('href', '/login')
+      expect(signInLink).toHaveAttribute('href', '/signin')
     })
 
     it('renders logout button only for authenticated users', () => {
@@ -222,7 +222,7 @@ describe('AppSidebar', () => {
       expect(screen.getByText('Home').closest('a')).toHaveAttribute('href', '/')
       expect(screen.getByText('Sign In').closest('a')).toHaveAttribute(
         'href',
-        '/login',
+        '/signin',
       )
       expect(screen.getByText('Sign Up').closest('a')).toHaveAttribute(
         'href',

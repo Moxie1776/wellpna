@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { SIGN_IN_MUTATION } from '../graphql/mutations/signInMutation'
+import { SIGN_IN_QUERY } from '../graphql/queries/signInQuery'
 import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
 import client from '../utils/graphqlClient'
 import { isValidToken } from '../utils/jwt'
@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null })
         try {
           const result = await client
-            .mutation(SIGN_IN_MUTATION, { email, password })
+            .query(SIGN_IN_QUERY, { email, password }, { preferGetMethod: false })
             .toPromise()
           if (result.error) {
             set({

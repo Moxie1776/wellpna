@@ -70,11 +70,6 @@ export const SignInForm = ({
     logger.debug('SignInForm submit', values)
     try {
       await signIn(values.email, values.password)
-      logger.debug(
-        'SignInForm signIn callback called',
-        values.email,
-        values.password,
-      )
       onSignIn()
       logger.debug('SignInForm onSignIn callback called')
     } catch (error: any) {

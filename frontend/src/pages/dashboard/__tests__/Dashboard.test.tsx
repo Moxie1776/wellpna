@@ -168,7 +168,7 @@ describe('Dashboard Component', () => {
       })
 
       expect(mockSignOut).toHaveBeenCalledTimes(1)
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      expect(mockNavigate).toHaveBeenCalledWith('/signin')
     })
 
     it('handles logout button keyboard interaction', async () => {
@@ -189,7 +189,7 @@ describe('Dashboard Component', () => {
       })
 
       expect(mockSignOut).toHaveBeenCalledTimes(1)
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      expect(mockNavigate).toHaveBeenCalledWith('/signin')
     })
 
     it('handles logout button space key interaction', async () => {
@@ -208,7 +208,7 @@ describe('Dashboard Component', () => {
       })
 
       expect(mockSignOut).toHaveBeenCalledTimes(1)
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      expect(mockNavigate).toHaveBeenCalledWith('/signin')
     })
   })
 
@@ -270,7 +270,7 @@ describe('Dashboard Component', () => {
         await userEvent.click(logoutButton)
       })
       // Should still navigate even if signOut fails
-      expect(mockNavigate).toHaveBeenCalledWith('/login')
+      expect(mockNavigate).toHaveBeenCalledWith('/signin')
     })
 
     it('handles navigation errors', () => {

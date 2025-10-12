@@ -17,6 +17,7 @@ const PasswordResetPage = () => {
   const { showSnackbar } = useSnackbar()
   const isResetMode = searchParams.has('code')
   const defaultEmail = searchParams.get('email') || ''
+  const defaultCode = searchParams.get('code') || ''
   const [hasRequestedReset, setHasRequestedReset] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_requestEmail, setRequestEmail] = useState('')
@@ -104,6 +105,7 @@ const PasswordResetPage = () => {
         <PasswordResetForm
           mode={isResetMode || hasRequestedReset ? 'reset' : 'request'}
           defaultEmail={defaultEmail}
+          defaultCode={defaultCode}
           onRequestReset={handleRequestReset}
           onResetPassword={handleResetPassword}
         />

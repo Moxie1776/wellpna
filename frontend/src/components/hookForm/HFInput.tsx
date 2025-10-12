@@ -9,7 +9,19 @@ interface Props extends InputProps {
 }
 
 export default function HFInput(props: Props) {
-  const { label, name, type, helperText, onChange, ...other } = props
+  const {
+    label,
+    name,
+    type,
+    helperText,
+    disabled,
+    hidden,
+    onChange,
+    autoComplete,
+    inputMode,
+    placeholder,
+    ...other
+  } = props
   const { control } = useFormContext()
   return (
     <Controller
@@ -19,14 +31,28 @@ export default function HFInput(props: Props) {
         <>
           {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
           <Input
-            {...field}
+            // Spread field props on the root as a defensive measure
+            {...(field as any)}
             type={type}
             id={name}
             name={name}
-            slotProps={{ input: { id: name, name } }}
-            onChange={(e) => {
-              field.onChange(e)
-              if (onChange) onChange(e)
+            disabled={disabled}
+            hidden={hidden}
+            // Pass the controlled input props directly to inner input element
+            slotProps={{
+              input: {
+                id: name,
+                name,
+                ref: field.ref,
+                value: field.value ?? '',
+                autoComplete: autoComplete,
+                inputMode: inputMode,
+                placeholder: placeholder,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  field.onChange(e)
+                  if (onChange) onChange(e)
+                },
+              },
             }}
             {...other}
           />

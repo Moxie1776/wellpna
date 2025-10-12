@@ -14,7 +14,7 @@ export const Dashboard = () => {
     } catch (err) {
       logger.error('Dashboard logout error', err)
     }
-    navigate('/login')
+    navigate('/signin')
   }
 
   return (

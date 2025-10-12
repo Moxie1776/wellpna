@@ -29,11 +29,13 @@ const resetPasswordSchema = z
 export function PasswordResetForm({
   mode,
   defaultEmail = '',
+  defaultCode = '',
   onRequestReset,
   onResetPassword,
 }: {
   mode: 'request' | 'reset'
   defaultEmail?: string
+  defaultCode?: string
   onRequestReset?: (values: { email: string }) => void
   onResetPassword?: (values: {
     code: string
@@ -48,7 +50,7 @@ export function PasswordResetForm({
   })
   const resetForm = useForm<z.infer<typeof resetPasswordSchema>>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { code: '', newPassword: '', confirmPassword: '' },
+    defaultValues: { code: defaultCode, newPassword: '', confirmPassword: '' },
     mode: 'onChange',
   })
 
@@ -150,6 +152,25 @@ export function PasswordResetForm({
           }
         })}
       >
+        {/* hidden email field to capture autofill */}
+        <input
+          type="email"
+          name="_email"
+          autoComplete="email"
+          style={{ display: 'none' }}
+        />
+
+        {/* <FormItem>
+          <FormControl>
+            <HFInput
+              name="email"
+              label="Email"
+              type="text"
+              helperText={emailHelperText}
+              disabled={true}
+            />
+          </FormControl>
+        </FormItem> */}
         <FormItem>
           <FormControl>
             <HFInput
@@ -157,6 +178,8 @@ export function PasswordResetForm({
               label="Verification Code"
               type="text"
               helperText={codeHelperText}
+              autoComplete="one-time-code"
+              inputMode="numeric"
             />
           </FormControl>
         </FormItem>

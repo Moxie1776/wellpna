@@ -7,10 +7,6 @@ import { SignInForm } from '@/components/public/SignInForm'
 const SignInPage = () => {
   const navigate = useNavigate()
 
-  const handleLogin = () => {
-    navigate('/')
-  }
-
   return (
     <Card
       color="primary"
@@ -18,12 +14,13 @@ const SignInPage = () => {
       sx={{
         minWidth: 300,
         maxWidth: 400,
-        justifyContent: 'center',
-        justifyItems: 'center',
       }}
     >
       <CardContent>
-        <SignInForm onSignIn={handleLogin} />
+        <SignInForm
+          title="Sign in to your account"
+          onSignIn={() => navigate('/dashboard')}
+        />
       </CardContent>
     </Card>
   )
