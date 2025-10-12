@@ -7,7 +7,7 @@ export interface JwtPayload {
   id: string
   email: string
   name: string
-  roleId: string
+  role: string
 }
 
 export const hashPassword = async (password: string): Promise<string> => {

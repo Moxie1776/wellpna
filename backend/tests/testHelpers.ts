@@ -11,7 +11,7 @@ export interface TestUser {
   id: string
   email: string
   name: string
-  roleId: string
+  role: string
   jwt: string
 }
 
@@ -40,7 +40,7 @@ export async function createTestUserAndJwt(
     email: string
     name: string
     password: string
-    roleId: string
+    role: string
   }> = {},
   password: string = 'password123',
   validated: boolean = true,
@@ -48,7 +48,7 @@ export async function createTestUserAndJwt(
   const userData = generateTestUserData()
   const email = overrides.email || userData.email
   const name = overrides.name || userData.name
-  const roleId = overrides.roleId || 'user'
+  const role = overrides.role || 'user'
 
   // Clean up any existing test user with the same email or name
   // This helps prevent conflicts if a previous test run didn't clean up
@@ -66,7 +66,7 @@ export async function createTestUserAndJwt(
       email,
       name,
       password: hashedPassword,
-      roleId,
+      role,
       // If validated is true, set validatedAt to current date
       ...(validated && { validatedAt: new Date() }),
     },
@@ -76,14 +76,14 @@ export async function createTestUserAndJwt(
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.roleId,
+    role: user.role,
   })
 
   return {
     id: user.id,
     email: user.email,
     name: user.name,
-    roleId: user.roleId,
+    role: user.role,
     jwt,
   }
 }

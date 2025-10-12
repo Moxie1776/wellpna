@@ -43,7 +43,7 @@ builder.mutationFields((t) => ({
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.roleId,
+        role: user.role,
       })
 
       return {
@@ -103,7 +103,7 @@ builder.mutationFields((t) => ({
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.roleId,
+        role: user.role,
       })
 
       return {
@@ -200,7 +200,7 @@ builder.mutationFields((t) => ({
         id: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,
-        role: updatedUser.roleId,
+        role: updatedUser.role,
       })
 
       return {
@@ -285,7 +285,7 @@ builder.mutationFields((t) => ({
         id: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,
-        role: updatedUser.roleId,
+        role: updatedUser.role,
       })
 
       return {

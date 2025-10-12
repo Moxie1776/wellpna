@@ -192,14 +192,14 @@ model User {
   email                       String    @unique
   password                    String
   name                        String
-  roleId                      String    @default("user")
+  role                        String    @default("user")
   registeredAt                DateTime  @default(now())
   validatedAt                 DateTime?
   verificationCode            String?
   verificationCodeExpiresAt   DateTime?
   passwordResetToken          String?
   passwordResetTokenExpiresAt DateTime?
-  role                        UserRole  @relation(fields: [roleId], references: [role], onDelete: Cascade, onUpdate: Cascade)
+  roleId                      UserRole  @relation(fields: [role], references: [role], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model UserRole {

@@ -36,7 +36,7 @@ builder.queryFields((t) => ({
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.roleId,
+        role: user.role,
       })
 
       return {

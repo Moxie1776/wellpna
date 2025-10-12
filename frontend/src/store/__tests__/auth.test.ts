@@ -46,7 +46,7 @@ vi.mock('../../utils/graphqlClient', () => {
                         id: 1,
                         email: _variables.email,
                         name: 'Persist User',
-                        roleId: 'user',
+                        role: 'user',
                       },
                     },
                   },
@@ -61,7 +61,7 @@ vi.mock('../../utils/graphqlClient', () => {
                         id: 1,
                         email: _variables.email,
                         name: 'Sync User',
-                        roleId: 'user',
+                        role: 'user',
                       },
                     },
                   },
@@ -89,7 +89,7 @@ vi.mock('../../utils/graphqlClient', () => {
                       id: 1,
                       email: _variables.email,
                       name: 'Test User',
-                      roleId: 'user',
+                      role: 'user',
                     },
                   },
                 },
@@ -112,7 +112,7 @@ vi.mock('../../utils/graphqlClient', () => {
                         id: 1,
                         email: _variables.email,
                         name: _variables.name,
-                        roleId: 'user',
+                        role: 'user',
                       },
                     },
                   },
@@ -127,7 +127,7 @@ vi.mock('../../utils/graphqlClient', () => {
                         id: 1,
                         email: _variables.email,
                         name: _variables.name,
-                        roleId: 'user',
+                        role: 'user',
                       },
                     },
                   },
@@ -152,7 +152,7 @@ vi.mock('../../utils/graphqlClient', () => {
                       id: 1,
                       email: _variables.email,
                       name: _variables.name,
-                      roleId: 'user',
+                      role: 'user',
                     },
                   },
                 },
@@ -233,7 +233,7 @@ describe('useAuthStore', () => {
           id: 1,
           email: 'test@example.com',
           name: 'Test User',
-          roleId: 'user',
+          role: 'user',
         })
         expect(state.loading).toBe(false)
         expect(state.error).toBe(null)
@@ -411,7 +411,7 @@ describe('useAuthStore', () => {
           id: 1,
           email: 'test@example.com',
           name: 'Test User',
-          roleId: 'user',
+          role: 'user',
         })
         expect(state.loading).toBe(false)
         expect(state.error).toBe(null)

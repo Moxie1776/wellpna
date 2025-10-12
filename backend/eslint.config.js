@@ -26,6 +26,7 @@ export default defineConfig([
       '**/logs/*',
       '**/dist/*',
       '**/src/generated/*',
+      'prisma/migrations/*',
     ],
   },
   ...compat.extends(

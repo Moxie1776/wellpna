@@ -30,7 +30,7 @@ export interface GraphQLContext {
 // Create a Yoga instance with a GraphQL schema.
 export const yoga = createYoga<GraphQLContext>({
   schema,
-  graphiql: true,
+  graphiql: process.env.NODE_ENV === 'development' ? true : false,
   maskedErrors: false, // Show actual error messages in development/tests
   plugins: [
     useJWT({

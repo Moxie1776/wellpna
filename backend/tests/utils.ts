@@ -6,7 +6,7 @@ export interface TestUser {
   id: string
   email: string
   name: string
-  roleId: string
+  role: string
   jwt: string
 }
 
@@ -21,13 +21,13 @@ export class TestUtils {
       email: string
       name: string
       password: string
-      roleId: string
+      role: string
     }> = {},
   ): Promise<TestUser> {
     const email = overrides.email || `test-${Date.now()}@example.com`
     const name = overrides.name || 'Test User'
     const password = overrides.password || 'password123'
-    const roleId = overrides.roleId || 'user'
+    const role = overrides.role || 'user'
 
     const hashedPassword = await hashPassword(password)
 
@@ -36,7 +36,7 @@ export class TestUtils {
         email,
         name,
         password: hashedPassword,
-        roleId,
+        role,
       },
     })
 
@@ -44,14 +44,14 @@ export class TestUtils {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.roleId,
+      role: user.role,
     })
 
     return {
       id: user.id,
       email: user.email,
       name: user.name,
-      roleId: user.roleId,
+      role: user.role,
       jwt,
     }
   }
@@ -64,7 +64,7 @@ export class TestUtils {
       email: string
       name: string
       password: string
-      roleId: string
+      role: string
     }> = {},
   ): Promise<TestUser> {
     const user = await this.createTestUser(overrides)
