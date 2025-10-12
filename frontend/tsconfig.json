@@ -5,7 +5,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "types": ["node", "vitest", "@testing-library/jest-dom"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
 
