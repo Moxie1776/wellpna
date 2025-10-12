@@ -1,33 +1,22 @@
-// auto-sort-ignore-next
+interface Logger {
+  error: (message: string, ...args: any[]) => void
+  warn: (message: string, ...args: any[]) => void
+  info: (message: string, ...args: any[]) => void
+  debug: (message: string, ...args: any[]) => void
+}
 
-// import fs from 'fs'
-// import path from 'path'
-
-// const LOG_DIR = path.resolve(__dirname, '../../logs')
-// const ERROR_LOG_FILE = path.join(LOG_DIR, 'logger-error.log')
-
-// function writeErrorLog(message: string) {
-//   const logEntry = `[${new Date().toISOString()}] [ERROR] ${message}\n`
-//   fs.appendFile(ERROR_LOG_FILE, logEntry, (err) => {
-//     if (err) console.error('Failed to write error log:', err)
-//   })
-// }
-
-const logger = {
+const logger: Logger = {
   error: (message: string, ...args: any[]) => {
-    console.error(`[ERROR] ${message}`, ...args)
-    // writeErrorLog(`${message} ${
-    //   args.map((a) => JSON.stringify(a)).join(' ')
-    // }`)
+    console.error(`[${new Date().toISOString()}] ERROR: ${message}`, ...args)
   },
   warn: (message: string, ...args: any[]) => {
-    console.warn(`[WARN] ${message}`, ...args)
+    console.warn(`[${new Date().toISOString()}] WARN: ${message}`, ...args)
   },
   info: (message: string, ...args: any[]) => {
-    console.info(`[INFO] ${message}`, ...args)
+    console.info(`[${new Date().toISOString()}] INFO: ${message}`, ...args)
   },
   debug: (message: string, ...args: any[]) => {
-    console.debug(`[DEBUG] ${message}`, ...args)
+    console.debug(`[${new Date().toISOString()}] DEBUG: ${message}`, ...args)
   },
 }
 

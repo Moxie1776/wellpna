@@ -13,6 +13,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "data": {
@@ -40,6 +41,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "data": {
@@ -61,6 +63,7 @@ Expected response:
 Queries that require authentication using the JWT token.
 
 First, get a token by logging in:
+
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
@@ -71,6 +74,7 @@ echo $TOKEN
 ```
 
 Use the token to access protected queries:
+
 ```bash
 curl -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
@@ -79,6 +83,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "data": {
@@ -105,6 +110,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "errors": [
@@ -116,9 +122,7 @@ Expected response:
           "column": 12
         }
       ],
-      "path": [
-        "login"
-      ]
+      "path": ["login"]
     }
   ],
   "data": {
@@ -138,6 +142,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "errors": [
@@ -165,6 +170,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "errors": [
@@ -176,9 +182,7 @@ Expected response:
           "column": 3
         }
       ],
-      "path": [
-        "me"
-      ]
+      "path": ["me"]
     }
   ],
   "data": {
@@ -199,6 +203,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "errors": [
@@ -210,9 +215,7 @@ Expected response:
           "column": 3
         }
       ],
-      "path": [
-        "me"
-      ]
+      "path": ["me"]
     }
   ],
   "data": {
@@ -232,6 +235,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 Expected response:
+
 ```json
 {
   "errors": [
@@ -243,9 +247,7 @@ Expected response:
           "column": 12
         }
       ],
-      "path": [
-        "signup"
-      ]
+      "path": ["signup"]
     }
   ],
   "data": {
@@ -309,11 +311,11 @@ signup_response=$(curl -s -X POST $SERVER_URL \
 # Check if signup was successful
 if echo "$signup_response" | grep -q '"token"'; then
   echo_result 0 "User signup successful"
-  
+
   # Extract token for later use
   token=$(echo "$signup_response" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
   echo -e "${cyan}Token:${normal} $token"
-  
+
   # Extract user ID
   user_id=$(echo "$signup_response" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
   echo -e "${cyan}User ID:${normal} $user_id"
@@ -335,7 +337,7 @@ login_response=$(curl -s -X POST $SERVER_URL \
 # Check if login was successful
 if echo "$login_response" | grep -q '"token"'; then
   echo_result 0 "User login successful"
-  
+
   # Extract token
   login_token=$(echo "$login_response" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
   echo -e "${cyan}Token:${normal} $login_token"

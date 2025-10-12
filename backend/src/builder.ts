@@ -1,49 +1,49 @@
-import SchemaBuilder from '@pothos/core';
-import PrismaPlugin, { PrismaClient } from '@pothos/plugin-prisma';
-import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
-import { GraphQLScalarType, Kind } from 'graphql';
-import { ByteResolver,DateResolver, DateTimeResolver } from 'graphql-scalars';
+import SchemaBuilder from '@pothos/core'
+import PrismaPlugin, { PrismaClient } from '@pothos/plugin-prisma'
+import ScopeAuthPlugin from '@pothos/plugin-scope-auth'
+import { GraphQLScalarType, Kind } from 'graphql'
+import { ByteResolver, DateResolver, DateTimeResolver } from 'graphql-scalars'
 
-import { prisma } from './client';
-import PrismaTypes from './generated/pothos';
-import { getDatamodel } from './generated/pothos';
-import { Decimal } from './generated/prisma/internal/prismaNamespace';
+import { prisma } from './client'
+import PrismaTypes from './generated/pothos'
+import { getDatamodel } from './generated/pothos'
+import { Decimal } from './generated/prisma/internal/prismaNamespace'
 
 // ----------------------------------------------------------------------------
 export const builder = new SchemaBuilder<{
-  PrismaTypes: PrismaTypes;
+  PrismaTypes: PrismaTypes
   Context: {
-    req: any;
-    prisma: PrismaClient;
-    jwt?: any;
+    req: any
+    prisma: PrismaClient
+    jwt?: any
     user?: {
-      id: string;
-      email: string;
-      name: string;
-      role: string;
-    };
-  };
+      id: string
+      email: string
+      name: string
+      role: string
+    }
+  }
   AuthScopes: {
-    authenticated: boolean;
-  };
+    authenticated: boolean
+  }
   Scalars: {
     DateTime: {
-      Input: Date;
-      Output: Date;
-    };
+      Input: Date
+      Output: Date
+    }
     Date: {
-      Input: Date;
-      Output: Date;
-    };
+      Input: Date
+      Output: Date
+    }
     Decimal: {
-      Input: Decimal;
-      Output: Decimal;
-    };
+      Input: Decimal
+      Output: Decimal
+    }
     Bytes: {
-      Input: string;
-      Output: string;
-    };
-  };
+      Input: string
+      Output: string
+    }
+  }
 }>({
   plugins: [PrismaPlugin, ScopeAuthPlugin],
   scopeAuth: {
@@ -52,21 +52,21 @@ export const builder = new SchemaBuilder<{
     authScopes: () => {
       return {
         authenticated: false, // Will be overridden in context
-      };
+      }
     },
   },
   prisma: {
     client: prisma,
     dmmf: getDatamodel(),
   },
-});
+})
 
-builder.queryType({});
-builder.mutationType({});
+builder.queryType({})
+builder.mutationType({})
 
-builder.addScalarType('DateTime', DateTimeResolver);
-builder.addScalarType('Date', DateResolver);
-builder.addScalarType('Bytes', ByteResolver);
+builder.addScalarType('DateTime', DateTimeResolver)
+builder.addScalarType('Date', DateResolver)
+builder.addScalarType('Bytes', ByteResolver)
 
 // Custom Decimal Scalar
 const DecimalResolver = new GraphQLScalarType({
@@ -74,22 +74,22 @@ const DecimalResolver = new GraphQLScalarType({
   description: 'A custom decimal scalar',
   serialize(value: unknown): number {
     if (value instanceof Decimal) {
-      return value.toNumber();
+      return value.toNumber()
     }
-    return parseFloat(String(value));
+    return parseFloat(String(value))
   },
   parseValue(value: unknown): Decimal | null {
     if (typeof value === 'string' || typeof value === 'number') {
-      return new Decimal(value);
+      return new Decimal(value)
     }
-    return null;
+    return null
   },
   parseLiteral(ast): Decimal | null {
     if (ast.kind === Kind.FLOAT || ast.kind === Kind.INT) {
-      return new Decimal(ast.value);
+      return new Decimal(ast.value)
     }
-    return null;
+    return null
   },
-});
+})
 
-builder.addScalarType('Decimal', DecimalResolver);
+builder.addScalarType('Decimal', DecimalResolver)

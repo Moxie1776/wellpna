@@ -1,13 +1,13 @@
-import { PrismaClient } from '../src/generated/prisma/client';
-import { signJwt } from '../src/utils/auth';
-import { hashPassword } from '../src/utils/auth';
+import { PrismaClient } from '../src/generated/prisma/client'
+import { signJwt } from '../src/utils/auth'
+import { hashPassword } from '../src/utils/auth'
 
 export interface TestUser {
-  id: string;
-  email: string;
-  name: string;
-  roleId: string;
-  jwt: string;
+  id: string
+  email: string
+  name: string
+  roleId: string
+  jwt: string
 }
 
 export class TestUtils {
@@ -18,18 +18,18 @@ export class TestUtils {
    */
   async createTestUser(
     overrides: Partial<{
-      email: string;
-      name: string;
-      password: string;
-      roleId: string;
-    }> = {}
+      email: string
+      name: string
+      password: string
+      roleId: string
+    }> = {},
   ): Promise<TestUser> {
-    const email = overrides.email || `test-${Date.now()}@example.com`;
-    const name = overrides.name || 'Test User';
-    const password = overrides.password || 'password123';
-    const roleId = overrides.roleId || 'user';
+    const email = overrides.email || `test-${Date.now()}@example.com`
+    const name = overrides.name || 'Test User'
+    const password = overrides.password || 'password123'
+    const roleId = overrides.roleId || 'user'
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(password)
 
     const user = await this.prisma.user.create({
       data: {
@@ -38,14 +38,14 @@ export class TestUtils {
         password: hashedPassword,
         roleId,
       },
-    });
+    })
 
     const jwt = signJwt({
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.roleId,
-    });
+    })
 
     return {
       id: user.id,
@@ -53,7 +53,7 @@ export class TestUtils {
       name: user.name,
       roleId: user.roleId,
       jwt,
-    };
+    }
   }
 
   /**
@@ -61,13 +61,13 @@ export class TestUtils {
    */
   async createVerifiedTestUser(
     overrides: Partial<{
-      email: string;
-      name: string;
-      password: string;
-      roleId: string;
-    }> = {}
+      email: string
+      name: string
+      password: string
+      roleId: string
+    }> = {},
   ): Promise<TestUser> {
-    const user = await this.createTestUser(overrides);
+    const user = await this.createTestUser(overrides)
 
     // Mark as verified
     await this.prisma.user.update({
@@ -77,9 +77,9 @@ export class TestUtils {
         verificationCode: null,
         verificationCodeExpiresAt: null,
       },
-    });
+    })
 
-    return user;
+    return user
   }
 
   /**
@@ -92,6 +92,6 @@ export class TestUtils {
           endsWith: '@example.com',
         },
       },
-    });
+    })
   }
 }

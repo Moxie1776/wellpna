@@ -1,21 +1,7 @@
-// import { PrismaPg } from '@prisma/adapter-pg'
-
-// import { PrismaClient } from './generated/prisma/client'
-
-// const connectionString = `${process.env.DATABASE_URL}`
-
-// const adapter: PrismaPg = new PrismaPg({ connectionString, schema: 'public' })
-// export const prisma = new PrismaClient({
-//   adapter,
-//   log:
-//     process.env.NODE_ENV === 'development'
-//       ? ['query', 'error', 'warn']
-//       : ['error'],
-// })
-
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
 import { config } from 'dotenv'
+import { Pool } from 'pg'
+
 import { PrismaClient } from './generated/prisma/client'
 import logger from './utils/logger'
 

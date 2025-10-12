@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { SIGN_IN_QUERY } from '../graphql/queries/signInQuery'
 import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
+import { SIGN_IN_QUERY } from '../graphql/queries/signInQuery'
 import client from '../utils/graphqlClient'
 import { isValidToken } from '../utils/jwt'
+import logger from '../utils/logger'
 
 interface AuthState {
   token: string | null
@@ -49,7 +50,11 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null })
         try {
           const result = await client
-            .query(SIGN_IN_QUERY, { email, password }, { preferGetMethod: false })
+            .query(
+              SIGN_IN_QUERY,
+              { email, password },
+              { preferGetMethod: false },
+            )
             .toPromise()
           if (result.error) {
             set({
@@ -67,6 +72,7 @@ export const useAuthStore = create<AuthState>()(
           set({ token, user, loading: false })
           return result.data.signIn
         } catch (err: any) {
+          logger.error('Sign in error:', err)
           set({
             error: err.message || 'An error occurred during sign in',
             loading: false,
@@ -104,6 +110,7 @@ export const useAuthStore = create<AuthState>()(
           set({ token, user, loading: false })
           return result.data.signUp
         } catch (err: any) {
+          logger.error('Sign up error:', err)
           set({
             error: err.message || 'An error occurred during sign up',
             loading: false,

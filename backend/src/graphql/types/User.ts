@@ -1,4 +1,4 @@
-import { builder } from '../../builder';
+import { builder } from '../../builder'
 
 export const User = builder.prismaObject('User', {
   fields: (t) => ({
@@ -10,4 +10,4 @@ export const User = builder.prismaObject('User', {
     validatedAt: t.expose('validatedAt', { type: 'DateTime' }),
     role: t.relation('role'),
   }),
-});
+})

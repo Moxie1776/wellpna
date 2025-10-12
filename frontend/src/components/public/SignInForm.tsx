@@ -10,7 +10,6 @@ import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
 import HFInput from '@/components/hookForm/HFInput'
 
 import { useAuth } from '../../hooks/useAuth'
-import logger from '../../utils/logger'
 
 const signInSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -26,7 +25,6 @@ export const SignInForm = ({
 }) => {
   const { signIn, error } = useAuth()
   const navigate = useNavigate()
-  logger.debug('SignInForm error:', error)
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -67,13 +65,10 @@ export const SignInForm = ({
   ])
 
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
-    logger.debug('SignInForm submit', values)
     try {
       await signIn(values.email, values.password)
       onSignIn()
-      logger.debug('SignInForm onSignIn callback called')
     } catch (error: any) {
-      logger.debug('SignInForm error in submit', error)
       // Check if email is not verified
       if (error?.message?.includes('Email not verified')) {
         navigate(

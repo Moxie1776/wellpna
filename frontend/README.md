@@ -48,6 +48,7 @@ The frontend follows a feature-based architecture with clear separation of conce
 ### Adding a New Page
 
 1. **Create Page Component** in `src/pages/` (public or dashboard)
+
    ```tsx
    // src/pages/dashboard/NewFeature.tsx
    const NewFeaturePage = () => {
@@ -62,6 +63,7 @@ The frontend follows a feature-based architecture with clear separation of conce
    ```
 
 2. **Add Route** in `src/lib/routes.ts`
+
    ```tsx
    import NewFeaturePage from '../pages/dashboard/NewFeature'
    // ... existing imports
@@ -79,6 +81,7 @@ The frontend follows a feature-based architecture with clear separation of conce
    ```
 
 3. **Add Tests** in `src/pages/dashboard/__tests__/NewFeature.test.tsx`
+
    ```tsx
    import { render, screen } from '@testing-library/react'
    import NewFeaturePage from '../NewFeature'
@@ -94,6 +97,7 @@ The frontend follows a feature-based architecture with clear separation of conce
 ### Adding a New Component
 
 1. **Create Component** in appropriate `src/components/` subfolder
+
    ```tsx
    // src/components/ui/NewComponent.tsx
    interface NewComponentProps {
@@ -106,6 +110,7 @@ The frontend follows a feature-based architecture with clear separation of conce
    ```
 
 2. **Add Tests** in `src/components/ui/__tests__/NewComponent.test.tsx`
+
    ```tsx
    import { render, screen } from '@testing-library/react'
    import { NewComponent } from '../NewComponent'
@@ -151,6 +156,7 @@ const MyComponent = () => {
 ```
 
 **Available Colors:**
+
 - `primary` / `primary.main`
 - `secondary` / `secondary.main`
 - `success` / `success.main`
@@ -278,22 +284,26 @@ Example: `VITE_GRAPHQL_ENDPOINT=https://your-api.example.com/graphql`
 ## Testing Best Practices
 
 ### Console Output in Tests
+
 - **Console suppression**: `console.log` and `console.error` are suppressed globally in Jest tests to keep test output clean
 - **Debugging**: Use the winston logger for debugging instead: `logger.info()`, `logger.debug()`, `logger.error()`, etc.
 - **Important errors**: Critical test failures and assertion errors will still appear in test output
 
 ### Component Tests
+
 - Test user-facing behavior, not implementation details
 - Mock external dependencies (hooks, stores, API calls)
 - Focus on rendering and user interactions
 - Avoid testing child component internals
 
 ### Page Tests
+
 - Test page-level composition and routing
 - Mock child components and providers
 - Verify correct data flow and navigation
 
 ### Example Test Structure
+
 ```tsx
 describe('MyComponent', () => {
   it('renders correctly', () => {

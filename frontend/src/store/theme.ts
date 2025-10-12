@@ -14,6 +14,6 @@ export const useModeStore = create<ThemeMode>()(
     }),
     {
       name: 'theme-storage',
-    }
-  )
+    },
+  ),
 )

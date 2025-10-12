@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+
 import logger from '../../utils/logger'
 
 describe('Logger', () => {

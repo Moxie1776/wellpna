@@ -7,6 +7,7 @@ import {
   hashPassword,
   signJwt,
 } from '../../utils/auth'
+import logger from '../../utils/logger'
 import { AuthPayload } from '../types/Auth'
 
 builder.mutationFields((t) => ({
@@ -93,7 +94,7 @@ builder.mutationFields((t) => ({
       try {
         await emailService.sendVerificationEmail(user.email, verificationCode)
       } catch (error) {
-        console.error('Failed to send verification email:', error)
+        logger.error('Failed to send verification email:', error)
         // Don't fail signup if email fails, but log it
       }
 
@@ -143,7 +144,12 @@ builder.mutationFields((t) => ({
         },
       })
 
-      await emailService.sendVerificationEmail(user.email, verificationCode)
+      try {
+        await emailService.sendVerificationEmail(user.email, verificationCode)
+      } catch (error) {
+        logger.error('Failed to send verification email:', error)
+        throw new Error('Failed to send verification email')
+      }
       return true
     },
   }),
@@ -231,7 +237,12 @@ builder.mutationFields((t) => ({
         },
       })
 
-      await emailService.sendPasswordResetEmail(user.email, resetCode)
+      try {
+        await emailService.sendPasswordResetEmail(user.email, resetCode)
+      } catch (error) {
+        logger.error('Failed to send password reset email:', error)
+        throw new Error('Failed to send password reset email')
+      }
       return true
     },
   }),

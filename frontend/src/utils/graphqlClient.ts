@@ -1,19 +1,30 @@
-import { cacheExchange, createClient, fetchExchange } from 'urql'
+import { cacheExchange, createClient, errorExchange, fetchExchange } from 'urql'
 
-// Use Vite's env directly. import.meta.env.meta is incorrect — use import.meta.env.VITE_*.
+import logger from './logger'
+
+// Use Vite's env directly. import.meta.env.meta is incorrect —
+// use import.meta.env.VITE_*.
 const graphQLEndpoint = String(
   import.meta.env.VITE_GRAPHQL_ENDPOINT ?? 'https://3.17.67.172/graphql',
 )
 
 if (!graphQLEndpoint) {
   // Helpful runtime hint when env isn't provided
-  // eslint-disable-next-line no-console
+   
   console.warn('VITE_GRAPHQL_ENDPOINT is not defined in import.meta.env')
 }
 
 const client = createClient({
   url: graphQLEndpoint,
-  exchanges: [cacheExchange, fetchExchange],
+  exchanges: [
+    cacheExchange,
+    errorExchange({
+      onError: (error) => {
+        logger.error('GraphQL Error:', error)
+      },
+    }),
+    fetchExchange,
+  ],
   fetchOptions: () => {
     const token =
       typeof window !== 'undefined' ? localStorage.getItem('token') : undefined
