@@ -1,33 +1,40 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockedFunction,
+  vi,
+} from 'vitest'
 
 import { SignInForm } from '../../../components/public/SignInForm'
 import { useAuth } from '../../../hooks/useAuth'
 
-jest.mock('../../../hooks/useAuth', () => ({ useAuth: jest.fn() }))
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+vi.mock('../../../hooks/useAuth', () => ({ useAuth: vi.fn() }))
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
 
-const mockSignIn = jest.fn()
-const mockOnSignIn = jest.fn()
+const mockSignIn = vi.fn()
+const mockOnSignIn = vi.fn()
 
 beforeEach(() => {
   mockSignIn.mockReset()
   mockOnSignIn.mockReset()
   mockUseAuth.mockReturnValue({
     signIn: mockSignIn,
-    signOut: jest.fn(),
-    signUp: jest.fn(),
-    getCurrentUser: jest.fn(),
+    signOut: vi.fn(),
+    signUp: vi.fn(),
+    getCurrentUser: vi.fn(),
     loading: false,
     error: null,
   } as any)
 })
 
 afterEach(() => {
-  jest.clearAllMocks()
+  vi.clearAllMocks()
 })
 
 describe('SignInForm', () => {
@@ -68,9 +75,9 @@ describe('SignInForm', () => {
     mockSignIn.mockRejectedValueOnce(new Error(errorMessage))
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
-      signOut: jest.fn(),
-      signUp: jest.fn(),
-      getCurrentUser: jest.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+      getCurrentUser: vi.fn(),
       loading: false,
       error: errorMessage,
     } as any)
@@ -90,9 +97,9 @@ describe('SignInForm', () => {
     mockSignIn.mockRejectedValueOnce(new Error(errorMessage))
     mockUseAuth.mockReturnValue({
       signIn: mockSignIn,
-      signOut: jest.fn(),
-      signUp: jest.fn(),
-      getCurrentUser: jest.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+      getCurrentUser: vi.fn(),
       loading: false,
       error: errorMessage,
     } as any)

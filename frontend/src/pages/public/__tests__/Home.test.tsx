@@ -1,21 +1,20 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ThemeProvider } from '../../../providers/ThemeProvider'
 import HomePage from '../Home'
 
 // Mock react-router-dom
-const mockNavigate = jest.fn()
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useNavigate: () => mockNavigate,
 }))
 
 // Mock SignInForm component
-jest.mock('../../../components/public/SignInForm', () => ({
+vi.mock('../../../components/public/SignInForm', () => ({
   SignInForm: ({
     title,
     onSignIn,
@@ -45,7 +44,7 @@ describe('HomePage Component', () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Rendering Tests', () => {
@@ -90,7 +89,10 @@ describe('HomePage Component', () => {
 
       const img = screen.getByRole('img', { name: /villahermosa/i })
       expect(img).toBeInTheDocument()
-      expect(img).toHaveAttribute('src', '/villahermosa2.2-removebg-preview.png')
+      expect(img).toHaveAttribute(
+        'src',
+        '/villahermosa2.2-removebg-preview.png',
+      )
       expect(img).toHaveAttribute('alt', 'villahermosa2.2')
     })
   })
@@ -150,9 +152,7 @@ describe('HomePage Component', () => {
         throw new Error('Navigation failed')
       })
 
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
         <TestWrapper>

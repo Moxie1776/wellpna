@@ -1,13 +1,12 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen } from '@testing-library/react'
 import * as React from 'react'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
 describe('Snackbar Interactive Tests', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   it('replaces previous notification with new one', () => {
@@ -39,7 +38,7 @@ describe('Snackbar Interactive Tests', () => {
     expect(snackbar).toHaveTextContent('First message')
     expect(snackbar).toHaveAttribute('data-color', 'primary')
     act(() => {
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
     })
     expect(snackbar).toHaveTextContent('Second message')
     expect(snackbar).toHaveAttribute('data-color', 'danger')
@@ -80,11 +79,11 @@ describe('Snackbar Interactive Tests', () => {
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toHaveTextContent('Message 1')
     act(() => {
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
     })
     expect(snackbar).toHaveTextContent('Message 2')
     act(() => {
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
     })
     expect(snackbar).toHaveTextContent('Message 3')
     expect(snackbar).toHaveAttribute('data-color', 'danger')
@@ -118,7 +117,7 @@ describe('Snackbar Interactive Tests', () => {
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toHaveTextContent('First')
     act(() => {
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
     })
     expect(snackbar).toHaveTextContent('Second')
     expect(snackbar).toBeVisible()

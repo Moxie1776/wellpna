@@ -2,11 +2,12 @@ import '@testing-library/jest-dom'
 
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { EmailVerificationForm } from '../EmailVerificationForm'
 
-const mockOnVerify = jest.fn()
-const mockOnResendCode = jest.fn()
+const mockOnVerify = vi.fn()
+const mockOnResendCode = vi.fn()
 
 beforeEach(() => {
   mockOnVerify.mockReset()

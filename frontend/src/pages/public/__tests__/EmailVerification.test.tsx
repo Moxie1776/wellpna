@@ -1,12 +1,12 @@
-jest.mock('@/components/ui/snackbar', () => ({
-  useSnackbar: jest.fn(),
+vi.mock('@/components/ui/snackbar', () => ({
+  useSnackbar: vi.fn(),
 }))
 
-jest.mock('@/utils/graphqlClient', () => ({
+vi.mock('@/utils/graphqlClient', () => ({
   __esModule: true,
   default: {
-    mutation: jest.fn(() => ({
-      toPromise: jest.fn(() =>
+    mutation: vi.fn(() => ({
+      toPromise: vi.fn(() =>
         Promise.resolve({
           data: {
             verifyEmail: true,
@@ -20,46 +20,47 @@ jest.mock('@/utils/graphqlClient', () => ({
 
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
 import { useSnackbar } from '@/components/ui/snackbar'
 
 import EmailVerificationPage from '../EmailVerification'
 
 // Mock dependencies
-jest.mock('react-router-dom', () => ({
-  useSearchParams: jest.fn(),
-  useNavigate: jest.fn(),
+vi.mock('react-router-dom', () => ({
+  useSearchParams: vi.fn(),
+  useNavigate: () => mockNavigate,
 }))
 
 // Mock EmailVerificationForm component to spy on props passed down and simulate interaction triggers
-jest.mock('@/components/public/EmailVerificationForm', () => ({
-  EmailVerificationForm: jest.fn(),
+vi.mock('@/components/public/EmailVerificationForm', () => ({
+  EmailVerificationForm: vi.fn(),
 }))
 
-const mockShowSnackbar = jest.fn()
-const mockNavigate = jest.fn()
-const mockSetSearchParams = jest.fn()
+import { EmailVerificationForm } from '@/components/public/EmailVerificationForm'
+
+const mockShowSnackbar = vi.fn()
+const mockNavigate = vi.fn()
+const mockSetSearchParams = vi.fn()
+
+// Get the mocked EmailVerificationForm function from vi.mock
+const mockedEmailVerificationForm = EmailVerificationForm as unknown as Mock
 
 describe('EmailVerificationPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // Mock hooks implementation
-    ;(useSnackbar as jest.Mock).mockReturnValue({
+    ;(useSnackbar as Mock).mockReturnValue({
       showSnackbar: mockShowSnackbar,
     })
-    ;(useSearchParams as jest.Mock).mockReturnValue([
+    ;(useSearchParams as Mock).mockReturnValue([
       new URLSearchParams('email=test@example.com'),
       mockSetSearchParams,
     ])
-    ;(useNavigate as jest.Mock).mockReturnValue(mockNavigate)
-
     // Mock EmailVerificationForm component implementation
-    const { EmailVerificationForm } = jest.requireMock(
-      '@/components/public/EmailVerificationForm',
-    )
-    EmailVerificationForm.mockImplementation(
+    mockedEmailVerificationForm.mockImplementation(
       ({ onVerify, onResendCode, defaultEmail }: any) => (
         <div data-testid="email-verification-form">
           {/* Simulate rendering based on props */}

@@ -1,15 +1,14 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { Breadcrumbs } from '../Breadcrumbs'
 
 // Mock react-router-dom hooks
-const mockUseLocation = jest.fn()
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockUseLocation = vi.fn()
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useLocation: () => mockUseLocation(),
   Link: ({ to, children, ...props }: any) => (
     <a href={to} {...props}>
@@ -29,11 +28,11 @@ const TestWrapper = ({
 
 describe('Breadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Rendering Tests', () => {

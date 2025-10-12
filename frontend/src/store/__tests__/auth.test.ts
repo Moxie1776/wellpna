@@ -1,15 +1,16 @@
 import { act } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuthStore } from '../auth'
 
 // Mock JWT utilities
-jest.mock('../../utils/jwt', () => ({
-  hashPassword: jest.fn((password: string) => Promise.resolve(password)), // Return password as-is for testing
-  isValidToken: jest.fn((token: string) => token && token.length > 0),
+vi.mock('../../utils/jwt', () => ({
+  hashPassword: vi.fn((password: string) => Promise.resolve(password)), // Return password as-is for testing
+  isValidToken: vi.fn((token: string) => token && token.length > 0),
 }))
 
 // Mock urql client for all tests
-jest.mock('../../utils/graphqlClient', () => {
+vi.mock('../../utils/graphqlClient', () => {
   return {
     __esModule: true,
     default: {
@@ -168,13 +169,13 @@ jest.mock('../../utils/graphqlClient', () => {
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 }
 // Mock fetch
-const fetchMock = jest.fn()
+const fetchMock = vi.fn()
 global.fetch = fetchMock
 
 describe('useAuthStore', () => {
@@ -184,7 +185,7 @@ describe('useAuthStore', () => {
       value: localStorageMock,
       writable: true,
     })
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     useAuthStore.setState({
       token: null,
       user: null,

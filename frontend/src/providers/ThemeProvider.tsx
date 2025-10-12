@@ -4,7 +4,8 @@ import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 
 import { CssBaseline } from '@mui/joy'
-import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
+import { CssVarsProvider, extendTheme, useColorScheme } from '@mui/joy/styles'
+import * as React from 'react'
 
 import { colors, darkModeOverrides, lightModeOverrides } from '../lib/colors'
 import { useModeStore } from '../store/theme'
@@ -30,10 +31,21 @@ export const theme = extendTheme({
   },
 })
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+function ThemeSetter() {
   const { mode } = useModeStore()
+  const { setMode: setJoyMode } = useColorScheme()
+
+  React.useEffect(() => {
+    setJoyMode(mode)
+  }, [mode, setJoyMode])
+
+  return null
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
-    <CssVarsProvider theme={theme} {...({ mode } as any)}>
+    <CssVarsProvider theme={theme}>
+      <ThemeSetter />
       <CssBaseline />
       {children}
     </CssVarsProvider>

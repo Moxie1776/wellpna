@@ -1,8 +1,7 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
+import { describe, expect, it, vi } from 'vitest'
 
 import HFInput from '../HFInput'
 import HFProvider from '../HFProvider'
@@ -105,7 +104,7 @@ describe('HFInput', () => {
 
   it('handles onChange prop', async () => {
     const user = userEvent.setup()
-    const mockOnChange = jest.fn()
+    const mockOnChange = vi.fn()
 
     render(
       <TestWrapper>

@@ -1,33 +1,40 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockedFunction,
+  vi,
+} from 'vitest'
 
 import { SignUpForm } from '../../../components/public/SignUpForm'
 import { useAuth } from '../../../hooks/useAuth'
 import passwordSchema from '../../../utils/passwordSchema'
 
-jest.mock('../../../hooks/useAuth', () => ({ useAuth: jest.fn() }))
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+vi.mock('../../../hooks/useAuth', () => ({ useAuth: vi.fn() }))
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
 
-const mockSignUp = jest.fn()
-const mockOnSignup = jest.fn()
+const mockSignUp = vi.fn()
+const mockOnSignup = vi.fn()
 
 beforeEach(() => {
   mockSignUp.mockReset()
   mockOnSignup.mockReset()
   mockUseAuth.mockReturnValue({
     signUp: mockSignUp,
-    signIn: jest.fn(),
-    signOut: jest.fn(),
-    getCurrentUser: jest.fn(),
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    getCurrentUser: vi.fn(),
     loading: false,
     error: null,
   } as any)
 })
 
 afterEach(() => {
-  jest.clearAllMocks()
+  vi.clearAllMocks()
 })
 
 describe('SignUpForm', () => {
@@ -69,9 +76,9 @@ describe('SignUpForm', () => {
     mockSignUp.mockRejectedValueOnce(new Error(errorMessage))
     mockUseAuth.mockReturnValue({
       signUp: mockSignUp,
-      signIn: jest.fn(),
-      signOut: jest.fn(),
-      getCurrentUser: jest.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      getCurrentUser: vi.fn(),
       loading: false,
       error: errorMessage,
     } as any)

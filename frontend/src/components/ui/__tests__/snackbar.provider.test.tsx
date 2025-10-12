@@ -1,7 +1,6 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import * as React from 'react'
+import { describe, expect, it, vi } from 'vitest'
 
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
@@ -16,7 +15,7 @@ describe('Snackbar Provider Tests', () => {
   })
 
   it('throws error when useSnackbar is used outside provider', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const TestWithoutProvider = () => {
       useSnackbar()
       return <div />

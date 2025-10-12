@@ -1,6 +1,9 @@
-import { afterAll, beforeAll, jest } from '@jest/globals'
+import { afterAll, beforeAll, vi } from 'vitest'
 // import { readFileSync } from 'fs'
 // import { resolve } from 'path'
+
+// Mock CSS and font files
+vi.mock('*.css', () => ({}))
 
 // Mock import.meta for ES module compatibility
 Object.defineProperty(global, 'import', {
@@ -51,7 +54,7 @@ globalThis.act = act
 const originalLog = console.log
 const originalError = console.error
 beforeAll(() => {
-  console.log = jest.fn()
+  console.log = vi.fn()
   console.error = (...args) => {
     // Allow specific important errors but suppress React act() warnings
     if (
@@ -72,7 +75,7 @@ afterAll(() => {
 })
 declare let global: typeof globalThis
 
-// Minimal TextEncoder/TextDecoder polyfill for Jest
+// Minimal TextEncoder/TextDecoder polyfill for Vitest
 if (typeof global.TextEncoder === 'undefined') {
   global.TextEncoder = class {
     encoding = 'utf-8'

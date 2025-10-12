@@ -1,12 +1,12 @@
-jest.mock('@/components/ui/snackbar', () => ({
-  useSnackbar: jest.fn(),
+vi.mock('@/components/ui/snackbar', () => ({
+  useSnackbar: vi.fn(),
 }))
 
-jest.mock('@/utils/graphqlClient', () => ({
+vi.mock('@/utils/graphqlClient', () => ({
   __esModule: true,
   default: {
-    mutation: jest.fn(() => ({
-      toPromise: jest.fn(() =>
+    mutation: vi.fn(() => ({
+      toPromise: vi.fn(() =>
         Promise.resolve({
           data: {
             requestPasswordReset: true,
@@ -18,30 +18,38 @@ jest.mock('@/utils/graphqlClient', () => ({
   },
 }))
 
-import '@testing-library/jest-dom'
-
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockedFunction,
+  vi,
+} from 'vitest'
 
 import { useSnackbar } from '@/components/ui/snackbar'
 
 import PasswordResetPage from '../PasswordReset'
 
-jest.mock('@/graphql/mutations/requestPasswordResetMutation', () => ({
+vi.mock('@/graphql/mutations/requestPasswordResetMutation', () => ({
   REQUEST_PASSWORD_RESET_MUTATION: 'mock-request-mutation',
 }))
 
-jest.mock('@/graphql/mutations/resetPasswordMutation', () => ({
+vi.mock('@/graphql/mutations/resetPasswordMutation', () => ({
   RESET_PASSWORD_MUTATION: 'mock-reset-mutation',
 }))
 
 // Mock PasswordResetForm component to spy on props passed down and simulate interaction triggers
-jest.mock('@/components/public/PasswordResetForm', () => ({
-  PasswordResetForm: jest.fn(),
+vi.mock('@/components/public/PasswordResetForm', () => ({
+  PasswordResetForm: vi.fn(),
 }))
 
-const mockShowSnackbar = jest.fn()
+import { PasswordResetForm } from '@/components/public/PasswordResetForm'
+
+const mockShowSnackbar = vi.fn()
 
 const renderWithRouter = (initialEntries: string[]) => {
   const router = createMemoryRouter(
@@ -58,18 +66,15 @@ const renderWithRouter = (initialEntries: string[]) => {
 
 describe('PasswordResetPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // Mock hooks implementation
-    ;(useSnackbar as jest.Mock).mockReturnValue({
+    ;(useSnackbar as MockedFunction<typeof useSnackbar>).mockReturnValue({
       showSnackbar: mockShowSnackbar,
     })
 
     // Mock PasswordResetForm component implementation
-    const { PasswordResetForm } = jest.requireMock(
-      '@/components/public/PasswordResetForm',
-    )
-    PasswordResetForm.mockImplementation(
+    ;(PasswordResetForm as any).mockImplementation(
       ({ mode, defaultEmail, onRequestReset, onResetPassword }: any) => (
         <div data-testid={`password-reset-form-${mode}`}>
           <p data-testid="default-email">{defaultEmail}</p>

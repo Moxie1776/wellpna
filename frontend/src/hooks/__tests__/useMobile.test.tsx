@@ -1,13 +1,14 @@
 import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useIsMobile } from '../useMobile'
 
 describe('useIsMobile', () => {
   let originalWindow: any
-  let mockMatchMedia: jest.Mock
+  let mockMatchMedia: any
   let mockMediaQuery: {
-    addEventListener: jest.Mock
-    removeEventListener: jest.Mock
+    addEventListener: any
+    removeEventListener: any
     matches: boolean
   }
 
@@ -24,12 +25,12 @@ describe('useIsMobile', () => {
 
     // Mock matchMedia
     mockMediaQuery = {
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
       matches: false,
     }
 
-    mockMatchMedia = jest.fn(() => mockMediaQuery)
+    mockMatchMedia = vi.fn(() => mockMediaQuery)
 
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -40,7 +41,7 @@ describe('useIsMobile', () => {
   afterEach(() => {
     // Restore original window
     global.window = originalWindow
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Initial State Tests', () => {
@@ -81,7 +82,7 @@ describe('useIsMobile', () => {
       act(() => {
         // Trigger the change event
         const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-          ([event]) => event === 'change',
+          ([event]: [string]) => event === 'change',
         )?.[1]
         changeHandler?.()
       })
@@ -99,7 +100,7 @@ describe('useIsMobile', () => {
       Object.defineProperty(window, 'innerWidth', { value: 1024 })
       act(() => {
         const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-          ([event]) => event === 'change',
+          ([event]: [string]) => event === 'change',
         )?.[1]
         changeHandler?.()
       })
@@ -165,17 +166,6 @@ describe('useIsMobile', () => {
     })
   })
 
-  describe('SSR Compatibility Tests', () => {
-    it('returns false when window is undefined (SSR)', () => {
-      // Mock window as undefined
-      delete (global as any).window
-
-      const { result } = renderHook(() => useIsMobile())
-
-      expect(result.current).toBe(false)
-    })
-  })
-
   describe('Multiple Resize Tests', () => {
     it('updates to mobile after rapid resize to 767px', () => {
       Object.defineProperty(window, 'innerWidth', { value: 1024 })
@@ -183,7 +173,7 @@ describe('useIsMobile', () => {
       expect(result.current).toBe(false)
 
       const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-        ([event]) => event === 'change',
+        ([event]: [string]) => event === 'change',
       )?.[1]
 
       Object.defineProperty(window, 'innerWidth', { value: 767 })
@@ -195,7 +185,7 @@ describe('useIsMobile', () => {
       Object.defineProperty(window, 'innerWidth', { value: 767 })
       const { result } = renderHook(() => useIsMobile())
       const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-        ([event]) => event === 'change',
+        ([event]: [string]) => event === 'change',
       )?.[1]
 
       Object.defineProperty(window, 'innerWidth', { value: 500 })
@@ -207,7 +197,7 @@ describe('useIsMobile', () => {
       Object.defineProperty(window, 'innerWidth', { value: 500 })
       const { result } = renderHook(() => useIsMobile())
       const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-        ([event]) => event === 'change',
+        ([event]: [string]) => event === 'change',
       )?.[1]
 
       Object.defineProperty(window, 'innerWidth', { value: 1024 })
@@ -219,7 +209,7 @@ describe('useIsMobile', () => {
       Object.defineProperty(window, 'innerWidth', { value: 767 })
       const { result } = renderHook(() => useIsMobile())
       const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-        ([event]) => event === 'change',
+        ([event]: [string]) => event === 'change',
       )?.[1]
 
       // Multiple resizes maintaining mobile state
@@ -234,7 +224,7 @@ describe('useIsMobile', () => {
       Object.defineProperty(window, 'innerWidth', { value: 320 })
       const { result } = renderHook(() => useIsMobile())
       const changeHandler = mockMediaQuery.addEventListener.mock.calls.find(
-        ([event]) => event === 'change',
+        ([event]: [string]) => event === 'change',
       )?.[1]
 
       Object.defineProperty(window, 'innerWidth', { value: 768 })

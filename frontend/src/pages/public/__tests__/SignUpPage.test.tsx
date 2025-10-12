@@ -1,21 +1,20 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ThemeProvider } from '../../../providers/ThemeProvider'
 import SignUpPage from '../SignUp'
 
 // Mock react-router-dom
-const mockNavigate = jest.fn()
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useNavigate: () => mockNavigate,
 }))
 
 // Mock SignUpForm component
-jest.mock('../../../components/public/SignUpForm', () => ({
+vi.mock('../../../components/public/SignUpForm', () => ({
   SignUpForm: ({ onSignup }: { onSignup: () => void }) => (
     <div data-testid="signup-form">
       <button onClick={onSignup} data-testid="signup-button">
@@ -38,7 +37,7 @@ describe('SignUpPage Component', () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders the SignUpForm', () => {

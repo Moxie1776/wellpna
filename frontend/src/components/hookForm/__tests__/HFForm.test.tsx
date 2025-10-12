@@ -1,8 +1,7 @@
-import '@testing-library/jest-dom'
-
 import { Input } from '@mui/joy'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock react-hook-form
 import {
@@ -17,11 +16,11 @@ import {
 
 describe('Form Components', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Form Component', () => {
@@ -56,7 +55,7 @@ describe('Form Components', () => {
     })
 
     it('handles form submission', async () => {
-      const mockOnSubmit = jest.fn()
+      const mockOnSubmit = vi.fn()
       const user = userEvent.setup()
 
       render(
@@ -456,7 +455,7 @@ describe('Form Components', () => {
     })
 
     it('form submission prevents default', async () => {
-      const mockOnSubmit = jest.fn((e) => e.preventDefault())
+      const mockOnSubmit = vi.fn((e) => e.preventDefault())
       const user = userEvent.setup()
 
       render(

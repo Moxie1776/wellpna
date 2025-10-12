@@ -1,7 +1,9 @@
 // Mock Navigate first
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  Navigate: jest.fn(() => <div data-testid="navigate-mock">Navigate</div>),
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
+  Navigate: vi.fn(() => <div data-testid="navigate-mock">Navigate</div>),
 }))
 
 import { render, screen } from '@testing-library/react'
@@ -11,13 +13,11 @@ import { useAuthStore } from '../../store/auth'
 import { ProtectedRoute } from '../ProtectedRouteProvider'
 
 // Mock useAuthStore
-jest.mock('../../store/auth', () => ({
-  useAuthStore: jest.fn(),
+vi.mock('../../store/auth', () => ({
+  useAuthStore: vi.fn(),
 }))
 
-const mockUseAuthStore = useAuthStore as jest.MockedFunction<
-  typeof useAuthStore
->
+const mockUseAuthStore = useAuthStore as any
 
 describe('ProtectedRoute', () => {
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -25,7 +25,7 @@ describe('ProtectedRoute', () => {
   )
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('renders children when user exists', () => {

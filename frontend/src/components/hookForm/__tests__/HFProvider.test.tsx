@@ -1,8 +1,7 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm, useFormContext } from 'react-hook-form'
+import { describe, expect, it, vi } from 'vitest'
 
 import HFProvider from '../HFProvider'
 
@@ -52,7 +51,7 @@ describe('HFProvider', () => {
 
   it('handles onSubmit callback', async () => {
     const user = userEvent.setup()
-    const mockOnSubmit = jest.fn()
+    const mockOnSubmit = vi.fn()
 
     render(
       <TestWrapper onSubmit={mockOnSubmit}>
@@ -83,7 +82,7 @@ describe('HFProvider', () => {
 
   it('handles form submission with validation', async () => {
     const user = userEvent.setup()
-    const mockOnSubmit = jest.fn()
+    const mockOnSubmit = vi.fn()
 
     const TestComponentWithForm = () => {
       const methods = useForm<TestFormData>({

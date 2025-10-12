@@ -1,8 +1,7 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuth } from '../../../hooks/useAuth'
 import { useIsMobile } from '../../../hooks/useMobile'
@@ -10,21 +9,21 @@ import { useMode } from '../../../hooks/useMode'
 import { AppSidebar } from '../Sidebar'
 
 // Mock the hooks
-jest.mock('../../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }))
 
-jest.mock('../../../hooks/useMobile', () => ({
-  useIsMobile: jest.fn(),
+vi.mock('../../../hooks/useMobile', () => ({
+  useIsMobile: vi.fn(),
 }))
 
-jest.mock('../../../hooks/useMode', () => ({
-  useMode: jest.fn(),
+vi.mock('../../../hooks/useMode', () => ({
+  useMode: vi.fn(),
 }))
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
-const mockUseIsMobile = useIsMobile as jest.MockedFunction<typeof useIsMobile>
-const mockUseMode = useMode as jest.MockedFunction<typeof useMode>
+const mockUseAuth = useAuth as vi.MockedFunction<typeof useAuth>
+const mockUseIsMobile = useIsMobile as vi.MockedFunction<typeof useIsMobile>
+const mockUseMode = useMode as vi.MockedFunction<typeof useMode>
 
 // Test wrapper component with MemoryRouter
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -32,19 +31,19 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('AppSidebar', () => {
-  let mockSignOut: jest.Mock
+  let mockSignOut: vi.Mock
   let defaultMocks: any
 
   beforeEach(() => {
-    mockSignOut = jest.fn()
-    jest.clearAllMocks()
+    mockSignOut = vi.fn()
+    vi.clearAllMocks()
     // Default mock values (created after mockSignOut is assigned)
     defaultMocks = {
       useAuth: {
-        signIn: jest.fn(),
+        signIn: vi.fn(),
         signOut: mockSignOut,
-        signUp: jest.fn(),
-        getCurrentUser: jest.fn(),
+        signUp: vi.fn(),
+        getCurrentUser: vi.fn(),
         loading: false,
         error: null,
         user: null,
@@ -53,13 +52,13 @@ describe('AppSidebar', () => {
       useIsMobile: false,
       useMode: {
         mode: 'light' as 'light' | 'dark',
-        setMode: jest.fn(),
+        setMode: vi.fn(),
       },
     }
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   const setupMocks = (overrides = {}) => {
@@ -95,10 +94,10 @@ describe('AppSidebar', () => {
     it('renders sidebar with correct structure for authenticated user', () => {
       setupMocks({
         useAuth: {
-          signIn: jest.fn(),
-          signOut: jest.fn(),
-          signUp: jest.fn(),
-          getCurrentUser: jest.fn(),
+          signIn: vi.fn(),
+          signOut: vi.fn(),
+          signUp: vi.fn(),
+          getCurrentUser: vi.fn(),
           loading: false,
           error: null,
           user: { id: 1, email: 'test@example.com' },
@@ -186,10 +185,10 @@ describe('AppSidebar', () => {
     it('renders correct navigation links for authenticated users', () => {
       setupMocks({
         useAuth: {
-          signIn: jest.fn(),
-          signOut: jest.fn(),
-          signUp: jest.fn(),
-          getCurrentUser: jest.fn(),
+          signIn: vi.fn(),
+          signOut: vi.fn(),
+          signUp: vi.fn(),
+          getCurrentUser: vi.fn(),
           loading: false,
           error: null,
           user: { id: 1, email: 'test@example.com' },
@@ -361,10 +360,10 @@ describe('AppSidebar', () => {
     it('shows authenticated routes when authenticated', () => {
       setupMocks({
         useAuth: {
-          signIn: jest.fn(),
-          signOut: jest.fn(),
-          signUp: jest.fn(),
-          getCurrentUser: jest.fn(),
+          signIn: vi.fn(),
+          signOut: vi.fn(),
+          signUp: vi.fn(),
+          getCurrentUser: vi.fn(),
           loading: false,
           error: null,
           user: { id: 1, email: 'test@example.com' },
@@ -409,7 +408,7 @@ describe('AppSidebar', () => {
 
   describe('Theme Integration Tests', () => {
     it('applies light theme link colors', () => {
-      setupMocks({ useMode: { mode: 'light', setMode: jest.fn() } })
+      setupMocks({ useMode: { mode: 'light', setMode: vi.fn() } })
 
       render(
         <TestWrapper>
@@ -422,7 +421,7 @@ describe('AppSidebar', () => {
     })
 
     it('applies dark theme link colors', () => {
-      setupMocks({ useMode: { mode: 'dark', setMode: jest.fn() } })
+      setupMocks({ useMode: { mode: 'dark', setMode: vi.fn() } })
 
       render(
         <TestWrapper>
@@ -435,7 +434,7 @@ describe('AppSidebar', () => {
     })
 
     it('header has consistent styling across themes', () => {
-      setupMocks({ useMode: { mode: 'dark', setMode: jest.fn() } })
+      setupMocks({ useMode: { mode: 'dark', setMode: vi.fn() } })
 
       render(
         <TestWrapper>

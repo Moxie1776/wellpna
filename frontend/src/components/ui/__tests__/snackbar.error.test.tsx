@@ -1,7 +1,6 @@
-import '@testing-library/jest-dom'
-
 import { render, screen } from '@testing-library/react'
 import * as React from 'react'
+import { describe, expect, it, vi } from 'vitest'
 
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
@@ -40,7 +39,7 @@ describe('Snackbar Error Handling Tests', () => {
   })
 
   it('handles malformed color values', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const TestWithSnackbar = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {

@@ -1,23 +1,31 @@
-import '@testing-library/jest-dom'
-
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import * as React from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type MockedFunction,
+  vi,
+} from 'vitest'
 
 import { useAuth } from '../../../hooks/useAuth'
 import { Dashboard } from '../Dashboard'
 
 // Mock useAuth hook
-jest.mock('../../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }))
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
 
 // Mock react-router-dom
-const mockNavigate = jest.fn()
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useNavigate: () => mockNavigate,
 }))
 
@@ -27,16 +35,16 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('Dashboard Component', () => {
-  const mockSignOut = jest.fn()
+  const mockSignOut = vi.fn()
 
   beforeEach(() => {
     mockSignOut.mockReset()
     mockNavigate.mockReset()
     mockUseAuth.mockReturnValue({
       signOut: mockSignOut,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      getCurrentUser: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      getCurrentUser: vi.fn(),
       loading: false,
       error: null,
       user: { id: 1, email: 'test@example.com' },
@@ -45,7 +53,7 @@ describe('Dashboard Component', () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('Rendering Tests', () => {
@@ -270,9 +278,7 @@ describe('Dashboard Component', () => {
         throw new Error('Navigation failed')
       })
 
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
         <TestWrapper>

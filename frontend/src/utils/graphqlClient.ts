@@ -1,7 +1,9 @@
 import { cacheExchange, createClient, fetchExchange } from 'urql'
 
 // Use Vite's env directly. import.meta.env.meta is incorrect — use import.meta.env.VITE_*.
-const graphQLEndpoint = String(import.meta.env.VITE_GRAPHQL_ENDPOINT ?? '')
+const graphQLEndpoint = String(
+  import.meta.env.VITE_GRAPHQL_ENDPOINT ?? 'https://3.17.67.172/graphql',
+)
 
 if (!graphQLEndpoint) {
   // Helpful runtime hint when env isn't provided
