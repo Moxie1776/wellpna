@@ -54,10 +54,12 @@ export const yoga = createYoga<GraphQLContext>({
   },
   cors: {
     origin: [
-      'http://localhost:5173',
       'https://wellpna.com',
       'https://www.wellpna.com',
       'https://3.17.67.172',
+      'http://127.0.0.1:5173',
+      'https://0.0.0.0:5173',
+      'http://localhost:5173',
     ],
   },
 })
