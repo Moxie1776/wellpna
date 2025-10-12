@@ -3,6 +3,7 @@ import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
+import { describe, expect, it } from 'vitest'
 
 import HFProvider from '../HFProvider'
 import HFSwitch from '../HFSwitch'

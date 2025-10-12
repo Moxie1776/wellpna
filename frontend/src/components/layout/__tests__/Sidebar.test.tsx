@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
+import type { MockedFunction } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuth } from '../../../hooks/useAuth'
@@ -20,10 +21,9 @@ vi.mock('../../../hooks/useMobile', () => ({
 vi.mock('../../../hooks/useMode', () => ({
   useMode: vi.fn(),
 }))
-
-const mockUseAuth = useAuth as vi.MockedFunction<typeof useAuth>
-const mockUseIsMobile = useIsMobile as vi.MockedFunction<typeof useIsMobile>
-const mockUseMode = useMode as vi.MockedFunction<typeof useMode>
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
+const mockUseIsMobile = useIsMobile as MockedFunction<typeof useIsMobile>
+const mockUseMode = useMode as MockedFunction<typeof useMode>
 
 // Test wrapper component with MemoryRouter
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -31,7 +31,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('AppSidebar', () => {
-  let mockSignOut: vi.Mock
+  let mockSignOut: MockedFunction<any>
   let defaultMocks: any
 
   beforeEach(() => {
