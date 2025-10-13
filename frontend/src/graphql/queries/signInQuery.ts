@@ -8,6 +8,8 @@ export const SIGN_IN_QUERY = gql`
         id
         email
         name
+        phoneNumber
+        role
       }
     }
   }

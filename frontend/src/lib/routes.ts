@@ -5,6 +5,7 @@ export type AppRoute = {
   href: string
   icon?: React.ComponentType<{ size?: number }>
   requiresAuth?: boolean
+  requiredRole?: string
   element?: React.ReactNode
   page?: React.ComponentType<any>
 }
@@ -12,15 +13,19 @@ export type AppRoute = {
 // Import icons at the top of your file
 
 import {
+  MdAdminPanelSettings,
   MdDashboard,
   MdEmail,
   MdHome,
   MdLogin,
+  MdPerson,
   MdPersonAdd,
   MdVpnKey,
 } from 'react-icons/md'
 
+import { Admin as AdminPage } from '../pages/admin/Admin'
 import { Dashboard } from '../pages/dashboard/Dashboard'
+import { Profile as ProfilePage } from '../pages/profile/Profile'
 import EmailVerificationPage from '../pages/public/EmailVerification'
 import HomePage from '../pages/public/Home'
 import PasswordResetPage from '../pages/public/PasswordReset'
@@ -41,6 +46,21 @@ export const appRoutes: AppRoute[] = [
     icon: MdDashboard,
     requiresAuth: true,
     page: Dashboard,
+  },
+  {
+    label: 'Profile',
+    href: '/profile',
+    icon: MdPerson,
+    requiresAuth: true,
+    page: ProfilePage,
+  },
+  {
+    label: 'Admin',
+    href: '/admin',
+    icon: MdAdminPanelSettings,
+    requiresAuth: true,
+    requiredRole: 'admin',
+    page: AdminPage,
   },
   {
     label: 'Sign In',

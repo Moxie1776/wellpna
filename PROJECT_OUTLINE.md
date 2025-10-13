@@ -42,12 +42,14 @@ The system manages complex well data including:
 
 ## Frontend Functionality
 
-The frontend is a React application that uses React Admin for the dashboard. It provides:
+The frontend is a React application that provides:
 
 1. User authentication pages (login/signup)
 2. A dashboard for viewing well data
 3. Wellbore diagram generation and visualization
 4. Data management interfaces for wells and related entities
+5. Import/export functionality for PDF and Excel files
+6. Generation of ad-hoc Wellbore Diagrams (WBDs) in SVG / PDF format
 
 ### UI Components
 
@@ -62,20 +64,26 @@ The frontend is a React application that uses React Admin for the dashboard. It 
 
 - Node.js with TypeScript
 - Prisma ORM with SQLite database
-- GraphQL API with Apollo Server
+- GraphQL API with GraphQL Yoga and Pothos
+- Authentication with JWT and bcryptjs
 - PDF processing with pdf2json
 - Excel processing with ExcelJS
 - PDF generation with jsPDF
-- Authentication with JWT and bcrypt
+- Email sending with nodemailer
+- Logging with winston
 
 ### Frontend
 
 - React with TypeScript
-- React Admin for dashboard
-- Tailwind CSS for styling
-- shadcn/ui components
+- Joy UI for component library
 - React Router for navigation
 - Zustand for state management
+- urql for GraphQL client
+- React Hook Form and Zod for form handling and validation
+- Testing with Vitest and React Testing Library
+- Diagram generation with D3.js and SVG
+- graphql playground for API exploration
+  + library for this has not been determined yet
 
 ## Color Scheme
 

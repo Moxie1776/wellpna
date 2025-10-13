@@ -9,6 +9,7 @@ import {
 } from '../../utils/auth'
 import logger from '../../utils/logger'
 import { AuthPayload } from '../types/Auth'
+import { User } from '../types/User'
 
 builder.mutationFields((t) => ({
   signIn: t.field({
@@ -59,6 +60,7 @@ builder.mutationFields((t) => ({
       email: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
       name: t.arg.string({ required: true }),
+      phoneNumber: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, _ctx) => {
       // Check if user already exists
@@ -85,6 +87,7 @@ builder.mutationFields((t) => ({
           email: args.email,
           password: hashedPassword,
           name: args.name,
+          phoneNumber: args.phoneNumber,
           verificationCode,
           verificationCodeExpiresAt,
         },
@@ -292,6 +295,71 @@ builder.mutationFields((t) => ({
         token,
         user: updatedUser,
       }
+    },
+  }),
+
+  updateUser: t.field({
+    type: User,
+    args: {
+      name: t.arg.string(),
+      phoneNumber: t.arg.string(),
+    },
+    resolve: async (_root, args, ctx) => {
+      // Check if user is authenticated
+      if (!ctx.user) {
+        throw new Error('Authentication required')
+      }
+
+      // Users can only update their own profile
+      const userId = ctx.user.id
+
+      // Prepare update data
+      const updateData: any = {}
+      if (args.name !== undefined) {
+        updateData.name = args.name
+      }
+      if (args.phoneNumber !== undefined) {
+        updateData.phoneNumber = args.phoneNumber
+      }
+
+      // Update the user
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+      })
+
+      return updatedUser
+    },
+  }),
+
+  updateUserRole: t.field({
+    type: User,
+    args: {
+      userId: t.arg.string({ required: true }),
+      role: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      // Check if user is authenticated and is admin
+      if (!ctx.user) {
+        throw new Error('Authentication required')
+      }
+
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Admin access required')
+      }
+
+      // Validate role
+      if (!['user', 'admin'].includes(args.role)) {
+        throw new Error('Invalid role')
+      }
+
+      // Update the user's role
+      const updatedUser = await prisma.user.update({
+        where: { id: args.userId },
+        data: { role: args.role },
+      })
+
+      return updatedUser
     },
   }),
 }))

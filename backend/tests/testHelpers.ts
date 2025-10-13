@@ -5,6 +5,7 @@ import { hashPassword } from '../src/utils/auth'
 export interface TestUserData {
   email: string
   name: string
+  phoneNumber: string
 }
 
 export interface TestUser {
@@ -24,6 +25,7 @@ export function generateTestUserData(): TestUserData {
   return {
     email: `test-${timestamp}-${random}@example.com`,
     name: `Test User ${timestamp}-${random}`,
+    phoneNumber: `555-${random.toString().padStart(4, '0')}-1234`,
   }
 }
 
@@ -39,6 +41,7 @@ export async function createTestUserAndJwt(
   overrides: Partial<{
     email: string
     name: string
+    phoneNumber: string
     password: string
     role: string
   }> = {},
@@ -48,6 +51,7 @@ export async function createTestUserAndJwt(
   const userData = generateTestUserData()
   const email = overrides.email || userData.email
   const name = overrides.name || userData.name
+  const phoneNumber = overrides.phoneNumber || userData.phoneNumber
   const role = overrides.role || 'user'
 
   // Clean up any existing test user with the same email or name
@@ -65,6 +69,7 @@ export async function createTestUserAndJwt(
     data: {
       email,
       name,
+      phoneNumber,
       password: hashedPassword,
       role,
       // If validated is true, set validatedAt to current date

@@ -88,21 +88,31 @@ model MechanicalIsolationEnum {
 }
 
 model Operator {
-  id              String            @id @default(cuid())
-  operatorNo      String            @unique
-  name            String
-  rrcOperatorNo   String
-  wells           Well[]
-  operatorContact OperatorContact[]
+  id             String         @id @default(cuid())
+  operatorEnum   String
+  operatorEnumId OperatorEnum   @relation(fields: [operatorEnum], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  stateAbbr      String // 2-digit state abbreviation
+  operatorNo     String // alphanumeric operator number
+  wells          Well[]
+  OperatorUsers  OperatorUser[]
+
+  @@unique([operatorEnum, stateAbbr])
 }
 
-model OperatorContact {
-  id          String   @id @default(cuid())
-  operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  operatorId  String
-  name        String
-  phoneNumber String
-  email       String
+model OperatorEnum {
+  id        String     @id @default(cuid())
+  name      String
+  operators Operator[]
+}
+
+model OperatorUser {
+  id         String   @id @default(cuid())
+  user       String
+  userId     User     @relation(fields: [user], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  operator   String
+  operatorId Operator @relation(fields: [operator], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([user, operator])
 }
 
 model Perforation {
@@ -150,6 +160,12 @@ model PlugSchedule {
   PlugCement                PlugCement[]
 }
 
+model RodEnum {
+  id   String @id @default(cuid())
+  type String
+  rods Rods[]
+}
+
 model Rods {
   id        String  @id @default(cuid())
   api       String
@@ -157,12 +173,6 @@ model Rods {
   rodEnumId String
   rodEnum   RodEnum @relation(fields: [rodEnumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   well      Well    @relation(fields: [api], references: [api], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model RodEnum {
-  id   String @id @default(cuid())
-  type String
-  rods Rods[]
 }
 
 model Tubing {
@@ -188,18 +198,20 @@ model TubingEnum {
 }
 
 model User {
-  id                          String    @id @default(cuid())
-  email                       String    @unique
+  id                          String         @id @default(cuid())
+  email                       String         @unique
   password                    String
   name                        String
-  role                        String    @default("user")
-  registeredAt                DateTime  @default(now())
+  phoneNumber                 String
+  role                        String         @default("user")
+  registeredAt                DateTime       @default(now())
   validatedAt                 DateTime?
   verificationCode            String?
   verificationCodeExpiresAt   DateTime?
   passwordResetToken          String?
   passwordResetTokenExpiresAt DateTime?
-  roleId                      UserRole  @relation(fields: [role], references: [role], onDelete: Cascade, onUpdate: Cascade)
+  roleId                      UserRole       @relation(fields: [role], references: [role], onDelete: Cascade, onUpdate: Cascade)
+  OperatorUser                OperatorUser[]
 }
 
 model UserRole {

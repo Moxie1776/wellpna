@@ -43,7 +43,7 @@ The `src` directory is organized as follows:
 - `src/`
   - `builder.ts`: Pothos schema builder configuration.
   - `client.ts`: Prisma client instance.
-  - `schema.ts`: Root schema definition, where all types, queries, and mutations are imported.
+  - `schema/index.ts`: Root schema definition, where all types, queries, and mutations are imported.
   - `server.ts`: Standalone GraphQL Yoga server setup.
   - `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
   - `graphql/`: Contains all GraphQL-related code.

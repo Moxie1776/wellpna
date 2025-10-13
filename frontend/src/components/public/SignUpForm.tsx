@@ -15,6 +15,7 @@ import logger from '../../utils/logger'
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.email({ message: 'Please enter a valid email address' }),
+  phoneNumber: z.string().min(1, 'Phone number is required'),
   password: passwordSchema,
 })
 
@@ -27,15 +28,19 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
     defaultValues: {
       name: '',
       email: '',
+      phoneNumber: '',
       password: '',
     },
     mode: 'onChange',
   })
 
-  // Helper text state for name, email, and password
+  // Helper text state for name, email, phone number, and password
   const [nameHelperText, setNameHelperText] = React.useState('Enter your name.')
   const [emailHelperText, setEmailHelperText] = React.useState(
     'Enter your email address.',
+  )
+  const [phoneNumberHelperText, setPhoneNumberHelperText] = React.useState(
+    'Enter your phone number.',
   )
   const [passwordHelperText, setPasswordHelperText] = React.useState(
     'Enter your password.',
@@ -56,6 +61,13 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
     } else {
       setEmailHelperText('Enter your email address.')
     }
+    if (form.formState.errors.phoneNumber) {
+      setPhoneNumberHelperText(
+        form.formState.errors.phoneNumber.message || 'Enter your phone number.',
+      )
+    } else {
+      setPhoneNumberHelperText('Enter your phone number.')
+    }
     if (form.formState.errors.password) {
       setPasswordHelperText(
         form.formState.errors.password.message || 'Enter your password.',
@@ -66,6 +78,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   }, [
     form.formState.errors.name,
     form.formState.errors.email,
+    form.formState.errors.phoneNumber,
     form.formState.errors.password,
     form.formState.isSubmitted,
   ])
@@ -73,7 +86,12 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     logger.debug('SignUpForm submit', values)
     try {
-      await signUp(values.email, values.password, values.name)
+      await signUp(
+        values.email,
+        values.password,
+        values.name,
+        values.phoneNumber,
+      )
       logger.debug(
         'SignUpForm signUp callback called',
         values.email,
@@ -113,6 +131,17 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
                 label="Email"
                 type="email"
                 helperText={emailHelperText}
+                disabled={form.formState.isSubmitting}
+              />
+            </FormControl>
+          </FormItem>
+          <FormItem>
+            <FormControl>
+              <HFInput
+                name="phoneNumber"
+                label="Phone Number"
+                type="tel"
+                helperText={phoneNumberHelperText}
                 disabled={form.formState.isSubmitting}
               />
             </FormControl>

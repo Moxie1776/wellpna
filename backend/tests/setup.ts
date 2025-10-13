@@ -1,6 +1,6 @@
-import { afterAll, beforeAll, vi } from 'vitest'
 import { config } from 'dotenv'
 import { createServer } from 'net'
+import { afterAll, beforeAll, vi } from 'vitest'
 
 import { prisma } from '../src/client'
 import { server } from '../src/server'

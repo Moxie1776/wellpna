@@ -7,17 +7,30 @@ import client from '../utils/graphqlClient'
 import { isValidToken } from '../utils/jwt'
 import logger from '../utils/logger'
 
+interface User {
+  id: number
+  email: string
+  name: string
+  phoneNumber: string
+  role: string
+}
+
 interface AuthState {
   token: string | null
-  user: { id: number; email: string } | null
+  user: User | null
   loading: boolean
   error: string | null
-  setAuth: (token: string, user: { id: number; email: string }) => void
+  setAuth: (token: string, user: User) => void
   clearAuth: () => void
   signIn: (email: string, password: string) => Promise<any>
   signOut: () => void
-  signUp: (email: string, password: string, name: string) => Promise<any>
-  getCurrentUser: () => { id: number; email: string } | null
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    phoneNumber: string,
+  ) => Promise<any>
+  getCurrentUser: () => User | null
   isTokenValid: () => boolean
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -81,7 +94,12 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem('token')
         set({ token: null, user: null })
       },
-      signUp: async (email: string, password: string, name: string) => {
+      signUp: async (
+        email: string,
+        password: string,
+        name: string,
+        phoneNumber: string,
+      ) => {
         set({ loading: true, error: null })
         try {
           const result = await client
@@ -89,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
               email,
               password,
               name,
+              phoneNumber,
             })
             .toPromise()
           if (result.error) {

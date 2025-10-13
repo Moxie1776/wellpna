@@ -365,7 +365,13 @@ describe('useAuthStore', () => {
       // Set initial state
       useAuthStore.setState({
         token: 'existing-token',
-        user: { id: 1, email: 'test@example.com' },
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          name: 'Test User',
+          phoneNumber: '555-123-4567',
+          role: 'user',
+        },
         loading: false,
         error: null,
       })
@@ -402,7 +408,12 @@ describe('useAuthStore', () => {
         const { signUp } = useAuthStore.getState()
 
         await act(async () => {
-          await signUp('test@example.com', 'password', 'Test User')
+          await signUp(
+            'test@example.com',
+            'password',
+            'Test User',
+            '555-123-4567',
+          )
         })
 
         const state = useAuthStore.getState()
@@ -444,7 +455,7 @@ describe('useAuthStore', () => {
         const { signUp } = useAuthStore.getState()
 
         act(() => {
-          signUp('test@example.com', 'password', 'Test User')
+          signUp('test@example.com', 'password', 'Test User', '555-123-4567')
         })
 
         expect(useAuthStore.getState().loading).toBe(true)
@@ -470,7 +481,12 @@ describe('useAuthStore', () => {
         const { signUp } = useAuthStore.getState()
 
         const result = await act(async () => {
-          return await signUp('exists@example.com', 'password', 'Test User')
+          return await signUp(
+            'exists@example.com',
+            'password',
+            'Test User',
+            '555-123-4567',
+          )
         })
 
         const state = useAuthStore.getState()
@@ -493,7 +509,12 @@ describe('useAuthStore', () => {
         const { signUp } = useAuthStore.getState()
 
         const result = await act(async () => {
-          return await signUp('nodata@example.com', 'password', 'Test User')
+          return await signUp(
+            'nodata@example.com',
+            'password',
+            'Test User',
+            '555-123-4567',
+          )
         })
 
         const state = useAuthStore.getState()
@@ -510,7 +531,12 @@ describe('useAuthStore', () => {
         const { signUp } = useAuthStore.getState()
 
         const result = await act(async () => {
-          return await signUp('network@example.com', 'password', 'Test User')
+          return await signUp(
+            'network@example.com',
+            'password',
+            'Test User',
+            '555-123-4567',
+          )
         })
 
         const state = useAuthStore.getState()
@@ -623,7 +649,13 @@ describe('useAuthStore', () => {
     it('should remove token from localStorage on sign out', () => {
       useAuthStore.setState({
         token: 'existing-token',
-        user: { id: 1, email: 'test@example.com' },
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          name: 'Test User',
+          phoneNumber: '555-123-4567',
+          role: 'user',
+        },
       })
 
       const { signOut } = useAuthStore.getState()
@@ -648,12 +680,24 @@ describe('useAuthStore', () => {
       // For testing, we manually set the state as persist would
       testStore.setState({
         token: 'restored-token',
-        user: { id: 1, email: 'restored@example.com' },
+        user: {
+          id: 1,
+          email: 'restored@example.com',
+          name: 'Restored User',
+          phoneNumber: '555-123-4567',
+          role: 'user',
+        },
       })
 
       const state = testStore.getState()
       expect(state.token).toBe('restored-token')
-      expect(state.user).toEqual({ id: 1, email: 'restored@example.com' })
+      expect(state.user).toEqual({
+        id: 1,
+        email: 'restored@example.com',
+        name: 'Restored User',
+        phoneNumber: '555-123-4567',
+        role: 'user',
+      })
     })
   })
 
@@ -700,13 +744,25 @@ describe('useAuthStore', () => {
       localStorageMock.getItem.mockReturnValue('existing-token')
       useAuthStore.setState({
         token: 'existing-token',
-        user: { id: 1, email: 'current@example.com' },
+        user: {
+          id: 1,
+          email: 'current@example.com',
+          name: 'Current User',
+          phoneNumber: '555-123-4567',
+          role: 'user',
+        },
       })
 
       const { getCurrentUser } = useAuthStore.getState()
 
       const user = getCurrentUser()
-      expect(user).toEqual({ id: 1, email: 'current@example.com' })
+      expect(user).toEqual({
+        id: 1,
+        email: 'current@example.com',
+        name: 'Current User',
+        phoneNumber: '555-123-4567',
+        role: 'user',
+      })
     })
 
     it('should return null when no token exists in localStorage', () => {

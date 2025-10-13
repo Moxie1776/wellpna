@@ -24,7 +24,9 @@ export default async function teardown() {
         },
       })
 
-      logger.info(`Global teardown: Cleaned up ${deletedUsers.count} test users`)
+      logger.info(
+        `Global teardown: Cleaned up ${deletedUsers.count} test users`,
+      )
 
       await prisma.$disconnect()
     } else {

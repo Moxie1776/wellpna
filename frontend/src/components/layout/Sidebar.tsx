@@ -10,7 +10,7 @@ import { useMode } from '@/hooks/useMode'
 import { appRoutes } from '@/lib/routes'
 
 export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const isMobile = useIsMobile()
   const { mode } = useMode()
 
@@ -20,15 +20,14 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
       ? 'var(--joy-palette-primary-300)'
       : 'var(--joy-palette-primary-700)'
 
-  // Filter links by auth
+  // Filter links by auth and role
   const filteredLinks = appRoutes.filter((link) => {
     if (isAuthenticated) {
       // Hide Home when authenticated
       if (link.label === 'Home') return false
       // Only show links that require auth or are general
       // (not public auth routes)
-      return (
-        link.requiresAuth ||
+      const isAuthRoute = link.requiresAuth ||
         (!link.requiresAuth &&
           ![
             'Sign In',
@@ -36,7 +35,13 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
             'Password Reset',
             'Email Verification',
           ].includes(link.label))
-      )
+
+      // Check role requirements
+      if (link.requiredRole && user?.role !== link.requiredRole) {
+        return false
+      }
+
+      return isAuthRoute
     }
     // Unauthenticated: show only links that do not require auth
     return !link.requiresAuth

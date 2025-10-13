@@ -16,7 +16,6 @@ This project is organized into three main directories:
 
 - **README.md**: This overview document
 - **wellpna.code-workspace**: VS Code workspace configuration
-- **INTEGRATION_TESTING.md**: Integration testing guidelines
 - **PROJECT_OUTLINE.md**: High-level project planning and roadmap
 
 ### Backend (`/backend`)
@@ -25,7 +24,6 @@ The backend is a Node.js/TypeScript application that provides the data processin
 
 **Purpose:**
 
-- Data ingestion from PDF and Excel files (examples in `backend/data/`)
 - Database storage and management (SQLite with Prisma)
 - GraphQL API for frontend consumption
 - Data parsing and extraction from files

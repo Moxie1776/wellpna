@@ -14,4 +14,16 @@ builder.queryFields((t) => ({
       })
     },
   }),
+  users: t.prismaField({
+    type: ['User'],
+    resolve: (query, root, args, ctx, _info) => {
+      if (!ctx.jwt || ctx.jwt.payload.role !== 'admin') {
+        throw new Error('Not authorized')
+      }
+      return prisma.user.findMany({
+        ...query,
+        orderBy: { registeredAt: 'desc' },
+      })
+    },
+  }),
 }))

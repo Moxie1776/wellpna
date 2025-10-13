@@ -19,13 +19,24 @@ describe('Authentication', () => {
       const userData = generateTestUserData()
 
       const mutation = `
-        mutation SignUp($email: String!, $password: String!, $name: String!) {
-          signUp(email: $email, password: $password, name: $name) {
+        mutation SignUp(
+          $email: String!,
+          $password: String!,
+          $name: String!,
+          $phoneNumber: String!
+        ) {
+          signUp(
+            email: $email,
+            password: $password,
+            name: $name,
+            phoneNumber: $phoneNumber
+          ) {
             token
             user {
               id
               email
               name
+              phoneNumber
             }
           }
         }
@@ -35,6 +46,7 @@ describe('Authentication', () => {
         email: userData.email,
         password: 'password123',
         name: userData.name,
+        phoneNumber: '555-123-4567',
       }
 
       const response = await yoga.fetch('http://localhost:4000/graphql', {
@@ -53,6 +65,7 @@ describe('Authentication', () => {
       expect(result.data.signUp).toBeDefined()
       expect(result.data.signUp.user.email).toBe(userData.email)
       expect(result.data.signUp.user.name).toBe(userData.name)
+      expect(result.data.signUp.user.phoneNumber).toBe('555-123-4567')
       expect(result.data.signUp.token).toBeDefined()
 
       // Verify user was created in database
@@ -71,8 +84,18 @@ describe('Authentication', () => {
       await createTestUserAndJwt(prisma, { email: 'duplicate@example.com' })
 
       const mutation = `
-        mutation SignUp($email: String!, $password: String!, $name: String!) {
-          signUp(email: $email, password: $password, name: $name) {
+        mutation SignUp(
+          $email: String!,
+          $password: String!,
+          $name: String!,
+          $phoneNumber: String!
+        ) {
+          signUp(
+            email: $email,
+            password: $password,
+            name: $name,
+            phoneNumber: $phoneNumber
+          ) {
             token
             user {
               id
@@ -87,6 +110,7 @@ describe('Authentication', () => {
         email: 'duplicate@example.com',
         password: 'password123',
         name: 'Another User',
+        phoneNumber: '555-987-6543',
       }
 
       const response = await yoga.fetch('http://localhost:4000/graphql', {

@@ -58,6 +58,10 @@ describe('SignUpForm', () => {
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(
+        screen.getByLabelText('Phone Number'),
+        '555-123-4567',
+      )
       await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
@@ -66,6 +70,7 @@ describe('SignUpForm', () => {
         'test@example.com',
         validPassword,
         'Test User',
+        '555-123-4567',
       )
       expect(mockOnSignup).toHaveBeenCalled()
     })
@@ -88,6 +93,10 @@ describe('SignUpForm', () => {
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(
+        screen.getByLabelText('Phone Number'),
+        '555-123-4567',
+      )
       await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
