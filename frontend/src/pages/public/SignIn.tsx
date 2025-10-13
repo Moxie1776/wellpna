@@ -19,7 +19,7 @@ const SignInPage = () => {
       <CardContent>
         <SignInForm
           title="Sign in to your account"
-          onSignIn={() => navigate('/dashboard')}
+          onSignIn={() => navigate('/')}
         />
       </CardContent>
     </Card>

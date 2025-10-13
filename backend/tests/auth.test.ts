@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 
 import { prisma } from '../src/client'
 import { yoga } from '../src/server'

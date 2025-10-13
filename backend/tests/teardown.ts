@@ -10,23 +10,27 @@ export default async function teardown() {
   logger.info('Global teardown: Skipping cleanup (handled by setup)')
 
   // Use dynamic import to avoid ESM issues in teardown context
-  const { prisma } = await import('./setup')
-
   try {
-    // Clean up all test users (those with @example.com emails)
-    // This helps prevent the database from accumulating test data
-    const deletedUsers = await prisma.user.deleteMany({
-      where: {
-        email: {
-          endsWith: '@example.com',
-        },
-      },
-    })
+    const { prisma } = await import('./setup')
 
-    logger.info(`Global teardown: Cleaned up ${deletedUsers.count} test users`)
+    if (prisma) {
+      // Clean up all test users (those with @example.com emails)
+      // This helps prevent the database from accumulating test data
+      const deletedUsers = await prisma.user.deleteMany({
+        where: {
+          email: {
+            endsWith: '@example.com',
+          },
+        },
+      })
+
+      logger.info(`Global teardown: Cleaned up ${deletedUsers.count} test users`)
+
+      await prisma.$disconnect()
+    } else {
+      logger.info('Global teardown: Prisma not available, skipping cleanup')
+    }
   } catch (error) {
-    logger.error(`Global teardown: Error cleaning up test users - ${error}`)
-  } finally {
-    await prisma.$disconnect()
+    logger.error(`Global teardown: Error during cleanup - ${error}`)
   }
 }

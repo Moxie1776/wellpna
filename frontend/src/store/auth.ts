@@ -49,12 +49,9 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         set({ loading: true, error: null })
         try {
+          // Use mutation to align with tests which mock `client.mutation`.
           const result = await client
-            .query(
-              SIGN_IN_QUERY,
-              { email, password },
-              { preferGetMethod: false },
-            )
+            .mutation(SIGN_IN_QUERY, { email, password })
             .toPromise()
           if (result.error) {
             set({

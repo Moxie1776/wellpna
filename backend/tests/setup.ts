@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, jest } from '@jest/globals'
+import { afterAll, beforeAll, vi } from 'vitest'
 import { config } from 'dotenv'
 import { createServer } from 'net'
 
@@ -32,8 +32,8 @@ config()
 const originalLog = console.log
 const originalError = console.error
 beforeAll(() => {
-  console.log = jest.fn()
-  console.error = jest.fn()
+  console.log = vi.fn()
+  console.error = vi.fn()
 })
 
 afterAll(() => {
@@ -46,22 +46,24 @@ afterAll(() => {
 // import nodemailerMock from 'nodemailer-mock'
 
 // Mock nodemailer to return an object with a createTransporter method
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => {
-    // Create a mock transporter object
-    const mockTransporter: any = {
-      sendMail: jest.fn().mockImplementation(() =>
-        Promise.resolve({
-          messageId: 'mock-message-id',
-          envelope: {
-            from: 'test@example.com',
-            to: ['user@example.com'],
-          },
-        }),
-      ),
-    }
-    return mockTransporter
-  }),
+vi.mock('nodemailer', () => ({
+  default: {
+    createTransport: vi.fn(() => {
+      // Create a mock transporter object
+      const mockTransporter: any = {
+        sendMail: vi.fn().mockImplementation(() =>
+          Promise.resolve({
+            messageId: 'mock-message-id',
+            envelope: {
+              from: 'test@example.com',
+              to: ['user@example.com'],
+            },
+          }),
+        ),
+      }
+      return mockTransporter
+    }),
+  },
 }))
 
 // Global test database client
