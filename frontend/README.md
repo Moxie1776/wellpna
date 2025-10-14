@@ -22,24 +22,26 @@ The frontend follows a feature-based architecture with clear separation of conce
 
 - **`src/`**: Main application source code
   - **`components/`**: Reusable UI components
-    - **`ui/`**: Base UI components (forms, snackbar, etc.)
-    - **`layout/`**: Layout components (sidebar, breadcrumbs, etc.)
-    - **`public/`**: Public-facing form components (SignInForm, SignUpForm, etc.)
-    - **`hook-form/`**: React Hook Form integrations
+    - **`forms/`**: Form components (SignInForm, SignUpForm, ProfileForm, etc.)
+    - **`hookForm/`**: React Hook Form integrations and custom form components
+    - **`layout/`**: Layout components (sidebar, breadcrumbs, theme toggle, etc.)
+    - **`tables/`**: Table components (UserManagementTable, etc.)
+    - **`ui/`**: Base UI components (snackbar, upload components, etc.)
   - **`pages/`**: Top-level route components
-    - **`public/`**: Public pages (Home, SignIn, SignUp, etc.)
+    - **`admin/`**: Admin-only pages (user management, role management)
     - **`dashboard/`**: Protected dashboard pages
-  - **`providers/`**: React context providers (Theme, Snackbar, etc.)
-  - **`hooks/`**: Custom React hooks (useAuth, useMobile, etc.)
+    - **`profile/`**: User profile pages (profile editing)
+  - **`providers/`**: React context providers (Theme, Snackbar, ProtectedRoute, etc.)
+  - **`hooks/`**: Custom React hooks (useAuth, useMobile, useMode, etc.)
   - **`store/`**: Zustand state stores (auth, theme)
-  - **`utils/`**: Utility functions (JWT helpers, logger, etc.)
-  - **`lib/`**: Configuration and shared code (routes, GraphQL client, colors)
+  - **`utils/`**: Utility functions (JWT helpers, logger, GraphQL client, etc.)
+  - **`lib/`**: Configuration and shared code (routes, colors, password schema)
   - **`graphql/`**: GraphQL queries and mutations
 
 ### File Organization Rules
 
-- **Components**: Place in appropriate subfolder (`ui/`, `layout/`, `public/`, etc.)
-- **Pages**: One component per file in `pages/public/` or `pages/dashboard/`
+- **Components**: Place in appropriate subfolder (`forms/`, `hookForm/`, `layout/`, `tables/`, `ui/`)
+- **Pages**: One component per file in `pages/admin/`, `pages/dashboard/`, or `pages/profile/`
 - **Tests**: Mirror source structure in `__tests__/` directories
 - **Types**: Define interfaces/types in component files or shared types file
 
@@ -47,38 +49,38 @@ The frontend follows a feature-based architecture with clear separation of conce
 
 ### Adding a New Page
 
-1. **Create Page Component** in `src/pages/` (public or dashboard)
+1. **Create Page Component** in appropriate `src/pages/` subfolder (admin, dashboard, or profile)
 
-   ```tsx
-   // src/pages/dashboard/NewFeature.tsx
-   const NewFeaturePage = () => {
-     return (
-       <div>
-         <h1>New Feature</h1>
-         {/* Page content */}
-       </div>
-     )
-   }
-   export default NewFeaturePage
-   ```
+    ```tsx
+    // src/pages/dashboard/NewFeature.tsx
+    const NewFeaturePage = () => {
+      return (
+        <div>
+          <h1>New Feature</h1>
+          {/* Page content */}
+        </div>
+      )
+    }
+    export default NewFeaturePage
+    ```
 
 2. **Add Route** in `src/lib/routes.ts`
 
-   ```tsx
-   import NewFeaturePage from '../pages/dashboard/NewFeature'
-   // ... existing imports
+    ```tsx
+    import NewFeaturePage from '../pages/dashboard/NewFeature'
+    // ... existing imports
 
-   export const appRoutes: AppRoute[] = [
-     // ... existing routes
-     {
-       label: 'New Feature',
-       href: '/new-feature',
-       icon: MdStar, // Import from react-icons/md
-       requiresAuth: true,
-       page: NewFeaturePage,
-     },
-   ]
-   ```
+    export const appRoutes: AppRoute[] = [
+      // ... existing routes
+      {
+        label: 'New Feature',
+        href: '/new-feature',
+        icon: MdStar, // Import from react-icons/md
+        requiresAuth: true,
+        page: NewFeaturePage,
+      },
+    ]
+    ```
 
 3. **Add Tests** in `src/pages/dashboard/__tests__/NewFeature.test.tsx`
 

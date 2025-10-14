@@ -41,16 +41,17 @@ sequenceDiagram;
 The `src` directory is organized as follows:
 
 - `src/`
-  - `builder.ts`: Pothos schema builder configuration.
-  - `client.ts`: Prisma client instance.
-  - `schema/index.ts`: Root schema definition, where all types, queries, and mutations are imported.
-  - `server.ts`: Standalone GraphQL Yoga server setup.
-  - `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
-  - `graphql/`: Contains all GraphQL-related code.
-    - `types/`: GraphQL object type definitions (e.g., `User.ts`, `Auth.ts`).
-    - `queries/`: GraphQL queries (e.g., `user.ts`).
-    - `mutations/`: GraphQL mutations (e.g., `auth.ts`).
-  - `utils/`: Utility functions (e.g., `auth.ts` for password hashing and JWT).
+   - `builder.ts`: Pothos schema builder configuration.
+   - `client.ts`: Prisma client instance.
+   - `schema/index.ts`: Root schema definition, where all types, queries, and mutations are imported.
+   - `server.ts`: Standalone GraphQL Yoga server setup.
+   - `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
+   - `graphql/`: Contains all GraphQL-related code.
+     - `types/`: GraphQL object type definitions (e.g., `User.ts`, `Auth.ts`).
+     - `queries/`: GraphQL queries (e.g., `user.ts`).
+     - `mutations/`: GraphQL mutations (e.g., `auth.ts`).
+   - `services/`: Service layer for external integrations (e.g., `emailService.ts`).
+   - `utils/`: Utility functions (e.g., `auth.ts` for password hashing and JWT).
 
 ## Development Rules
 

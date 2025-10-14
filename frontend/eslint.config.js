@@ -80,7 +80,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/__tests__/**/*.{js,ts,tsx}'],
+    files: ['**/__tests__/**/*.{js,ts,tsx}', '**/*.md'],
     rules: {
       'max-len': 'off',
     },

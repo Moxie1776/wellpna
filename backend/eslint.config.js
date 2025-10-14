@@ -76,7 +76,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/utils/secret.ts'],
+    files: ['**/utils/secret.ts', '**/*.md'],
     rules: {
       'max-len': 'off',
     },

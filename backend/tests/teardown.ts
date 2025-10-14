@@ -4,14 +4,12 @@
  * accumulating test users
  */
 export default async function teardown() {
-  // For now, skip teardown to avoid ESM issues
-  // The setup.ts already cleans up test users before each test run
-  const { default: logger } = await import('./utils/logger')
-  logger.info('Global teardown: Skipping cleanup (handled by setup)')
-
   // Use dynamic import to avoid ESM issues in teardown context
+  const { default: logger } = await import('./utils/logger')
+
   try {
-    const { prisma } = await import('./setup')
+    // Get prisma from global context (set in setup.ts)
+    const prisma = (global as any).testPrisma
 
     if (prisma) {
       // Clean up all test users (those with @example.com emails)
