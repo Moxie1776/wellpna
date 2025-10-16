@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Moxie1776/wellpna/compare/v1.0.0...v1.1.0) (2025-10-16)
+
+
+### Features
+
+* comprehensive GraphQL and auth improvements ([80d151e](https://github.com/Moxie1776/wellpna/commit/80d151e4ce084df5aa16ebe71a9b5c6c997951bc))
+
 # 1.0.0 (2025-10-14)
 
 
