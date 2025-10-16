@@ -8,6 +8,8 @@ export const SIGN_IN_MUTATION = gql`
         id
         email
         name
+        phoneNumber
+        role
       }
     }
   }

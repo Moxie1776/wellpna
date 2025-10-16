@@ -29,7 +29,7 @@ describe('ProtectedRoute', () => {
   })
 
   it('renders children when user exists', () => {
-    mockUseAuthStore.mockReturnValue({ id: 1, email: 'test@example.com' })
+    mockUseAuthStore.mockReturnValue({ id: '1', email: 'test@example.com' })
 
     render(
       <TestWrapper>

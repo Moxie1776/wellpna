@@ -45,4 +45,51 @@ builder.queryFields((t) => ({
       }
     },
   }),
+
+  // Debug query to get verification code for testing (only works in debug mode)
+  getVerificationCode: t.field({
+    type: 'String',
+    args: {
+      email: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, _ctx) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('getVerificationCode is only available in debug mode')
+      }
+
+      // Find the user
+      const user = await prisma.user.findUnique({
+        where: { email: args.email },
+      })
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      if (!user.verificationCode) {
+        throw new Error('No verification code found for this user')
+      }
+
+      return user.verificationCode
+    },
+  }),
+
+  // Health check query
+  health: t.field({
+    type: 'String',
+    resolve: async (_root, _args, _ctx) => {
+      return 'ok'
+    },
+  }),
+
+  // Debug status query (only works in debug mode)
+  debugStatus: t.field({
+    type: 'String',
+    resolve: async (_root, _args, _ctx) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('debugStatus is only available in debug mode')
+      }
+      return 'debug'
+    },
+  }),
 }))

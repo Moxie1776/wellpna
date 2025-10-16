@@ -7,7 +7,7 @@ import { decodeToken, isValidToken } from '../utils/jwt'
 import logger from '../utils/logger'
 import { SIGN_IN_MUTATION } from './../graphql/mutations/signInMutation'
 
-interface User {
+export interface User {
   id: string
   email: string
   name: string
@@ -15,7 +15,7 @@ interface User {
   role: string
 }
 
-interface AuthState {
+export interface AuthState {
   token: string | null
   user: User | null
   loading: boolean
@@ -87,6 +87,7 @@ export const useAuthStore = create<AuthState>()(
           const { token, user } = result.data.signIn
           localStorage.setItem('token', token)
           set({ token, user, loading: false })
+          logger.debug('Sign in successful, user details:', user)
           return result.data.signIn
         } catch (err: any) {
           logger.error('Sign in error:', err)
@@ -98,7 +99,15 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       signOut: () => {
-        localStorage.removeItem('token')
+        // Remove both the token and the persisted zustand storage to avoid
+        // restoring a stale user without a valid token.
+        try {
+          localStorage.removeItem('token')
+          localStorage.removeItem('auth-storage')
+          logger.debug('Cleared token and auth-storage from localStorage')
+        } catch (e) {
+          logger.error('Error clearing localStorage on signOut', e)
+        }
         set({ token: null, user: null })
       },
       signUp: async (
@@ -145,7 +154,19 @@ export const useAuthStore = create<AuthState>()(
       },
       initializeAuth: () => {
         const token = localStorage.getItem('token')
-        if (token && isValidToken(token)) {
+        if (!token) {
+          // No token: ensure persisted user is not restored
+          try {
+            localStorage.removeItem('auth-storage')
+            logger.debug('No token found; removed persisted auth-storage')
+          } catch (e) {
+            logger.error('Error clearing auth-storage during init', e)
+          }
+          set({ token: null, user: null })
+          return
+        }
+
+        if (isValidToken(token)) {
           const decoded = decodeToken(token)
           if (decoded && typeof decoded === 'object') {
             // Extract user info from JWT payload
@@ -157,8 +178,20 @@ export const useAuthStore = create<AuthState>()(
               role: decoded.role,
             }
             set({ token, user })
+            logger.debug('initializeAuth: token valid, user restored', user)
+            return
           }
         }
+
+        // Invalid token: clear everything
+        try {
+          localStorage.removeItem('token')
+          localStorage.removeItem('auth-storage')
+          logger.debug('initializeAuth: invalid token cleared')
+        } catch (e) {
+          logger.error('Error clearing storage during initializeAuth', e)
+        }
+        set({ token: null, user: null })
       },
     }),
     {

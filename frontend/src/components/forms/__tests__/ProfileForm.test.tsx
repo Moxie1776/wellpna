@@ -20,7 +20,7 @@ vi.mock('urql', () => ({
 
 describe('ProfileForm', () => {
   const mockUser = {
-    id: 1,
+    id: '1',
     email: 'test@example.com',
     name: 'Test User',
     phoneNumber: '555-123-4567',
@@ -55,7 +55,7 @@ describe('ProfileForm', () => {
     mockUpdateUser.mockResolvedValue({
       data: {
         updateUser: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Updated Name',
           phoneNumber: '555-987-6543',
@@ -85,7 +85,7 @@ describe('ProfileForm', () => {
     mockUpdateUser.mockResolvedValue({
       data: {
         updateUser: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Updated Name',
           phoneNumber: '555-987-6543',
@@ -167,7 +167,7 @@ describe('ProfileForm', () => {
     resolveMutation!({
       data: {
         updateUser: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Updated Name',
           phoneNumber: '555-123-4567',
@@ -184,7 +184,7 @@ describe('ProfileForm', () => {
     mockUpdateUser.mockResolvedValue({
       data: {
         updateUser: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Updated Name',
           phoneNumber: '555-987-6543',

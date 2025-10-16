@@ -2,14 +2,13 @@ import { Button, FormControl, FormLabel, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useMutation } from 'urql'
 
-import {
-  UPDATE_USER_MUTATION,
-} from '../../graphql/mutations/updateUserMutation'
+import { UPDATE_USER_MUTATION } from '../../graphql/mutations/updateUserMutation'
+import { useAuthStore } from '../../store/auth'
 import logger from '../../utils/logger'
 
 interface ProfileFormProps {
   user: {
-    id: number
+    id: string
     email: string
     name: string
     phoneNumber: string
@@ -44,10 +43,15 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
         return
       }
 
+      // Update Zustand auth store with new user data if available
+      if (result.data?.updateUser) {
+        useAuthStore.getState().updateUser(result.data.updateUser)
+      }
+
       setSuccess(true)
       logger.info('Profile updated successfully')
     } catch (err: any) {
-      logger.error('Profile update error', err)
+      logger.error('Profile update error:', err)
       setError(err.message || 'An error occurred while updating profile')
     } finally {
       setLoading(false)
