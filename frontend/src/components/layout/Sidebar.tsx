@@ -1,6 +1,12 @@
-import { Box, Button, Drawer, IconButton, Sheet } from '@mui/joy'
-import { IconButton as JoyIconButton } from '@mui/joy'
-import * as React from 'react'
+import {
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  IconButton as JoyIconButton,
+  Sheet,
+} from '@mui/joy'
+import { useMemo, useState } from 'react'
 import { MdDashboard, MdHome, MdMenu } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 
@@ -21,33 +27,46 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
       : 'var(--joy-palette-primary-700)'
 
   // Filter links by auth and role
-  const filteredLinks = appRoutes.filter((link) => {
-    if (isAuthenticated) {
-      // Hide Home when authenticated
-      if (link.label === 'Home') return false
-      // Only show links that require auth or are general
-      // (not public auth routes)
-      const isAuthRoute = link.requiresAuth ||
-        (!link.requiresAuth &&
-          ![
-            'Sign In',
-            'Sign Up',
-            'Password Reset',
-            'Email Verification',
-          ].includes(link.label))
+  const filteredLinks = useMemo(
+    () =>
+      appRoutes.filter((link) => {
+        if (isAuthenticated) {
+          // Hide Home when authenticated
+          if (link.label === 'Home') return false
+          // Only show links that require auth or are general
+          // (not public auth routes)
+          const isAuthRoute =
+            link.requiresAuth ||
+            (!link.requiresAuth &&
+              ![
+                'Sign In',
+                'Sign Up',
+                'Password Reset',
+                'Email Verification',
+                'Forbidden',
+                'Server Error',
+                'Not Found',
+              ].includes(link.label))
 
-      // Check role requirements
-      if (link.requiredRole && user?.role !== link.requiredRole) {
-        return false
-      }
+          // Check role requirements
+          if (link.requiredRole && user?.role !== link.requiredRole) {
+            return false
+          }
 
-      return isAuthRoute
-    }
-    // Unauthenticated: show only links that do not require auth
-    return !link.requiresAuth
-  })
+          return isAuthRoute
+        }
+        // Unauthenticated: show only links that do not require auth,
+        // excluding error pages
 
-  const [open, setOpen] = React.useState(false)
+        return (
+          !link.requiresAuth &&
+          !['Forbidden', 'Server Error', 'Not Found'].includes(link.label)
+        )
+      }),
+    [isAuthenticated, user],
+  )
+
+  const [open, setOpen] = useState(false)
 
   // Sidebar content
   const sidebarContent = (

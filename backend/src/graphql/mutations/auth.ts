@@ -319,9 +319,11 @@ builder.mutationFields((t) => ({
       const db = ctx?.prisma || prisma
       if (!['user', 'admin'].includes(args.data.role))
         throw new Error('Invalid role')
-      const updatedUser = await db.user.update({
-        where: { id: args.data.userId },
-        data: { role: args.data.role },
+      const updatedUser = await db.$transaction(async (tx: typeof db) => {
+        return await tx.user.update({
+          where: { id: args.data.userId },
+          data: { role: args.data.role },
+        })
       })
       return updatedUser
     },

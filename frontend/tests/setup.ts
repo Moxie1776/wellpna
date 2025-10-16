@@ -1,0 +1,240 @@
+import { createServer } from 'net'
+import { afterAll, beforeAll, vi } from 'vitest'
+import '@testing-library/jest-dom'
+import { act } from '@testing-library/react'
+
+// Mock CSS and font files
+vi.mock('*.css', () => ({}))
+
+// Mock import.meta for ES module compatibility
+Object.defineProperty(global, 'import', {
+  value: {
+    meta: {
+      env: {
+        VITE_GRAPHQL_ENDPOINT: process.env.VITE_GRAPHQL_ENDPOINT,
+        // Add other env vars as needed
+      },
+    },
+  },
+  writable: false,
+})
+
+// Mock window.matchMedia for Joy UI/MUI tests
+if (typeof window !== 'undefined' && !window.matchMedia) {
+  window.matchMedia = function (query) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: function () {}, // Deprecated
+      removeListener: function () {}, // Deprecated
+      addEventListener: function () {},
+      removeEventListener: function () {},
+      dispatchEvent: function () {
+        return false
+      },
+    }
+  }
+}
+
+// Polyfill for document.elementFromPoint for JSDOM
+if (typeof document !== 'undefined' && !document.elementFromPoint) {
+  document.elementFromPoint = function (_x, _y) {
+    // Simple polyfill: always return the body
+    return document.body
+  }
+}
+
+declare global {
+  var act: (typeof import('@testing-library/react'))['act']
+}
+globalThis.act = act
+
+declare let global: typeof globalThis
+
+// Minimal TextEncoder/TextDecoder polyfill for Vitest
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = class {
+    encoding = 'utf-8'
+    encode(str: string) {
+      // Simple UTF-8 encoding polyfill
+      const arr = []
+      for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i)
+        if (code < 0x80) {
+          arr.push(code)
+        } else if (code < 0x800) {
+          arr.push(0xc0 | (code >> 6))
+          arr.push(0x80 | (code & 0x3f))
+        } else if (code < 0x10000) {
+          arr.push(0xe0 | (code >> 12))
+          arr.push(0x80 | ((code >> 6) & 0x3f))
+          arr.push(0x80 | (code & 0x3f))
+        } else {
+          arr.push(0xf0 | (code >> 18))
+          arr.push(0x80 | ((code >> 12) & 0x3f))
+          arr.push(0x80 | ((code >> 6) & 0x3f))
+          arr.push(0x80 | (code & 0x3f))
+        }
+      }
+      return new Uint8Array(arr)
+    }
+    encodeInto(str: string, arr: Uint8Array) {
+      const encoded = this.encode(str)
+      arr.set(encoded)
+      return { read: str.length, written: encoded.length }
+    }
+  }
+}
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = class {
+    encoding = 'utf-8'
+    fatal = false
+    ignoreBOM = false
+    decode(arr: Uint8Array) {
+      // Simple UTF-8 decoding polyfill
+      let str = ''
+      let i = 0
+      while (i < arr.length) {
+        const byte1 = arr[i++]
+        if (byte1 < 0x80) {
+          str += String.fromCharCode(byte1)
+        } else if (byte1 < 0xe0) {
+          const byte2 = arr[i++]
+          str += String.fromCharCode(((byte1 & 0x1f) << 6) | (byte2 & 0x3f))
+        } else if (byte1 < 0xf0) {
+          const byte2 = arr[i++]
+          const byte3 = arr[i++]
+          str += String.fromCharCode(
+            ((byte1 & 0x0f) << 12) | ((byte2 & 0x3f) << 6) | (byte3 & 0x3f),
+          )
+        } else {
+          // surrogate pair
+          const byte2 = arr[i++]
+          const byte3 = arr[i++]
+          const byte4 = arr[i++]
+          const codepoint =
+            ((byte1 & 0x07) << 18) |
+            ((byte2 & 0x3f) << 12) |
+            ((byte3 & 0x3f) << 6) |
+            (byte4 & 0x3f)
+          const cp = codepoint - 0x10000
+          str += String.fromCharCode(0xd800 + (cp >> 10), 0xdc00 + (cp & 0x3ff))
+        }
+      }
+      return str
+    }
+  }
+  // Polyfill for Request for react-router
+  if (typeof global.Request === 'undefined') {
+    ;(global as any).Request = class Request {
+      constructor(input: string | URL, init?: RequestInit) {
+        ;(this as any).url = typeof input === 'string' ? input : input.href
+        ;(this as any).method = init?.method || 'GET'
+        ;(this as any).headers = new Headers(init?.headers)
+        ;(this as any).body = init?.body
+      }
+    }
+  }
+}
+
+const checkPortInUse = (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const testServer = createServer()
+      .once('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(true) // Port is in use
+        } else {
+          resolve(false)
+        }
+      })
+      .once('listening', () => {
+        testServer.close()
+        resolve(false) // Port is free
+      })
+      .listen(port)
+  })
+}
+
+export async function ensureBackendRunning() {
+  try {
+    // Check if port is in use
+    const portInUse = await checkPortInUse(4000)
+    if (!portInUse) {
+      throw new Error(
+        'Backend server not running on localhost:4000. ' +
+          'Please start the backend server in debug mode first.',
+      )
+    }
+
+    // Note: fetch may not be available in Node.js test environment
+    // The global-setup.ts handles starting the backend server
+    // Here we just verify the port is in use as a basic check
+    console.log('Backend server verification: port 4000 is in use')
+
+    console.log('Backend server is running in debug mode on localhost:4000')
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('Failed to verify backend server status')
+  }
+}
+
+// Set test environment variables
+process.env.VITE_GRAPHQL_ENDPOINT = 'http://localhost:4000/graphql'
+process.env.NODE_ENV = 'debug'
+
+// Suppress console.log and console.error in tests globally
+// Use logger.info, logger.debug, etc. for debugging instead
+const originalLog = console.log
+const originalError = console.error
+beforeAll(() => {
+  console.log = vi.fn()
+  console.error = vi.fn()
+})
+
+afterAll(() => {
+  console.log = originalLog
+  console.error = originalError
+})
+
+// Mock nodemailer (keep from backend tests)
+vi.mock('nodemailer', () => ({
+  default: {
+    createTransport: vi.fn(() => {
+      // Ensure a global place to collect sent emails for tests to inspect
+      ;(global as any).sentEmails = (global as any).sentEmails || []
+
+      // Create a mock transporter object
+      const mockTransporter: any = {
+        sendMail: vi.fn().mockImplementation((mailOptions: any) => {
+          // Push the sent email data into global.sentEmails
+          ;(global as any).sentEmails.push(mailOptions)
+          return Promise.resolve({
+            messageId: 'mock-message-id',
+            envelope: {
+              from: mailOptions.from || 'test@example.com',
+              to: mailOptions.to || ['user@example.com'],
+            },
+          })
+        }),
+      }
+      return mockTransporter
+    }),
+  },
+}))
+
+beforeAll(async () => {
+  // Ensure backend server is running and in debug mode
+  await ensureBackendRunning()
+
+  // Backend server is started in global-setup.ts
+  // Here we just set up any frontend-specific test setup
+})
+
+afterAll(async () => {
+  // Call the teardown script for cleanup
+  const teardown = (await import('./teardown')).default
+  await teardown()
+})

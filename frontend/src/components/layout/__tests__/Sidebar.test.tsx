@@ -100,7 +100,7 @@ describe('AppSidebar', () => {
           getCurrentUser: vi.fn(),
           loading: false,
           error: null,
-          user: { id: 1, email: 'test@example.com' },
+          user: { id: '1', email: 'test@example.com' },
           token: 'mock-token',
         },
       })
@@ -191,7 +191,7 @@ describe('AppSidebar', () => {
           getCurrentUser: vi.fn(),
           loading: false,
           error: null,
-          user: { id: 1, email: 'test@example.com' },
+          user: { id: '1', email: 'test@example.com' },
           token: 'mock-token',
         },
       })
@@ -366,7 +366,7 @@ describe('AppSidebar', () => {
           getCurrentUser: vi.fn(),
           loading: false,
           error: null,
-          user: { id: 1, email: 'test@example.com' },
+          user: { id: '1', email: 'test@example.com' },
           token: 'mock-token',
         },
       })

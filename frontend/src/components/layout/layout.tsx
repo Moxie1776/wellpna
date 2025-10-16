@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         boxShadow: 'none',
       }}
     >
-      <Sidebar isAuthenticated={isAuthenticated} />
+      <Sidebar isAuthenticated={isAuthenticated} key={user?.role} />
       <Box
         sx={{
           flex: 1,

@@ -43,7 +43,7 @@ vi.mock('../../utils/graphqlClient', () => {
                     signIn: {
                       token: 'persist-token',
                       user: {
-                        id: 1,
+                        id: '1',
                         email: _variables.email,
                         name: 'Persist User',
                         role: 'user',
@@ -58,7 +58,7 @@ vi.mock('../../utils/graphqlClient', () => {
                     signIn: {
                       token: 'sync-token',
                       user: {
-                        id: 1,
+                        id: '1',
                         email: _variables.email,
                         name: 'Sync User',
                         role: 'user',
@@ -86,7 +86,7 @@ vi.mock('../../utils/graphqlClient', () => {
                   signIn: {
                     token: 'mock-token',
                     user: {
-                      id: 1,
+                      id: '1',
                       email: _variables.email,
                       name: 'Test User',
                       role: 'user',
@@ -109,7 +109,7 @@ vi.mock('../../utils/graphqlClient', () => {
                     signUp: {
                       token: 'persist-token',
                       user: {
-                        id: 1,
+                        id: '1',
                         email: _variables.email,
                         name: _variables.name,
                         role: 'user',
@@ -124,7 +124,7 @@ vi.mock('../../utils/graphqlClient', () => {
                     signUp: {
                       token: 'sync-token',
                       user: {
-                        id: 1,
+                        id: '1',
                         email: _variables.email,
                         name: _variables.name,
                         role: 'user',
@@ -149,7 +149,7 @@ vi.mock('../../utils/graphqlClient', () => {
                   signUp: {
                     token: 'mock-token',
                     user: {
-                      id: 1,
+                      id: '1',
                       email: _variables.email,
                       name: _variables.name,
                       role: 'user',
@@ -212,7 +212,7 @@ describe('useAuthStore', () => {
           data: {
             signIn: {
               token: 'mock-token',
-              user: { id: 1, email: 'test@example.com', name: 'Test User' },
+              user: { id: '1', email: 'test@example.com', name: 'Test User' },
             },
           },
         }
@@ -230,7 +230,7 @@ describe('useAuthStore', () => {
         const state = useAuthStore.getState()
         expect(state.token).toBe('mock-token')
         expect(state.user).toEqual({
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Test User',
           role: 'user',
@@ -248,7 +248,7 @@ describe('useAuthStore', () => {
           data: {
             signIn: {
               token: 'mock-token',
-              user: { id: 1, email: 'test@example.com', name: 'Test User' },
+              user: { id: '1', email: 'test@example.com', name: 'Test User' },
             },
           },
         }
@@ -366,7 +366,7 @@ describe('useAuthStore', () => {
       useAuthStore.setState({
         token: 'existing-token',
         user: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Test User',
           phoneNumber: '555-123-4567',
@@ -396,7 +396,7 @@ describe('useAuthStore', () => {
           data: {
             signUp: {
               token: 'mock-token',
-              user: { id: 1, email: 'test@example.com', name: 'Test User' },
+              user: { id: '1', email: 'test@example.com', name: 'Test User' },
             },
           },
         }
@@ -419,7 +419,7 @@ describe('useAuthStore', () => {
         const state = useAuthStore.getState()
         expect(state.token).toBe('mock-token')
         expect(state.user).toEqual({
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Test User',
           role: 'user',
@@ -437,7 +437,7 @@ describe('useAuthStore', () => {
           data: {
             signUp: {
               token: 'mock-token',
-              user: { id: 1, email: 'test@example.com', name: 'Test User' },
+              user: { id: '1', email: 'test@example.com', name: 'Test User' },
             },
           },
         }
@@ -555,7 +555,7 @@ describe('useAuthStore', () => {
         data: {
           signIn: {
             token: 'mock-token',
-            user: { id: 1, email: 'test@example.com', name: 'Test User' },
+            user: { id: '1', email: 'test@example.com', name: 'Test User' },
           },
         },
       }
@@ -593,7 +593,7 @@ describe('useAuthStore', () => {
         data: {
           signIn: {
             token: 'mock-token',
-            user: { id: 1, email: 'test@example.com', name: 'Test User' },
+            user: { id: '1', email: 'test@example.com', name: 'Test User' },
           },
         },
       }
@@ -625,7 +625,11 @@ describe('useAuthStore', () => {
         data: {
           signIn: {
             token: 'persist-token',
-            user: { id: 1, email: 'persist@example.com', name: 'Persist User' },
+            user: {
+              id: '1',
+              email: 'persist@example.com',
+              name: 'Persist User',
+            },
           },
         },
       }
@@ -650,7 +654,7 @@ describe('useAuthStore', () => {
       useAuthStore.setState({
         token: 'existing-token',
         user: {
-          id: 1,
+          id: '1',
           email: 'test@example.com',
           name: 'Test User',
           phoneNumber: '555-123-4567',
@@ -681,7 +685,7 @@ describe('useAuthStore', () => {
       testStore.setState({
         token: 'restored-token',
         user: {
-          id: 1,
+          id: '1',
           email: 'restored@example.com',
           name: 'Restored User',
           phoneNumber: '555-123-4567',
@@ -692,7 +696,7 @@ describe('useAuthStore', () => {
       const state = testStore.getState()
       expect(state.token).toBe('restored-token')
       expect(state.user).toEqual({
-        id: 1,
+        id: '1',
         email: 'restored@example.com',
         name: 'Restored User',
         phoneNumber: '555-123-4567',
@@ -707,7 +711,7 @@ describe('useAuthStore', () => {
         data: {
           signIn: {
             token: 'sync-token',
-            user: { id: 1, email: 'sync@example.com', name: 'Sync User' },
+            user: { id: '1', email: 'sync@example.com', name: 'Sync User' },
           },
         },
       }
@@ -745,7 +749,7 @@ describe('useAuthStore', () => {
       useAuthStore.setState({
         token: 'existing-token',
         user: {
-          id: 1,
+          id: '1',
           email: 'current@example.com',
           name: 'Current User',
           phoneNumber: '555-123-4567',
@@ -757,7 +761,7 @@ describe('useAuthStore', () => {
 
       const user = getCurrentUser()
       expect(user).toEqual({
-        id: 1,
+        id: '1',
         email: 'current@example.com',
         name: 'Current User',
         phoneNumber: '555-123-4567',

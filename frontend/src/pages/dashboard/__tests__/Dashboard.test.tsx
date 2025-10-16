@@ -47,7 +47,7 @@ describe('Dashboard Component', () => {
       getCurrentUser: vi.fn(),
       loading: false,
       error: null,
-      user: { id: 1, email: 'test@example.com' },
+      user: { id: '1', email: 'test@example.com' },
       token: 'test-token',
     } as any)
   })
@@ -106,7 +106,7 @@ describe('Dashboard Component', () => {
     it('renders for authenticated users', () => {
       mockUseAuth.mockReturnValue({
         ...mockUseAuth(),
-        user: { id: 1, email: 'test@example.com' },
+        user: { id: '1', email: 'test@example.com' },
         token: 'test-token',
       } as any)
 
@@ -123,7 +123,7 @@ describe('Dashboard Component', () => {
       // Initially authenticated
       mockUseAuth.mockReturnValue({
         ...mockUseAuth(),
-        user: { id: 1, email: 'test@example.com' },
+        user: { id: '1', email: 'test@example.com' },
         token: 'test-token',
       } as any)
 
