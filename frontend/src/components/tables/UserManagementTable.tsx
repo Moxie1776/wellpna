@@ -22,9 +22,9 @@ export const UserManagementTable = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const { user: currentUser, updateUser } = useAuthStore()
+  const { user: currentUser } = useAuthStore()
 
-  const [{ data, fetching, error: queryError }] = useQuery({
+  const [{ data, fetching, error: queryError }, refetchUsers] = useQuery({
     query: USERS_QUERY,
   })
 
@@ -48,14 +48,17 @@ export const UserManagementTable = () => {
         return
       }
 
-      // Update the auth store if the current user changed their own role
+      // If the current user changed their own role
       if (currentUser && currentUser.id === userId) {
-        updateUser({
-          ...currentUser,
-          role: newRole,
-        })
+        // Update Zustand auth store with new user data if available
+        if (result.data?.updateUserRole) {
+          useAuthStore.getState().updateUser(result.data.updateUserRole)
+        }
+        return
       }
 
+      // For other users, refetch the users list to update the table
+      await refetchUsers({ requestPolicy: 'network-only' })
       setSuccess('User role updated successfully')
       logger.info('User role updated', { userId, newRole })
     } catch (err: any) {
