@@ -28,6 +28,7 @@ export default defineConfig([
       '**/src/assets/*',
       '**/dist/*',
       '**/logs/*',
+      '**/*.md',
     ],
   },
   ...compat.extends(

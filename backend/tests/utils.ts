@@ -1,12 +1,8 @@
-import { PrismaClient } from '../src/generated/prisma/client'
-import { signJwt } from '../src/utils/auth'
-import { hashPassword } from '../src/utils/auth'
+import { PrismaClient, User } from '../src/generated/prisma/client'
+import { yoga } from '../src/server'
 
-export interface TestUser {
-  id: string
-  email: string
-  name: string
-  role: string
+// Define a proper type for TestUser that includes JWT
+interface TestUser extends User {
   jwt: string
 }
 
@@ -22,38 +18,46 @@ export class TestUtils {
       name: string
       password: string
       role: string
+      registeredAt: Date
+      phoneNumber: string
     }> = {},
   ): Promise<TestUser> {
     const email = overrides.email || `test-${Date.now()}@example.com`
     const name = overrides.name || 'Test User'
     const password = overrides.password || 'password123'
-    const role = overrides.role || 'user'
+    // Generate a random phone number for test users
+    const phoneNumber =
+      overrides.phoneNumber ||
+      `555-${Math.floor(1000 + Math.random() * 9000)}-` +
+        `${Math.floor(1000 + Math.random() * 9000)}`
 
-    const hashedPassword = await hashPassword(password)
+    const signUpMutation = `
+      mutation SignUp($data: SignUpInput!) {
+        signUp(data: $data) {
+          token
+          user { id email name role phoneNumber registeredAt validatedAt }
+        }
+      }
+    `
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-        role,
-      },
+    const response = await yoga.fetch('http://localhost:4000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: signUpMutation,
+        variables: { data: { email, password, name, phoneNumber } },
+      }),
     })
 
-    const jwt = signJwt({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    })
-
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      jwt,
+    const result = await response.json()
+    if (result.errors) {
+      throw new Error('signUp failed: ' + JSON.stringify(result.errors))
     }
+
+    const payload = result.data.signUp
+    const user = payload.user as User
+    const jwt = payload.token as string
+    return { ...user, jwt } as TestUser
   }
 
   /**
@@ -67,19 +71,82 @@ export class TestUtils {
       role: string
     }> = {},
   ): Promise<TestUser> {
-    const user = await this.createTestUser(overrides)
+    // Create via signUp mutation
+    const created = await this.createTestUser(overrides)
 
-    // Mark as verified
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        validatedAt: new Date(),
-        verificationCode: null,
-        verificationCodeExpiresAt: null,
-      },
+    // Ensure a verification code exists; if not, trigger sendVerificationEmail
+    const dbUser = await this.prisma.user.findUnique({
+      where: { id: created.id },
+    })
+    if (!dbUser) throw new Error('User not found after signUp')
+
+    if (!dbUser.verificationCode) {
+      const sendVerificationMutation = `
+        mutation SendVerificationEmail($email: String!) {
+          sendVerificationEmail(email: $email)
+        }
+      `
+      await yoga.fetch('http://localhost:4000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: sendVerificationMutation,
+          variables: { email: created.email },
+        }),
+      })
+      // refresh
+      const refreshed = await this.prisma.user.findUnique({
+        where: { id: created.id },
+      })
+      if (refreshed) Object.assign(dbUser, refreshed)
+    }
+
+    if (!dbUser.verificationCode)
+      throw new Error('No verification code available to verify user')
+
+    const verifyMutation = `
+      mutation VerifyEmail($data: VerifyEmailInput!) {
+        verifyEmail(data: $data) {
+          token
+          user { id email name role phoneNumber registeredAt validatedAt }
+        }
+      }
+    `
+
+    const verifyResp = await yoga.fetch('http://localhost:4000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: verifyMutation,
+        variables: {
+          data: {
+            email: created.email,
+            code: dbUser.verificationCode,
+          },
+        },
+      }),
     })
 
-    return user
+    const verifyRes = await verifyResp.json()
+    if (verifyRes.errors)
+      throw new Error('verifyEmail failed: ' + JSON.stringify(verifyRes.errors))
+
+    const payload = verifyRes.data.verifyEmail
+    return { ...payload.user, jwt: payload.token } as TestUser
+  }
+
+  /**
+   * One permitted direct DB write: set a verification code for an email.
+   * Use this only when a test can't intercept/mock email delivery.
+   */
+  async setVerificationCode(email: string, code: string) {
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        verificationCode: code,
+        verificationCodeExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    })
   }
 
   /**

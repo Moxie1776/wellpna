@@ -49,17 +49,22 @@ afterAll(() => {
 vi.mock('nodemailer', () => ({
   default: {
     createTransport: vi.fn(() => {
+      // Ensure a global place to collect sent emails for tests to inspect
+      ;(global as any).sentEmails = (global as any).sentEmails || []
+
       // Create a mock transporter object
       const mockTransporter: any = {
-        sendMail: vi.fn().mockImplementation(() =>
-          Promise.resolve({
+        sendMail: vi.fn().mockImplementation((mailOptions: any) => {
+          // Push the sent email data into global.sentEmails
+          ;(global as any).sentEmails.push(mailOptions)
+          return Promise.resolve({
             messageId: 'mock-message-id',
             envelope: {
-              from: 'test@example.com',
-              to: ['user@example.com'],
+              from: mailOptions.from || 'test@example.com',
+              to: mailOptions.to || ['user@example.com'],
             },
-          }),
-        ),
+          })
+        }),
       }
       return mockTransporter
     }),
@@ -88,9 +93,12 @@ beforeAll(async () => {
 
   // Check if server is already running on port 4000
   const portInUse = await checkPortInUse(4000)
+  // Track whether this setup started the server so we only close it if started
+  ;(global as any).__testServerStartedByThisProcess = false
   if (!portInUse) {
     // Start the test server if not already running
     server.listen(4000)
+    ;(global as any).__testServerStartedByThisProcess = true
     logger.info('Started test server on port 4000')
   } else {
     logger.info('Using existing server running on port 4000')
@@ -101,7 +109,14 @@ afterAll(async () => {
   // Call the teardown script for cleanup
   const teardown = (await import('./teardown')).default
   await teardown()
-  server.close()
+  // Only close the server if this setup started it
+  if ((global as any).__testServerStartedByThisProcess) {
+    try {
+      server.close()
+    } catch (err) {
+      logger.error('Error closing test server', err)
+    }
+  }
 })
 
 export { prisma }

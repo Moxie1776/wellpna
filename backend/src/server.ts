@@ -2,29 +2,26 @@ import { createServer } from 'node:http'
 
 import {
   createInlineSigningKeyProvider,
+  extractFromHeader,
   useJWT,
 } from '@graphql-yoga/plugin-jwt'
-import dotenv from 'dotenv'
+import { config } from 'dotenv'
 import { createYoga } from 'graphql-yoga'
 
 import { prisma } from './client'
 import { schema } from './schema'
-import { JWT_SECRET } from './utils/constants'
+import { JwtUserPayload } from './utils/auth'
 import logger from './utils/logger'
 
 // Load environment variables first
-dotenv.config()
+config()
 
 export interface GraphQLContext {
   req: any
   prisma: typeof prisma
-  jwt?: any // JWT payload injected by the plugin
-  user?: {
-    id: string
-    email: string
-    name: string
-    role: string
-  }
+  jwt?: any
+  user?: JwtUserPayload // User info extracted from JWT
+  logger: typeof logger
 }
 
 // Create a Yoga instance with a GraphQL schema.
@@ -32,9 +29,28 @@ export const yoga = createYoga<GraphQLContext>({
   schema,
   graphiql: process.env.NODE_ENV === 'development' ? true : false,
   maskedErrors: false, // Show actual error messages in development/tests
+  logging: {
+    debug(message, ...args) {
+      logger.debug(message, ...args)
+    },
+    info(message, ...args) {
+      logger.info(message, ...args)
+    },
+    warn(message, ...args) {
+      logger.warn(message, ...args)
+    },
+    error(message, ...args) {
+      logger.error(message, ...args)
+    },
+  },
   plugins: [
     useJWT({
-      signingKeyProviders: [createInlineSigningKeyProvider(JWT_SECRET)],
+      signingKeyProviders: [
+        createInlineSigningKeyProvider(process.env.JWT_SECRET!),
+      ],
+      tokenLookupLocations: [
+        extractFromHeader({ name: 'authorization', prefix: 'Bearer' }),
+      ],
       tokenVerification: {
         algorithms: ['HS256'],
       },
@@ -46,11 +62,25 @@ export const yoga = createYoga<GraphQLContext>({
     }),
   ],
   context: async ({ request }) => {
-    return {
+    // Create base context
+    const context: GraphQLContext = {
       req: request,
       prisma: (global as any).testPrisma || prisma,
-      logger,
+      logger: logger,
     }
+
+    // Diagnostic logging: show incoming Authorization header and JWT payload
+    const authHeader =
+      request.headers.get('authorization') ||
+      request.headers.get('Authorization')
+    logger.debug(`Incoming Authorization header: ${authHeader}`)
+    logger.debug(
+      `Context JWT before user mapping: ${JSON.stringify(
+        (context as any).jwt?.payload || null,
+      )}`,
+    )
+
+    return context
   },
   cors: {
     origin: [

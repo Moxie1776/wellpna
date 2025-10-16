@@ -1,6 +1,6 @@
 import './global.css'
 
-import React from 'react'
+import { StrictMode, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Route, Routes } from 'react-router-dom'
@@ -11,34 +11,47 @@ import { appRoutes } from './lib/routes'
 import { ProtectedRoute } from './providers/ProtectedRouteProvider'
 import { SnackbarProvider } from './providers/SnackbarProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
+import { useAuthStore } from './store/auth'
 import { client } from './utils'
 
+function AppContent() {
+  const initializeAuth = useAuthStore((state) => state.initializeAuth)
+
+  useEffect(() => {
+    initializeAuth()
+  }, [initializeAuth])
+
+  return (
+    <Routes>
+      {appRoutes.map((route) => {
+        const element = route.page ? <route.page /> : null
+        const wrappedElement = route.requiresAuth ? (
+          <ProtectedRoute>{element}</ProtectedRoute>
+        ) : (
+          element
+        )
+        return (
+          <Route
+            key={route.href}
+            path={route.href}
+            element={<Layout>{wrappedElement}</Layout>}
+          />
+        )
+      })}
+    </Routes>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  <StrictMode>
     <BrowserRouter>
       <ThemeProvider>
         <UrqlProvider value={client}>
           <SnackbarProvider>
-            <Routes>
-              {appRoutes.map((route) => {
-                const element = route.page ? <route.page /> : null
-                const wrappedElement = route.requiresAuth ? (
-                  <ProtectedRoute>{element}</ProtectedRoute>
-                ) : (
-                  element
-                )
-                return (
-                  <Route
-                    key={route.href}
-                    path={route.href}
-                    element={<Layout>{wrappedElement}</Layout>}
-                  />
-                )
-              })}
-            </Routes>
+            <AppContent />
           </SnackbarProvider>
         </UrqlProvider>
       </ThemeProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </StrictMode>,
 )

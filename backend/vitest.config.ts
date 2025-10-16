@@ -8,6 +8,13 @@ export default defineConfig({
     exclude: ['node_modules', 'dist'],
     setupFiles: ['tests/setup.ts'],
     testTimeout: 10000,
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        maxThreads: 1,
+        minThreads: 1,
+      },
+    },
     coverage: {
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.d.ts', 'src/generated/**'],

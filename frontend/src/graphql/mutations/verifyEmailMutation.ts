@@ -1,8 +1,8 @@
 import { gql } from 'urql'
 
 export const VERIFY_EMAIL_MUTATION = gql`
-  mutation VerifyEmail($email: String!, $code: String!) {
-    verifyEmail(email: $email, code: $code) {
+  mutation VerifyEmail($data: VerifyEmailInput!) {
+    verifyEmail(data: $data) {
       token
       user {
         id

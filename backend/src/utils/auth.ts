@@ -3,11 +3,12 @@ import jwt from 'jsonwebtoken'
 
 import { JWT_SECRET } from './constants'
 
-export interface JwtPayload {
+export interface JwtUserPayload {
   id: string
   email: string
   name: string
   role: string
+  phoneNumber: string
 }
 
 export const hashPassword = async (password: string): Promise<string> => {
@@ -25,9 +26,9 @@ export const signJwt = (payload: object, options?: jwt.SignOptions) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '14d', ...options })
 }
 
-export const verifyToken = (token: string): JwtPayload => {
+export const verifyToken = (token: string): JwtUserPayload => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtUserPayload
     return decoded
   } catch {
     throw new Error('Invalid token')

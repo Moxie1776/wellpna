@@ -19,8 +19,10 @@ const EmailVerificationPage = () => {
     try {
       const result = await client
         .mutation(VERIFY_EMAIL_MUTATION, {
-          email: values.email,
-          code: values.code,
+          data: {
+            email: values.email,
+            code: values.code,
+          },
         })
         .toPromise()
 

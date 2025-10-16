@@ -33,8 +33,10 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
 
     try {
       const result = await updateUser({
-        name: name.trim(),
-        phoneNumber: phoneNumber.trim(),
+        data: {
+          name: name.trim(),
+          phoneNumber: phoneNumber.trim(),
+        },
       })
 
       if (result.error) {

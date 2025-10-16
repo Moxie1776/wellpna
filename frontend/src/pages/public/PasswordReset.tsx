@@ -62,8 +62,10 @@ const PasswordResetPage = () => {
     try {
       const result = await client
         .mutation(RESET_PASSWORD_MUTATION, {
-          code: values.code,
-          newPassword: values.newPassword,
+          data: {
+            code: values.code,
+            newPassword: values.newPassword,
+          },
         })
         .toPromise()
 

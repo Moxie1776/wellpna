@@ -2,10 +2,10 @@ import { FormControl, Option, Select, Table, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useMutation, useQuery } from 'urql'
 
-import {
-  UPDATE_USER_ROLE_MUTATION,
-} from '../../graphql/mutations/updateUserRoleMutation'
+// eslint-disable-next-line max-len
+import { UPDATE_USER_ROLE_MUTATION } from '../../graphql/mutations/updateUserRoleMutation'
 import { USERS_QUERY } from '../../graphql/queries/usersQuery'
+import { useAuthStore } from '../../store/auth'
 import logger from '../../utils/logger'
 
 interface User {
@@ -22,6 +22,8 @@ export const UserManagementTable = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  const { user: currentUser, updateUser } = useAuthStore()
+
   const [{ data, fetching, error: queryError }] = useQuery({
     query: USERS_QUERY,
   })
@@ -35,13 +37,23 @@ export const UserManagementTable = () => {
 
     try {
       const result = await updateUserRole({
-        userId,
-        role: newRole,
+        data: {
+          userId,
+          role: newRole,
+        },
       })
 
       if (result.error) {
         setError(result.error.message || 'Failed to update user role')
         return
+      }
+
+      // Update the auth store if the current user changed their own role
+      if (currentUser && currentUser.id === userId) {
+        updateUser({
+          ...currentUser,
+          role: newRole,
+        })
       }
 
       setSuccess('User role updated successfully')

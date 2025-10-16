@@ -1,8 +1,8 @@
 import { gql } from 'urql'
 
 export const RESET_PASSWORD_MUTATION = gql`
-  mutation ResetPassword($code: String!, $newPassword: String!) {
-    resetPassword(code: $code, newPassword: $newPassword) {
+  mutation ResetPassword($data: ResetPasswordInput!) {
+    resetPassword(data: $data) {
       token
       user {
         id

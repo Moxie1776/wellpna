@@ -2,13 +2,13 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
-import { SIGN_IN_QUERY } from '../graphql/queries/signInQuery'
 import client from '../utils/graphqlClient'
-import { isValidToken } from '../utils/jwt'
+import { decodeToken, isValidToken } from '../utils/jwt'
 import logger from '../utils/logger'
+import { SIGN_IN_MUTATION } from './../graphql/mutations/signInMutation'
 
 interface User {
-  id: number
+  id: string
   email: string
   name: string
   phoneNumber: string
@@ -22,6 +22,7 @@ interface AuthState {
   error: string | null
   setAuth: (token: string, user: User) => void
   clearAuth: () => void
+  updateUser: (user: User) => void
   signIn: (email: string, password: string) => Promise<any>
   signOut: () => void
   signUp: (
@@ -34,6 +35,7 @@ interface AuthState {
   isTokenValid: () => boolean
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
+  initializeAuth: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -44,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
       loading: false,
       error: null,
       setAuth: (token, user) => set({ token, user }),
+      updateUser: (user) => set({ user }),
       clearAuth: () => set({ token: null, user: null }),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
@@ -62,9 +65,13 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         set({ loading: true, error: null })
         try {
-          // Use mutation to align with tests which mock `client.mutation`.
           const result = await client
-            .mutation(SIGN_IN_QUERY, { email, password })
+            .mutation(SIGN_IN_MUTATION, {
+              data: {
+                email,
+                password,
+              },
+            })
             .toPromise()
           if (result.error) {
             set({
@@ -104,10 +111,12 @@ export const useAuthStore = create<AuthState>()(
         try {
           const result = await client
             .mutation(SIGN_UP_MUTATION, {
-              email,
-              password,
-              name,
-              phoneNumber,
+              data: {
+                email,
+                password,
+                name,
+                phoneNumber,
+              },
             })
             .toPromise()
           if (result.error) {
@@ -132,6 +141,23 @@ export const useAuthStore = create<AuthState>()(
             loading: false,
           })
           return null
+        }
+      },
+      initializeAuth: () => {
+        const token = localStorage.getItem('token')
+        if (token && isValidToken(token)) {
+          const decoded = decodeToken(token)
+          if (decoded && typeof decoded === 'object') {
+            // Extract user info from JWT payload
+            const user: User = {
+              id: decoded.id,
+              email: decoded.email,
+              name: decoded.name,
+              phoneNumber: decoded.phoneNumber,
+              role: decoded.role,
+            }
+            set({ token, user })
+          }
         }
       },
     }),
