@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Moxie1776/wellpna/compare/v1.1.0...v1.2.0) (2025-10-17)
+
+
+### Features
+
+* implement TypeScript integration for GraphQL operations ([85d6dfc](https://github.com/Moxie1776/wellpna/commit/85d6dfcf52ebdd10c8d0db10f86d7297ec5cfd2d))
+
 # [1.1.0](https://github.com/Moxie1776/wellpna/compare/v1.0.0...v1.1.0) (2025-10-16)
 
 
