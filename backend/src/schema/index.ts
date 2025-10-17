@@ -24,4 +24,12 @@ import '../graphql/mutations/auth'
 
 // Export the schema
 import { builder } from '../builder'
+import { writeFileSync } from 'fs'
+import { printSchema } from 'graphql'
+
 export const schema = builder.toSchema({})
+
+// Export schema as SDL for frontend codegen
+const schemaSDL = printSchema(schema)
+writeFileSync('./src/generated/schema.graphql', schemaSDL)
+console.log('Schema exported to ./src/generated/schema.graphql')
