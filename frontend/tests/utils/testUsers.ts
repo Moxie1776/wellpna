@@ -3,22 +3,10 @@ import { SIGN_IN_MUTATION } from '../../src/graphql/mutations/signInMutation'
 import { VERIFY_EMAIL_MUTATION } from '../../src/graphql/mutations/verifyEmailMutation'
 import { GET_VERIFICATION_CODE_QUERY } from '../../src/graphql/queries/getVerificationCodeQuery'
 import { USERS_QUERY } from '../../src/graphql/queries/usersQuery'
+import { User, AuthResponse } from '../../src/graphql'
 
-// Import existing types from auth store
-type User = {
-  id: string
-  email: string
-  name: string
-  phoneNumber: string
-  role: string
-}
-
-type AuthResponse = {
-  token: string
-  user: User
-}
-
-type TestUserSession = {
+// Test-specific type for managing test user sessions
+interface TestUserSession {
   user: User
   token: string
   email: string
@@ -245,7 +233,8 @@ export async function cleanupTestUsers(
     }
 
     const usersToDelete = result.users.filter(
-      (user: User & { registeredAt: string }) => user.email.endsWith(pattern),
+      (user: User & { registeredAt: string }) =>
+        user.email.endsWith(pattern),
     )
 
     if (usersToDelete.length === 0) {

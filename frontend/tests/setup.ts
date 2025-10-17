@@ -1,7 +1,8 @@
+import '@testing-library/jest-dom'
+
+import { act } from '@testing-library/react'
 import { createServer } from 'net'
 import { afterAll, beforeAll, vi } from 'vitest'
-import '@testing-library/jest-dom'
-import { act } from '@testing-library/react'
 
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))

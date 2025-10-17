@@ -1,11 +1,4 @@
-/**
- * Decoded JWT token payload interface
- */
-interface DecodedToken {
-  [key: string]: any
-  exp?: number
-  iat?: number
-}
+import { DecodedToken } from '../graphql'
 
 /**
  * Decodes a JWT token and returns the payload

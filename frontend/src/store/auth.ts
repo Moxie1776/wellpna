@@ -1,42 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { AuthState,User } from '../graphql'
 import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
 import client from '../utils/graphqlClient'
 import { decodeToken, isValidToken } from '../utils/jwt'
 import logger from '../utils/logger'
 import { SIGN_IN_MUTATION } from './../graphql/mutations/signInMutation'
-
-export interface User {
-  id: string
-  email: string
-  name: string
-  phoneNumber: string
-  role: string
-}
-
-export interface AuthState {
-  token: string | null
-  user: User | null
-  loading: boolean
-  error: string | null
-  setAuth: (token: string, user: User) => void
-  clearAuth: () => void
-  updateUser: (user: User) => void
-  signIn: (email: string, password: string) => Promise<any>
-  signOut: () => void
-  signUp: (
-    email: string,
-    password: string,
-    name: string,
-    phoneNumber: string,
-  ) => Promise<any>
-  getCurrentUser: () => User | null
-  isTokenValid: () => boolean
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-  initializeAuth: () => void
-}
 
 export const useAuthStore = create<AuthState>()(
   persist(

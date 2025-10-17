@@ -1,6 +1,19 @@
-import { gql } from 'urql'
+import { gql, TypedDocumentNode } from '@urql/core'
+import { AuthResponse } from '../types'
 
-export const SIGN_IN_MUTATION = gql`
+interface SignInInput {
+  email: string
+  password: string
+}
+
+interface SignInMutationResponse {
+  signIn: AuthResponse
+}
+
+export const SIGN_IN_MUTATION: TypedDocumentNode<
+  SignInMutationResponse,
+  { data: SignInInput }
+> = gql`
   mutation SignIn($data: SignInInput!) {
     signIn(data: $data) {
       token

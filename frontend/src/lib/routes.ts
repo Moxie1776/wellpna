@@ -25,13 +25,13 @@ import {
 
 import { Admin as AdminPage } from '../pages/admin/Admin'
 import { Dashboard } from '../pages/dashboard/Dashboard'
+import Forbidden from '../pages/errors/Forbidden'
+import NotFound from '../pages/errors/NotFound'
+import ServerError from '../pages/errors/ServerError'
 import { Profile as ProfilePage } from '../pages/profile/Profile'
 import EmailVerificationPage from '../pages/public/EmailVerification'
-import Forbidden from '../pages/errors/Forbidden'
 import HomePage from '../pages/public/Home'
-import NotFound from '../pages/errors/NotFound'
 import PasswordResetPage from '../pages/public/PasswordReset'
-import ServerError from '../pages/errors/ServerError'
 import SignInPage from '../pages/public/SignIn'
 import SignupPage from '../pages/public/SignUp'
 

@@ -1,6 +1,19 @@
-import { gql } from 'urql'
+import { gql, TypedDocumentNode } from '@urql/core'
+import { AuthResponse } from '../types'
 
-export const VERIFY_EMAIL_MUTATION = gql`
+interface VerifyEmailInput {
+  email: string
+  code: string
+}
+
+interface VerifyEmailMutationResponse {
+  verifyEmail: AuthResponse
+}
+
+export const VERIFY_EMAIL_MUTATION: TypedDocumentNode<
+  VerifyEmailMutationResponse,
+  { data: VerifyEmailInput }
+> = gql`
   mutation VerifyEmail($data: VerifyEmailInput!) {
     verifyEmail(data: $data) {
       token
