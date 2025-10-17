@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Moxie1776/wellpna/compare/v1.2.0...v1.3.0) (2025-10-17)
+
+
+### Features
+
+* set up GraphQL code generation for type-safe operations ([c3546e6](https://github.com/Moxie1776/wellpna/commit/c3546e6fd6324b7ae783e0f6baa538798d32b26d))
+
 # [1.2.0](https://github.com/Moxie1776/wellpna/compare/v1.1.0...v1.2.0) (2025-10-17)
 
 
