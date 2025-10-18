@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "npm -s run generate && tsc && npx tsc-esm-fix dist && npm run build:schema && node scripts/fix-prisma-client.cjs",
-    "build:schema": "tsx src/schema/index.ts",
+    "build:schema": "tsx src/schema/build-schema.ts",
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
     "generate": "prisma generate",

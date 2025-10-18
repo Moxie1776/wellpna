@@ -56,6 +56,31 @@ export const UpdateUserRoleInput = builder.inputType('UpdateUserRoleInput', {
 })
 
 builder.mutationFields((t) => ({
+  cleanupTestUsers: t.field({
+    type: 'Int',
+    args: {
+      pattern: t.arg.string({ defaultValue: '@example.com' }),
+    },
+    resolve: async (_root, args, ctx: any) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('cleanupTestUsers is unavailable')
+      }
+      const db = ctx?.prisma || prisma
+      // Delete all users with emails ending in the pattern
+      const result = await db.user.deleteMany({
+        where: {
+          email: {
+            endsWith: args.pattern,
+          },
+        },
+      })
+      logger.info(
+        `Cleaned up ${result.count} test users with pattern ${args.pattern}`,
+      )
+      return result.count
+    },
+  }),
+
   signIn: t.field({
     type: AuthPayload,
     args: {
@@ -319,11 +344,9 @@ builder.mutationFields((t) => ({
       const db = ctx?.prisma || prisma
       if (!['user', 'admin'].includes(args.data.role))
         throw new Error('Invalid role')
-      const updatedUser = await db.$transaction(async (tx: typeof db) => {
-        return await tx.user.update({
-          where: { id: args.data.userId },
-          data: { role: args.data.role },
-        })
+      const updatedUser = await db.user.update({
+        where: { id: args.data.userId },
+        data: { role: args.data.role },
       })
       return updatedUser
     },

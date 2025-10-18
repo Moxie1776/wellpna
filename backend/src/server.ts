@@ -1,4 +1,7 @@
 import { createServer } from 'node:http'
+import { readFileSync } from 'fs'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 
 import {
   createInlineSigningKeyProvider,
@@ -95,7 +98,28 @@ export const yoga = createYoga<GraphQLContext>({
 })
 
 // Pass it into a server to hook into request handlers.
-export const server = createServer(yoga)
+// Create a server that serves the GraphQL endpoint and a simple /api/schema
+export const server = createServer((req, res) => {
+  const url = req.url || '/'
+  if (url.startsWith('/api/schema')) {
+    try {
+      // Require printSchema at runtime from the resolved graphql instance
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { printSchema: runtimePrint } = require('graphql')
+      const sdl = runtimePrint(schema)
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(sdl)
+      return
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' })
+      res.end('Failed to generate schema')
+      return
+    }
+  }
+
+  // Delegate to Yoga for everything else
+  ;(yoga as any).handle(req, res)
+})
 
 // Start the server and you're done!
 // Only start if this file is run directly (not imported)

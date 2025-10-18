@@ -31,7 +31,7 @@ class DailyLevelFileTransport extends Transport {
 
     fs.appendFile(filename, logEntry, (err) => {
       if (err) {
-        console.error('Failed to write log:', err)
+        process.stderr.write('Failed to write log: ' + String(err) + '\n')
       }
     })
 

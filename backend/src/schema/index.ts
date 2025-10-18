@@ -22,14 +22,9 @@ import '../graphql/queries/auth'
 // Import all mutations
 import '../graphql/mutations/auth'
 
-// Export the schema
+// Export the schema (ESM-friendly)
 import { builder } from '../builder'
-import { writeFileSync } from 'fs'
-import { printSchema } from 'graphql'
 
+// Export Pothos schema only. Codegen (writing SDL) is performed by a separate
+// build script to avoid side-effects during module import in tests.
 export const schema = builder.toSchema({})
-
-// Export schema as SDL for frontend codegen
-const schemaSDL = printSchema(schema)
-writeFileSync('./src/generated/schema.graphql', schemaSDL)
-console.log('Schema exported to ./src/generated/schema.graphql')

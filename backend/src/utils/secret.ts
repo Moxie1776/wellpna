@@ -14,6 +14,7 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager'
+import logger from './logger'
 
 class SecretsManager {
   private secretsManager: SecretsManagerClient
@@ -35,7 +36,7 @@ class SecretsManager {
     }
 
     try {
-      console.log(`Fetching secret: ${secretName}`)
+      logger.debug(`Fetching secret: ${secretName}`)
       const command = new GetSecretValueCommand({
         SecretId: secretName,
       })
@@ -50,7 +51,7 @@ class SecretsManager {
 
       return secretData
     } catch (error) {
-      console.error('Error retrieving secret:', error)
+      logger.error('Error retrieving secret:', error)
       throw error
     }
   }
