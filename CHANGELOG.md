@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Moxie1776/wellpna/compare/v1.3.0...v1.3.1) (2025-10-18)
+
+
+### Bug Fixes
+
+* **schema:** avoid graphql realm conflicts; add ESM-safe schema build and /api/schema endpoint; add debug-only cleanupTestUsers; centralize logging ([9eb76cc](https://github.com/Moxie1776/wellpna/commit/9eb76ccc762fc36bf3e4842920b26501dd4d8076))
+
 # [1.3.0](https://github.com/Moxie1776/wellpna/compare/v1.2.0...v1.3.0) (2025-10-17)
 
 
