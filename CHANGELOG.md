@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/Moxie1776/wellpna/compare/v1.3.1...v1.4.0) (2025-10-19)
+
+
+### Features
+
+* Add comprehensive route protection testing ([b1ceaad](https://github.com/Moxie1776/wellpna/commit/b1ceaadaa782a8a6490d760453af42083a41d562))
+
 ## [1.3.1](https://github.com/Moxie1776/wellpna/compare/v1.3.0...v1.3.1) (2025-10-18)
 
 
