@@ -1,5 +1,7 @@
 import React, { Component, ReactNode } from 'react'
 
+import ServerError from '../pages/errors/ServerError'
+
 interface Props {
   children: ReactNode
 }
@@ -25,9 +27,6 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       // Render the ServerError component
-      const ServerError = React.lazy(
-        () => import('../pages/errors/ServerError'),
-      )
       return <ServerError />
     }
 

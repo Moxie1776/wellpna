@@ -1,9 +1,9 @@
 import { writeFileSync } from 'fs'
+import { printSchema } from 'graphql'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { printSchema } from 'graphql'
-import logger from '../utils/logger'
 
+import logger from '../utils/logger'
 // Import schema after graphql resolved
 import { schema } from '.'
 

@@ -1,7 +1,4 @@
 import { createServer } from 'node:http'
-import { readFileSync } from 'fs'
-import { dirname, resolve } from 'path'
-import { fileURLToPath } from 'url'
 
 import {
   createInlineSigningKeyProvider,
@@ -9,6 +6,7 @@ import {
   useJWT,
 } from '@graphql-yoga/plugin-jwt'
 import { config } from 'dotenv'
+import { readFileSync } from 'fs'
 import { createYoga } from 'graphql-yoga'
 
 import { prisma } from './client'
@@ -103,16 +101,14 @@ export const server = createServer((req, res) => {
   const url = req.url || '/'
   if (url.startsWith('/api/schema')) {
     try {
-      // Require printSchema at runtime from the resolved graphql instance
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { printSchema: runtimePrint } = require('graphql')
-      const sdl = runtimePrint(schema)
+      // Serve the pre-generated schema file
+      const sdl = readFileSync('./generated/schema.graphql', 'utf8')
       res.writeHead(200, { 'Content-Type': 'text/plain' })
       res.end(sdl)
       return
-    } catch (e) {
+    } catch {
       res.writeHead(500, { 'Content-Type': 'text/plain' })
-      res.end('Failed to generate schema')
+      res.end('Failed to load schema')
       return
     }
   }

@@ -14,6 +14,7 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager'
+
 import logger from './logger'
 
 class SecretsManager {

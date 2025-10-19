@@ -43,7 +43,8 @@ class EmailService {
     // In debug mode, don't actually send emails to avoid failures in tests
     if (process.env.NODE_ENV === 'debug') {
       console.log(
-        `[DEBUG] Would send verification email to ${email} with code ${verificationCode}`,
+        `[DEBUG] Would send verification email to ${email} ` +
+          `with code ${verificationCode}`,
       )
       return
     }
@@ -82,7 +83,8 @@ class EmailService {
     // In debug mode, don't actually send emails to avoid failures in tests
     if (process.env.NODE_ENV === 'debug') {
       console.log(
-        `[DEBUG] Would send password reset email to ${email} with code ${resetCode}`,
+        `[DEBUG] Would send password reset email to ${email} ` +
+          `with code ${resetCode}`,
       )
       return
     }

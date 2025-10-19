@@ -21,9 +21,6 @@ interface TestUserSession {
 // Global test user sessions storage
 const testUserSessions = new Map<string, TestUserSession>()
 
-// Queue for cleanup patterns. Tests should enqueue patterns to avoid
-// deleting users while other tests are running. The queued cleanups are
-// executed once in global teardown.
 const cleanupQueue = new Set<string>()
 
 /**
@@ -200,98 +197,37 @@ export async function createTestUser(
               debugVerifyUser(email: $email)
             }
           `
-
-          // Try the debug verify mutation a few times with backoff — the
-          // backend may take a short moment to expose debug-only helpers
-          // after a new user is created.
           let debugVerified = false
           for (let vAttempt = 1; vAttempt <= 3; vAttempt++) {
-            try {
-              const verifyResult = await executeGraphQL(
-                verifyMutation,
-                { email },
-                undefined,
-                { retries: 1, timeoutMs: 1500 },
-              )
-              if (verifyResult?.debugVerifyUser) {
-                debugVerified = true
-                break
-              }
-            } catch (e) {
-              // ignore and retry
+            const verifyResult = await executeGraphQL(
+              verifyMutation,
+              { email },
+              undefined,
+              { retries: 1, timeoutMs: 1500 },
+            )
+            if (verifyResult?.debugVerifyUser) {
+              debugVerified = true
+              break
             }
 
             await new Promise((r) => setTimeout(r, 200 * vAttempt))
           }
 
           if (debugVerified) {
-            // debug verify succeeded — sign in to obtain a token for the session
-            try {
-              const signInResp = await signInTestUser(email, password)
-              // update stored session with fresh token
-              testUserSessions.set(email, {
-                user: signInResp.user,
-                token: signInResp.token,
-                email,
-              })
-            } catch (siErr) {
-              // If sign in fails, ignore — session may remain without token
-            }
+            const signInResp = await signInTestUser(email, password)
+            // update stored session with fresh token
+            testUserSessions.set(email, {
+              user: signInResp.user,
+              token: signInResp.token,
+              email,
+            })
           } else {
             // Fallback to code-based verification
             const verificationCode = await getVerificationCode(email)
             if (verificationCode) {
               try {
                 await verifyTestUser(email, verificationCode)
-              } catch (verifyErr) {
-                // If verification by code failed, try forcing debug verify and sign in
-                try {
-                  const fallback = await executeGraphQL(
-                    verifyMutation,
-                    { email },
-                    undefined,
-                    { retries: 1, timeoutMs: 1500 },
-                  )
-                  if (fallback?.debugVerifyUser) {
-                    const signInResp = await signInTestUser(email, password)
-                    testUserSessions.set(email, {
-                      user: signInResp.user,
-                      token: signInResp.token,
-                      email,
-                    })
-                  }
-                } catch (e) {
-                  // ignore
-                }
-              }
-            } else {
-              // getVerificationCode returned empty string indicating debug verify
-              try {
-                const signInResp = await signInTestUser(email, password)
-                testUserSessions.set(email, {
-                  user: signInResp.user,
-                  token: signInResp.token,
-                  email,
-                })
-              } catch (siErr) {
-                // ignore
-              }
-            }
-          }
-        } catch (err) {
-          // If debug mutation failed, try code-based flow
-          const verificationCode = await getVerificationCode(email)
-          if (verificationCode) {
-            try {
-              await verifyTestUser(email, verificationCode)
-            } catch (verifyErr) {
-              // try forcing debug verify and sign in
-              try {
-                const verifyMutation = `
-                  mutation DebugVerifyUser($email: String!) {
-                    debugVerifyUser(email: $email)
-                  }
-                `
+              } catch {
                 const fallback = await executeGraphQL(
                   verifyMutation,
                   { email },
@@ -306,38 +242,67 @@ export async function createTestUser(
                     email,
                   })
                 }
-              } catch (e) {
-                // ignore
               }
+            } else {
+              const signInResp = await signInTestUser(email, password)
+              testUserSessions.set(email, {
+                user: signInResp.user,
+                token: signInResp.token,
+                email,
+              })
             }
-          } else {
-            // If no code could be retrieved, try forcing debug verify and sign in
+          }
+        } catch {
+          // If debug mutation failed, try code-based flow
+          const verificationCode = await getVerificationCode(email)
+          if (verificationCode) {
             try {
+              await verifyTestUser(email, verificationCode)
+            } catch {
+              // try forcing debug verify and sign in
+
               const verifyMutation = `
-                mutation DebugVerifyUser($email: String!) {
-                  debugVerifyUser(email: $email)
-                }
-              `
-              const verifyResult2 = await executeGraphQL(
+                  mutation DebugVerifyUser($email: String!) {
+                    debugVerifyUser(email: $email)
+                  }
+                `
+              const fallback = await executeGraphQL(
                 verifyMutation,
                 { email },
                 undefined,
                 { retries: 1, timeoutMs: 1500 },
               )
-              if (verifyResult2?.debugVerifyUser) {
-                try {
-                  const signInResp = await signInTestUser(email, password)
-                  testUserSessions.set(email, {
-                    user: signInResp.user,
-                    token: signInResp.token,
-                    email,
-                  })
-                } catch (siErr) {
-                  // ignore
-                }
+              if (fallback?.debugVerifyUser) {
+                const signInResp = await signInTestUser(email, password)
+                testUserSessions.set(email, {
+                  user: signInResp.user,
+                  token: signInResp.token,
+                  email,
+                })
               }
-            } catch (e) {
-              // ignore
+            }
+          } else {
+            // If no code could be retrieved, try forcing debug verify
+            // and sign in
+
+            const verifyMutation = `
+                mutation DebugVerifyUser($email: String!) {
+                  debugVerifyUser(email: $email)
+                }
+              `
+            const verifyResult2 = await executeGraphQL(
+              verifyMutation,
+              { email },
+              undefined,
+              { retries: 1, timeoutMs: 1500 },
+            )
+            if (verifyResult2?.debugVerifyUser) {
+              const signInResp = await signInTestUser(email, password)
+              testUserSessions.set(email, {
+                user: signInResp.user,
+                token: signInResp.token,
+                email,
+              })
             }
           }
         }
@@ -350,7 +315,9 @@ export async function createTestUser(
     return authResponse
   } catch (error) {
     throw new Error(
-      `Failed to create test user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to create test user: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     )
   }
 }
@@ -365,63 +332,52 @@ export async function getVerificationCode(email: string): Promise<string> {
   let lastErr: unknown = null
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      const result = await executeGraphQL(GetVerificationCodeDocument, {
-        email,
-      })
+    const result = await executeGraphQL(GetVerificationCodeDocument, {
+      email,
+    })
 
-      if (result?.getVerificationCode) {
-        return result.getVerificationCode
-      }
-
-      // If the debug query explicitly reports user not found, retry a few
-      // times because user creation propagation to the debug query may be
-      // slightly delayed.
-      if (result && (result as any).errors) {
-        lastErr = (result as any).errors[0]
-      }
-
-      // small backoff before next attempt
-
-      await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
-    } catch (err) {
-      lastErr = err
-      // If this was the last attempt, we'll fallthrough to the debugVerifyUser
-      // fallback below.
-      if (attempt < MAX_ATTEMPTS) {
-        await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
-        continue
-      }
+    if (result?.getVerificationCode) {
+      return result.getVerificationCode
     }
+
+    // If the debug query explicitly reports user not found, retry a few
+    // times because user creation propagation to the debug query may be
+    // slightly delayed.
+    if (result && (result as any).errors) {
+      lastErr = (result as any).errors[0]
+    }
+
+    // small backoff before next attempt
+
+    await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
   }
 
   // As a last resort attempt to force-verify the user in debug mode. If the
   // backend marks the user verified, return an empty string to indicate that
   // no code is required.
-  try {
-    const verifyMutation = `
+
+  const verifyMutation = `
       mutation DebugVerifyUser($email: String!) {
         debugVerifyUser(email: $email)
       }
     `
-    const verifyResult = await executeGraphQL(
-      verifyMutation,
-      { email },
-      undefined,
-      {
-        retries: 1,
-        timeoutMs: 1500,
-      },
-    )
-    if (verifyResult?.debugVerifyUser) {
-      return ''
-    }
-  } catch (err) {
-    // ignore and throw a clearer error below
+  const verifyResult = await executeGraphQL(
+    verifyMutation,
+    { email },
+    undefined,
+    {
+      retries: 1,
+      timeoutMs: 1500,
+    },
+  )
+  if (verifyResult?.debugVerifyUser) {
+    return ''
   }
 
   throw new Error(
-    `Failed to get verification code: ${lastErr instanceof Error ? lastErr.message : String(lastErr)}`,
+    `Failed to get verification code: ${
+      lastErr instanceof Error ? lastErr.message : String(lastErr)
+    }`,
   )
 }
 
@@ -458,7 +414,9 @@ export async function verifyTestUser(
     return authResponse
   } catch (error) {
     throw new Error(
-      `Failed to verify test user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to verify test user: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     )
   }
 }
@@ -496,20 +454,24 @@ export async function signInTestUser(
     return authResponse
   } catch (error) {
     throw new Error(
-      `Failed to sign in test user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to sign in test user: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     )
   }
 }
 
 /**
- * Remove test users by email pattern (@example.com) to maintain clean test database state
+ * Remove test users by email pattern (@example.com) to maintain
+ * clean test database state
  */
 export async function cleanupTestUsers(
   pattern: string = '@example.com',
 ): Promise<void> {
   try {
-    // Call the backend debug mutation which deletes test users matching the pattern.
-    // This mutation is guarded by NODE_ENV === 'debug' on the backend.
+    // Call the backend debug mutation which deletes test users
+    // matching the pattern. This mutation is guarded by
+    // NODE_ENV === 'debug' on the backend.
     const mutation = `
       mutation CleanupTestUsers($pattern: String!) {
         cleanupTestUsers(pattern: $pattern)
@@ -529,7 +491,9 @@ export async function cleanupTestUsers(
     }
   } catch (error) {
     console.warn(
-      `Failed to cleanup test users: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to cleanup test users: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     )
     // Don't throw error for cleanup failures
   }

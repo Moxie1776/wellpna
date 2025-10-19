@@ -1,4 +1,5 @@
 import logger from 'src/utils/logger'
+
 import { builder } from '../../builder'
 import { prisma } from '../../client'
 import { comparePassword, signJwt } from '../../utils/auth'
@@ -75,7 +76,7 @@ builder.queryFields((t) => ({
     },
   }),
 
-  // Debug query to get password reset code for testing (only works in debug mode)
+  // Debug query to get password reset code for testing (debug mode only)
   getPasswordResetCode: t.field({
     type: 'String',
     args: {

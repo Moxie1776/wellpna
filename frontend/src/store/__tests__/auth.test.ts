@@ -30,8 +30,7 @@ describe('useAuthStore', () => {
     vi.stubGlobal('localStorage', localStorageMock)
 
     // Import the store after stubbing localStorage
-     
-     
+
     const mod = await import('../auth')
     useAuthStore = mod.useAuthStore
     vi.clearAllMocks()
@@ -51,7 +50,7 @@ describe('useAuthStore', () => {
     // global teardown.
     try {
       enqueueCleanup('@example.com')
-    } catch (e) {
+    } catch {
       // ignore
     }
   })

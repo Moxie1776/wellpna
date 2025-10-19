@@ -9,7 +9,8 @@ export default async function teardown() {
 
   try {
     // Use GraphQL debug mutation for cleanup instead of direct Prisma access
-    const GRAPHQL_ENDPOINT = process.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
+    const GRAPHQL_ENDPOINT =
+      process.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
     
     const mutation = `
       mutation CleanupTestUsers($pattern: String!) {
@@ -42,6 +43,10 @@ export default async function teardown() {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
   } catch (error) {
-    logger.info(`Global teardown: Cleanup failed - ${error instanceof Error ? error.message : 'Unknown error'}`)
+    logger.info(
+      `Global teardown: Cleanup failed - ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    )
   }
 }

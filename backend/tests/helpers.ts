@@ -78,7 +78,9 @@ export async function createTestUserAndJwt(
     })
     const codeResult = await codeResponse.json()
     if (codeResult.errors) {
-      throw new Error('Failed to get verification code: ' + JSON.stringify(codeResult.errors))
+      throw new Error(
+        'Failed to get verification code: ' + JSON.stringify(codeResult.errors),
+      )
     }
 
     const code = codeResult.data.getVerificationCode

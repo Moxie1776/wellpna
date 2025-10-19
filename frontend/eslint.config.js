@@ -81,7 +81,12 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/__tests__/**/*.{js,ts,tsx}', '**/*.md'],
+    files: [
+      '**/__tests__/**/*.{js,ts,tsx}',
+      '**/*.md',
+      '**/src/graphql/generated/graphql.ts',
+      '**/src/graphql/mutations/index.ts',
+    ],
     rules: {
       'max-len': 'off',
     },

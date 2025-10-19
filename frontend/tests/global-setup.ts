@@ -1,4 +1,5 @@
-// Global setup for Vitest: set env vars, wait for GraphQL probe, and run queued cleanups at teardown.
+// Global setup for Vitest: set env vars, wait for GraphQL probe,
+// and run queued cleanups at teardown.
 
 import { logger } from '../src/utils'
 
@@ -18,7 +19,7 @@ async function probeGraphQL(url: string): Promise<boolean> {
       body: JSON.stringify({ query: '{ __typename }' }),
     })
     return res.ok
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -46,20 +47,20 @@ export default async function globalSetup() {
       await utils.runQueuedCleanups()
       logger.debug('Ran initial test user cleanup')
     }
-  } catch (e) {
+  } catch {
     // best-effort
   }
 
   return async function globalTeardown() {
     try {
-      // Import dynamically to avoid pulling test helper bundles into transform step.
+      // Import dynamically to avoid pulling test helper bundles transform step.
       const utils = await import('./utils/testUsers')
       if (utils && typeof utils.runQueuedCleanups === 'function') {
         await utils.runQueuedCleanups()
 
         logger.debug('Ran queued test user cleanups')
       }
-    } catch (e) {
+    } catch {
       // best-effort teardown
     }
   }
