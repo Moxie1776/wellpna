@@ -49,12 +49,12 @@ declare global {
 }
 globalThis.act = act
 
-// Suppress console.log and console.error in tests globally
+// Suppress logger.debug and console.error in tests globally
 // Use logger.info, logger.debug, etc. for debugging instead
-const originalLog = console.log
+const originalLog = logger.debug
 const originalError = console.error
 beforeAll(() => {
-  console.log = vi.fn()
+  logger.debug = vi.fn()
   console.error = (...args) => {
     // Allow specific important errors but suppress React act() warnings
     if (
@@ -70,7 +70,7 @@ beforeAll(() => {
 })
 
 afterAll(() => {
-  console.log = originalLog
+  logger.debug = originalLog
   console.error = originalError
 })
 declare let global: typeof globalThis

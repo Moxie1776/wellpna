@@ -1,12 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { AuthState,User } from '../graphql'
-import { SIGN_UP_MUTATION } from '../graphql/mutations/signUpMutation'
+import { AuthState, User } from '../graphql'
+import { SignInDocument, SignUpDocument } from '../graphql/generated/graphql'
 import client from '../utils/graphqlClient'
 import { decodeToken, isValidToken } from '../utils/jwt'
 import logger from '../utils/logger'
-import { SIGN_IN_MUTATION } from './../graphql/mutations/signInMutation'
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -36,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null })
         try {
           const result = await client
-            .mutation(SIGN_IN_MUTATION, {
+            .mutation(SignInDocument, {
               data: {
                 email,
                 password,
@@ -89,7 +88,7 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null })
         try {
           const result = await client
-            .mutation(SIGN_UP_MUTATION, {
+            .mutation(SignUpDocument, {
               data: {
                 email,
                 password,

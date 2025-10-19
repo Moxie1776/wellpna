@@ -130,10 +130,15 @@ export function PasswordResetForm({
               label="Email"
               type="email"
               helperText={emailHelperText}
+              data-testid="email-input"
             />
           </FormControl>
         </FormItem>
-        <Button type="submit" disabled={requestForm.formState.isLoading}>
+        <Button
+          type="submit"
+          disabled={requestForm.formState.isLoading}
+          data-testid="request-submit-button"
+        >
           {requestForm.formState.isLoading ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </Form>
@@ -204,7 +209,11 @@ export function PasswordResetForm({
             />
           </FormControl>
         </FormItem>
-        <Button type="submit" disabled={resetForm.formState.isLoading}>
+        <Button
+          type="submit"
+          disabled={resetForm.formState.isLoading}
+          data-testid="reset-submit-button"
+        >
           {resetForm.formState.isLoading ? 'Resetting...' : 'Reset Password'}
         </Button>
       </Form>

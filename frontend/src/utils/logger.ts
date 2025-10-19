@@ -3,7 +3,8 @@ import { Logger } from '../graphql/types/logger'
 const isTestEnv =
   typeof process !== 'undefined' &&
   process.env &&
-  process.env.NODE_ENV === 'test'
+  // Treat vitest and debug runs as test-like to keep logger output stable for tests
+  (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'debug' || (process.env as any).VITEST === 'true')
 
 const logger: Logger = {
   error: (message: string, ...args: any[]) => {

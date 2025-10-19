@@ -8,13 +8,43 @@ This document outlines the plan to transform frontend tests from mocked, isolate
 
 **Solution**: Implement integration testing with real backend interactions to ensure tests actually catch bugs.
 
-## Key Changes Based on Feedback
+## Current Implementation Status
 
-- **Test Database**: Backend handles shadowDb internally - frontend tests don't import backend code
-- **Server Management**: Frontend tests assume backend server is running on localhost:4000
-- **Email Handling**: Keep mock SMTP (currently working well in backend tests)
-- **CI/CD**: Design for production server testing capability to verify nginx routing etc.
-- **Project Separation**: No imports from backend - use GraphQL HTTP requests only
+### ✅ **COMPLETED PHASES**
+
+#### Phase 0: TypeScript Integration Setup
+
+- ✅ GraphQL code generation configured with `@graphql-codegen/cli`
+- ✅ TypeScript types generated for all GraphQL operations
+- ✅ Auth store updated to use generated types instead of local interfaces
+- ✅ GraphQL operations reorganized into structured directories
+
+#### Infrastructure Setup (Partial)
+
+- ✅ Shadow database configured in Prisma schema (`SHADOW_DATABASE_URL`)
+- ✅ Backend server setup with debug mode support
+- ✅ Debug query `getVerificationCode` implemented for test verification
+- ✅ Global test setup/teardown infrastructure exists
+- ✅ Email mocking preserved (working well in backend tests)
+
+#### Phase 2A: Core Integration Setup (Partial)
+
+- ✅ Updated testUsers.ts for Generated Documents
+- ✅ SignInForm and SignUpForm integration tests converted to use real GraphQL calls
+- ✅ GraphQL client un-mocking completed for auth form tests
+- ✅ Real user creation and verification working in test environment
+
+### 🔄 **CURRENT STATE**
+
+#### Mixed Implementation
+
+- ✅ Backend has shadow database and debug queries ready
+- ✅ Frontend has test utilities (`testUsers.ts`) with generated documents
+- ✅ Auth store tests updated to work with generated documents
+- ✅ SignInForm and SignUpForm component tests converted to integration tests
+- ❌ EmailVerification and PasswordReset component tests still use mocked callbacks
+- ❌ GraphQL client still mocked in some test files
+- ❌ Some integration tests blocked by test environment database issues
 
 ## Architecture
 
@@ -31,152 +61,117 @@ graph TD
     C --> K[Mock SMTP<br/>Backend Internal]
 ```
 
-## Implementation Plan
+## Detailed Execution Plan
 
-### Phase 0: TypeScript Integration Setup
+### Phase 2A: Core Integration Setup (Priority: HIGH)
 
-1. **URQL TypeScript Integration**
-   - Set up GraphQL code generation for type-safe operations
-   - Generate TypeScript types from GraphQL schema
-   - Configure URQL client with proper TypeScript support
-   - Update all existing GraphQL operations to use generated types
+1. **Update testUsers.ts for Generated Documents**
 
-### Phase 1: Infrastructure Setup
+- Fix testUsers.ts to use generated GraphQL documents instead of `.loc.source.body`
+- Replace `SIGN_UP_MUTATION.loc?.source.body` with `SignUpDocument`
+- Update all GraphQL calls to use generated documents
 
-1. **Shadow Database Integration**
-   - Configure frontend tests to use `SHADOW_DATABASE_URL`
-   - Ensure shadowDb is properly initialized for tests
-   - Add environment variable handling for test mode
+2. **Complete GraphQL Client Un-mocking**
 
-2. **Server Configuration**
-   - Use existing server startup logic
-   - Set `NODE_ENV=debug` for test environment
-   - Configure test-specific GraphQL endpoint (localhost:4000)
+- Remove all urql/urql client mocks from vitest.setup.ts and individual test files
+- Configure real GraphQL client for integration tests
+- Ensure test environment uses `http://localhost:4000/graphql`
 
-3. **Email Handling & Verification**
-   - Backend exposes debug GraphQL query for verification codes when NODE_ENV=debug
-   - Frontend tests can retrieve verification codes via API instead of email
-   - Enables real email verification testing without mocking
-   - Test user cleanup uses @example.com pattern (handled by backend)
-   - Backend server must run in debug mode for verification code access
+3. **Verify Shadow Database Isolation**
 
-### Phase 2: Test Conversion Strategy
+- Ensure shadow database is properly isolated and cleaned between test runs
+- Test database cleanup functionality
 
-4. **GraphQL Client Un-mocking**
-   - Remove all urql mocks from `vitest.setup.ts`
-   - Configure real client with test endpoint
-   - Handle authentication tokens from real API responses
+### Phase 2B: Component Test Conversion (Priority: HIGH)
 
-5. **Test User Management**
-   - Create `frontend/tests/utils/testUsers.ts`
-   - Functions to create verified/unverified users via real API
-   - Extract and manage JWT tokens from signUp/signIn responses
-   - Cleanup utilities for shadowDb isolation
+1. **Convert Component Tests to Integration Tests**
 
-6. **Component Test Conversion**
-   - Replace mocked mutations with real GraphQL calls
-   - Use API-created test users instead of mock objects
-   - Test actual loading states, error handling, and UI updates
-   - Verify form submissions persist real data
+- ✅ SignInForm test converted to use real GraphQL calls, testUsers utility, and localStorage mocks
+- ✅ SignUpForm test converted to integration test with real GraphQL calls and error handling (main signup flow working)
+- 🔄 EmailVerificationPage test conversion started but blocked by database/Prisma client issues in test environment
+- ❌ PasswordResetForm test conversion pending
+- Remove mocked `useAuth` hook usage
+- Integrate with testUsers utility for real user creation
+- Test actual loading states, error handling, and UI updates
 
-### Phase 3: Integration Testing
+2. **Update Hook Tests for Real API**
 
-7. **Full Application Tests**
-   - Add tests rendering complete app with React Router
-   - Test authentication flows end-to-end
-   - Verify protected routes with real auth state
-   - Test complex user journeys with real backend
+- Convert useAuth hook tests to work with real Zustand store + GraphQL API
+- Remove mock implementations
+- Test token persistence, validation, and refresh with real backend
 
-8. **Hook Testing Overhaul**
-   - Convert useAuth tests to work with real Zustand store + API
-   - Test token persistence, validation, and refresh
-   - Verify auth state synchronization with backend
+### Phase 3: Full Integration Testing (Priority: MEDIUM)
 
-### Phase 4: Test Validation & Bug Injection
+1. **Implement Full Application Integration Tests**
 
-9. **Bug Injection Framework**
-   - Create utilities to temporarily break backend functionality
-   - Examples: corrupt responses, invalidate tokens, break validations
-   - Systematic testing of error scenarios
+- Add tests that render complete React app with React Router
+- Test authentication flows end-to-end
+- Verify protected routes with real auth state
+- Test complex user journeys with real backend
 
-10. **Coverage Verification**
-    - Introduce known bugs and verify test failures
-    - Document and fill test coverage gaps
-    - Establish confidence in catching real issues
+2. **Build Bug Injection Framework**
 
-### Phase 5: Production Testing Capability
+- Create utilities to temporarily break backend functionality
+- Examples: corrupt responses, invalidate tokens, break validations
+- Systematic testing of error scenarios
 
-11. **CI/CD Integration**
-    - Configure pipelines to run against production server
-    - Use shadowDb for isolation during production testing
-    - Verify nginx routing, SSL, and full stack integration
-    - Enable comprehensive end-to-end validation
+### Phase 4: Production Readiness (Priority: LOW)
 
-## Technical Implementation Details
+1. **Set Up Production Testing Pipeline**
 
-**Server Availability Check:**
+- Configure CI/CD to run integration tests against production server
+- Use shadowDb for isolation during production testing
+- Verify nginx routing, SSL, and full stack integration
 
-```typescript
-// frontend/tests/setup.ts
-export async function ensureBackendRunning() {
-  try {
-    const response = await fetch('http://localhost:4000/health');
-    if (!response.ok) throw new Error('Backend not healthy');
-  } catch (error) {
-    throw new Error(
-      'Backend server not running on localhost:4000. ' +
-      'Please start the backend server with test configuration first.'
-    );
-  }
-}
-```
+2. **Coverage Verification & Documentation**
 
-**Test User Creation:**
+- Document test coverage gaps and establish confidence metrics
+- Establish confidence in catching real issues
 
-```typescript
-// frontend/tests/utils/testUsers.ts
-export async function createTestUser(email: string, verified = true) {
-  // Real GraphQL mutation to signUp via HTTP
-  // If verified=true, retrieve verification code via debug query
-  // Complete email verification automatically
-  // Extract JWT token from signIn response
-  // Return user + token for tests
-  // Backend handles shadowDb isolation
-}
+## Known Issues
 
-export async function getVerificationCode(email: string) {
-  // Debug query: getVerificationCode(email: string)
-  // Only works when backend NODE_ENV=debug
-  // Returns verification code for completing email verification
-}
-```
+- **Database/Prisma Client Issues in Test Environment**: Some integration tests are failing with "Invalid `db.user.findUnique()` invocation" errors. This appears to be a test environment issue with Prisma client initialization or database state. The core GraphQL functionality works in production/development environments. SignInForm and SignUpForm integration tests work for primary use cases but fail when testing duplicate user scenarios.
 
-**GraphQL Client Configuration:**
+## Review Summary & Recommended Changes
 
-```typescript
-// Configure urql client for tests
-const testClient = createClient({
-  url: 'http://localhost:4000/graphql',
-  // No mocks - real HTTP requests
-});
-```
+Summary of where we are in integration
 
-**Bug Injection Utility:**
+- The project has completed the foundational work: generated GraphQL documents, test utilities (e.g., `testUsers.ts`), and a shadow DB configured for Prisma. Several auth form tests (SignIn/SignUp) were converted to integration tests and run against the test backend.
+- Remaining blockers are primarily in the test environment rather than test code: Prisma client initialization and database isolation/cleanup during test runs. A handful of frontend tests still mock the GraphQL client or use mocked callbacks (EmailVerification, PasswordReset), which reduces coverage.
 
-```typescript
-// frontend/tests/utils/bugInjection.ts
-export function injectGraphQLError(operation: string, error: string) {
-  // This would require backend cooperation
-  // For now, test error scenarios by manipulating test data
-}
-```
+Immediate risks and blockers
 
-## Benefits of This Approach
+- Prisma/test environment instability: failing Prisma client calls and inconsistent DB state make duplicate-user and edge-case tests flaky.
+- Partial client un-mocking: some tests still mock the GraphQL client, which creates a mixed test surface and makes it hard to reason about which tests are true integration tests.
+- CI/automation: Without a reliable way to start the backend and use an isolated shadow DB in CI, integration tests will be hard to run consistently.
 
-- **Leverages Existing Infrastructure**: Uses shadowDb and standard server
-- **Production Testing**: Can run tests against production to verify full stack
-- **Maintains Working Email Tests**: Keeps proven mock SMTP approach
-- **Real Bug Detection**: Tests will fail when actual functionality breaks
-- **CI/CD Ready**: Supports both development and production testing scenarios
+Recommended next steps (short, medium, long)
 
-This plan transforms your tests from "always passing mocks" to "real integration tests that catch actual bugs," while respecting your existing infrastructure and testing patterns.
+- Short (high priority):
+  - Stabilize the Prisma/test environment. Reproduce the "Invalid `db.user.findUnique()`" failure locally, adjust Prisma client initialization in the test bootstrap (add retries/guards), and ensure the shadow DB URL is used for test runs. Add robust DB cleanup between tests (transactions or reset scripts).
+  - Finish un-mocking the GraphQL client in vitest setup and individual tests so tests consistently hit the real backend.
+  - Convert the remaining auth-related component tests (EmailVerification, PasswordReset) to use the `testUsers` utilities and generated documents.
+
+- Medium (medium priority):
+  - Convert hook tests (`useAuth`) and other stores to use real API calls and Zustand state.
+  - Add full-app integration tests for 3 critical flows (signup -> verify -> signin -> protected route, profile update, password reset).
+
+- Long (low priority):
+  - Build the bug-injection framework and add CI wiring to run the integration tests in a reproducible environment.
+
+Acceptance criteria for the short-term work
+
+- Backend tests start deterministically and Prisma-related errors for `db.user.findUnique()` no longer occur during vitest runs.
+- Vitest runs for the frontend integration tests hit `http://localhost:4000/graphql` (or configured test server) without client mocks.
+- SignInForm, SignUpForm, EmailVerification, and PasswordReset integration tests pass locally and in CI when the backend is available.
+
+Notes / assumptions made
+
+- Assumed the backend GraphQL server runs at `http://localhost:4000/graphql` in local test runs. If that differs, update the vitest configuration accordingly.
+- Assumed shadow DB configuration is intended and available; if not, create or document how to provision a test database for CI.
+
+Proposed immediate tasks (to kick off)
+
+1. Reproduce and fix Prisma/test env errors (backend). (See todo #2)
+2. Update vitest setup to stop mocking urql client and point to a running backend. (See todo #3)
+3. Convert remaining frontend tests to integration tests and remove mocked `useAuth`. (See todos #4 and #5)

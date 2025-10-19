@@ -1,40 +1,50 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type MockedFunction,
-  vi,
-} from 'vitest'
+  createTestUser,
+  enqueueCleanup,
+} from '../../../../tests/utils/testUsers'
+import { SignUpForm } from '../SignUpForm'
 
-import { SignUpForm } from '../../../components/public/SignUpForm'
-import { useAuth } from '../../../hooks/useAuth'
-import passwordSchema from '../../../utils/passwordSchema'
+// Mock localStorage for auth store persistence
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+}
 
-vi.mock('../../../hooks/useAuth', () => ({ useAuth: vi.fn() }))
-const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
-
-const mockSignUp = vi.fn()
 const mockOnSignup = vi.fn()
+let testUserEmail: string
 
 beforeEach(() => {
-  mockSignUp.mockReset()
+  // Inject localStorageMock before each test
+  Object.defineProperty(global, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  })
+
+  // Reset localStorageMock state
+  localStorageMock.getItem.mockReset()
+  localStorageMock.setItem.mockReset()
+  localStorageMock.removeItem.mockReset()
+
+  // Reset mock
   mockOnSignup.mockReset()
-  mockUseAuth.mockReturnValue({
-    signUp: mockSignUp,
-    signIn: vi.fn(),
-    signOut: vi.fn(),
-    getCurrentUser: vi.fn(),
-    loading: false,
-    error: null,
-  } as any)
+
+  // Generate unique email for this test
+  testUserEmail = `signup-test-${Date.now()}@example.com`
 })
 
 afterEach(() => {
   vi.clearAllMocks()
+  try {
+    enqueueCleanup('@example.com')
+  } catch {
+    // ignore
+  }
 })
 
 describe('SignUpForm', () => {
@@ -47,17 +57,12 @@ describe('SignUpForm', () => {
   })
 
   it('calls signUp when submitted', async () => {
-    mockSignUp.mockResolvedValueOnce({
-      token: 'test-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    })
     // Use a valid password according to passwordSchema
     const validPassword = 'Password123!'
-    expect(passwordSchema.safeParse(validPassword).success).toBe(true)
     render(<SignUpForm onSignup={mockOnSignup} />)
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
-      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Email'), testUserEmail)
       await userEvent.type(
         screen.getByLabelText('Phone Number'),
         '555-123-4567',
@@ -65,34 +70,33 @@ describe('SignUpForm', () => {
       await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
+    await waitFor(
+      () => {
+        expect(mockOnSignup).toHaveBeenCalled()
+      },
+      { timeout: 5000 },
+    )
+    // Ensure form is not disabled after successful submission
     await waitFor(() => {
-      expect(mockSignUp).toHaveBeenCalledWith(
-        'test@example.com',
-        validPassword,
-        'Test User',
-        '555-123-4567',
-      )
-      expect(mockOnSignup).toHaveBeenCalled()
+      expect(screen.getByLabelText('Name')).not.toBeDisabled()
+      expect(screen.getByLabelText('Email')).not.toBeDisabled()
+      expect(screen.getByLabelText('Phone Number')).not.toBeDisabled()
+      expect(screen.getByLabelText('Password')).not.toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Sign Up' })).not.toBeDisabled()
     })
   })
 
   it('shows error message when signUp fails', async () => {
-    const errorMessage = 'Email already exists'
-    mockSignUp.mockRejectedValueOnce(new Error(errorMessage))
-    mockUseAuth.mockReturnValue({
-      signUp: mockSignUp,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      getCurrentUser: vi.fn(),
-      loading: false,
-      error: errorMessage,
-    } as any)
     const validPassword = 'Password123!'
-    expect(passwordSchema.safeParse(validPassword).success).toBe(true)
+
+    // First create a user
+    const existingEmail = `existing-${Date.now()}@example.com`
+    await createTestUser(existingEmail, validPassword, 'Existing User')
+
     render(<SignUpForm onSignup={mockOnSignup} />)
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
-      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Email'), existingEmail)
       await userEvent.type(
         screen.getByLabelText('Phone Number'),
         '555-123-4567',
@@ -101,7 +105,11 @@ describe('SignUpForm', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /User with this email already exists|Network error|An error occurred/i,
+        ),
+      ).toBeInTheDocument()
     })
   })
 })

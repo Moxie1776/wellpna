@@ -5,32 +5,43 @@
  */
 export default async function teardown() {
   // Use dynamic import to avoid ESM issues in teardown context
-  const { default: logger } = await import('../../backend/tests/utils/logger')
+  const { default: logger } = await import('../src/utils/logger')
 
   try {
-    // Get prisma from global context (set in setup.ts)
-    const prisma = (global as any).testPrisma
+    // Use GraphQL debug mutation for cleanup instead of direct Prisma access
+    const GRAPHQL_ENDPOINT = process.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
+    
+    const mutation = `
+      mutation CleanupTestUsers($pattern: String!) {
+        cleanupTestUsers(pattern: $pattern)
+      }
+    `
 
-    if (prisma) {
-      // Clean up all test users (those with @example.com emails)
-      // This helps prevent the database from accumulating test data
-      const deletedUsers = await prisma.user.deleteMany({
-        where: {
-          email: {
-            endsWith: '@example.com',
-          },
-        },
-      })
+    const response = await fetch(GRAPHQL_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: mutation,
+        variables: { pattern: '@example.com' }
+      }),
+    })
 
-      logger.info(
-        `Global teardown: Cleaned up ${deletedUsers.count} test users`,
-      )
-
-      await prisma.$disconnect()
+    if (response.ok) {
+      const result = await response.json()
+      if (result.errors) {
+        throw new Error(result.errors[0].message || 'GraphQL error')
+      }
+      
+      const count = result.data?.cleanupTestUsers
+      if (typeof count === 'number') {
+        logger.info(`Global teardown: Cleaned up ${count} test users`)
+      } else {
+        logger.info('Global teardown: Cleanup completed (no count returned)')
+      }
     } else {
-      logger.info('Global teardown: Prisma not available, skipping cleanup')
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
   } catch (error) {
-    logger.error(`Global teardown: Error during cleanup - ${error}`)
+    logger.info(`Global teardown: Cleanup failed - ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }

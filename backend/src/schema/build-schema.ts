@@ -1,11 +1,8 @@
 import { writeFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+import { printSchema } from 'graphql'
 import logger from '../utils/logger'
-
-// Ensure we import the schema and call printSchema from the same runtime instance
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { printSchema } = require('graphql')
 
 // Import schema after graphql resolved
 import { schema } from '.'

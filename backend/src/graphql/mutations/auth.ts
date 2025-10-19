@@ -81,6 +81,29 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  // Debug mutation to force-verify a user (only available in debug mode)
+  debugVerifyUser: t.field({
+    type: 'Boolean',
+    args: { email: t.arg.string({ required: true }) },
+    resolve: async (_root, args, ctx: any) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('debugVerifyUser is only available in debug mode')
+      }
+      const db = ctx?.prisma || prisma
+      const user = await db.user.findUnique({ where: { email: args.email } })
+      if (!user) throw new Error('User not found')
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          validatedAt: new Date(),
+          verificationCode: null,
+          verificationCodeExpiresAt: null,
+        },
+      })
+      return true
+    },
+  }),
+
   signIn: t.field({
     type: AuthPayload,
     args: {
@@ -256,6 +279,14 @@ builder.mutationFields((t) => ({
       const resetCode = generate6DigitCode()
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
 
+      logger.debug(
+        'Setting password reset token for user:',
+        user.email,
+        'token:',
+        resetCode,
+        'expires:',
+        expiresAt,
+      )
       await db.user.update({
         where: { id: user.id },
         data: {
@@ -280,13 +311,23 @@ builder.mutationFields((t) => ({
       data: t.arg({ type: ResetPasswordInput, required: true }),
     },
     resolve: async (_root, args, ctx: any) => {
+      logger.debug('resetPassword called with code:', args.data.code)
       const db = ctx?.prisma || prisma
+
       const user = await db.user.findFirst({
         where: {
           passwordResetToken: args.data.code,
           passwordResetTokenExpiresAt: { gt: new Date() },
         },
       })
+
+      logger.debug('User found for reset code:', user ? 'yes' : 'no')
+      if (user) {
+        logger.debug('User token:', user.passwordResetToken)
+        logger.debug('Token expires:', user.passwordResetTokenExpiresAt)
+        logger.debug('Current time:', new Date())
+      }
+
       if (!user) throw new Error('Invalid or expired reset code')
 
       const hashedPassword = await hashPassword(args.data.newPassword)

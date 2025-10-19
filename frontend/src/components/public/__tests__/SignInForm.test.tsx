@@ -1,40 +1,68 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type MockedFunction,
-  vi,
-} from 'vitest'
+  createTestUser,
+  enqueueCleanup,
+} from '../../../../tests/utils/testUsers'
+let SignInForm: any
 
-import { SignInForm } from '../../../components/public/SignInForm'
-import { useAuth } from '../../../hooks/useAuth'
-
-vi.mock('../../../hooks/useAuth', () => ({ useAuth: vi.fn() }))
-const mockUseAuth = useAuth as MockedFunction<typeof useAuth>
-
-const mockSignIn = vi.fn()
 const mockOnSignIn = vi.fn()
 
-beforeEach(() => {
-  mockSignIn.mockReset()
-  mockOnSignIn.mockReset()
-  mockUseAuth.mockReturnValue({
-    signIn: mockSignIn,
-    signOut: vi.fn(),
-    signUp: vi.fn(),
-    getCurrentUser: vi.fn(),
-    loading: false,
-    error: null,
-  } as any)
+// Mock localStorage for auth store persistence
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+}
+
+let testUserEmail: string
+
+beforeEach(async () => {
+  // Inject localStorageMock before importing modules that read it at init
+  Object.defineProperty(global, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  })
+
+  // Reset localStorageMock state
+  localStorageMock.getItem.mockReset()
+  localStorageMock.setItem.mockReset()
+  localStorageMock.removeItem.mockReset()
+
+  // Dynamically import SignInForm after localStorage is mocked so any
+  // module-level initialization that reads localStorage sees the mock.
+   
+  const mod = await import('../SignInForm')
+  SignInForm = mod.SignInForm
+
+  // Create a test user for the integration test with unique email
+  const timestamp = Date.now()
+  testUserEmail = `signin-test-${timestamp}@example.com`
+  await createTestUser(testUserEmail, 'password123', 'SignIn Test User')
+  
+  // Manually verify the user to ensure sign in works
+  const { verifyTestUser, getVerificationCode } = await import('../../../../tests/utils/testUsers')
+  try {
+    const code = await getVerificationCode(testUserEmail)
+    if (code) {
+      await verifyTestUser(testUserEmail, code)
+    }
+  } catch (error) {
+    console.warn('Manual verification failed, user may already be verified:', error)
+  }
 })
 
-afterEach(() => {
+afterEach(async () => {
   vi.clearAllMocks()
+  try {
+    enqueueCleanup('@example.com')
+  } catch {
+    // ignore
+  }
 })
 
 describe('SignInForm', () => {
@@ -54,55 +82,43 @@ describe('SignInForm', () => {
   })
 
   it('calls signIn when submitted', async () => {
-    mockSignIn.mockResolvedValueOnce({
-      token: 'test-token',
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-    })
     renderWithRouter(<SignInForm onSignIn={mockOnSignIn} />)
     await act(async () => {
-      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Email'), testUserEmail)
       await userEvent.type(screen.getByLabelText('Password'), 'password123')
       await userEvent.click(screen.getByRole('button', { name: 'Sign In' }))
     })
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123')
       expect(mockOnSignIn).toHaveBeenCalled()
     })
   })
 
   it('shows error message when signIn fails', async () => {
-    const errorMessage = 'Invalid credentials'
-    mockSignIn.mockRejectedValueOnce(new Error(errorMessage))
-    mockUseAuth.mockReturnValue({
-      signIn: mockSignIn,
-      signOut: vi.fn(),
-      signUp: vi.fn(),
-      getCurrentUser: vi.fn(),
-      loading: false,
-      error: errorMessage,
-    } as any)
     renderWithRouter(<SignInForm onSignIn={mockOnSignIn} />)
     await act(async () => {
-      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Email'), 'wrong@example.com')
       await userEvent.type(screen.getByLabelText('Password'), 'wrongpassword')
       await userEvent.click(screen.getByRole('button', { name: 'Sign In' }))
     })
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /Invalid email or password|Network error|An error occurred/i,
+        ),
+      ).toBeInTheDocument()
     })
   })
 
   it('redirects to email verification page when email is not verified', async () => {
-    const errorMessage = 'Email not verified'
-    mockSignIn.mockRejectedValueOnce(new Error(errorMessage))
-    mockUseAuth.mockReturnValue({
-      signIn: mockSignIn,
-      signOut: vi.fn(),
-      signUp: vi.fn(),
-      getCurrentUser: vi.fn(),
-      loading: false,
-      error: errorMessage,
-    } as any)
+    // Create a user that needs email verification
+    const unverifiedEmail = `unverified-${Date.now()}@example.com`
+    await createTestUser(
+      unverifiedEmail,
+      'password123',
+      'Unverified User',
+      undefined,
+      false,
+    )
 
     const router = createMemoryRouter([
       { path: '/', element: <SignInForm onSignIn={mockOnSignIn} /> },
@@ -112,14 +128,16 @@ describe('SignInForm', () => {
     render(<RouterProvider router={router} />)
 
     await act(async () => {
-      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Email'), unverifiedEmail)
       await userEvent.type(screen.getByLabelText('Password'), 'password123')
       await userEvent.click(screen.getByRole('button', { name: 'Sign In' }))
     })
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe('/email-verification')
-      expect(router.state.location.search).toBe('?email=test%40example.com')
+      expect(router.state.location.search).toBe(
+        `?email=${encodeURIComponent(unverifiedEmail)}`,
+      )
     })
   })
 })

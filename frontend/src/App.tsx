@@ -15,7 +15,7 @@ import { ThemeProvider } from './providers/ThemeProvider'
 import { useAuthStore } from './store/auth'
 import { client } from './utils'
 
-function AppContent() {
+export function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth)
   const user = useAuthStore((state) => state.user)
 
@@ -48,18 +48,24 @@ function AppContent() {
   )
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <ThemeProvider>
-        <UrqlProvider value={client}>
-          <SnackbarProvider>
-            <ErrorBoundary>
-              <AppContent />
-            </ErrorBoundary>
-          </SnackbarProvider>
-        </UrqlProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </StrictMode>,
-)
+if (
+  import.meta.env.MODE !== 'test' &&
+  typeof document !== 'undefined' &&
+  document.getElementById('root')
+) {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <ThemeProvider>
+          <UrqlProvider value={client}>
+            <SnackbarProvider>
+              <ErrorBoundary>
+                <AppContent />
+              </ErrorBoundary>
+            </SnackbarProvider>
+          </UrqlProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </StrictMode>,
+  )
+}

@@ -1,72 +1,66 @@
-import { spawn } from 'child_process'
-import { createServer } from 'net'
+// Global setup for Vitest: set env vars, wait for GraphQL probe, and run queued cleanups at teardown.
 
-const checkPortInUse = (port: number): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const testServer = createServer()
-      .once('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          resolve(true) // Port is in use
-        } else {
-          resolve(false)
-        }
-      })
-      .once('listening', () => {
-        testServer.close()
-        resolve(false) // Port is free
-      })
-      .listen(port)
-  })
+import { logger } from '../src/utils'
+
+process.env.VITE_GRAPHQL_ENDPOINT =
+  process.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
+process.env.NODE_ENV = process.env.NODE_ENV || 'debug'
+
+const GRAPHQL_URL = process.env.VITE_GRAPHQL_ENDPOINT
+const PROBE_TIMEOUT_MS = 30_000
+const PROBE_INTERVAL_MS = 500
+
+async function probeGraphQL(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: '{ __typename }' }),
+    })
+    return res.ok
+  } catch (e) {
+    return false
+  }
 }
 
 export default async function globalSetup() {
-  // Set test environment variables
-  process.env.VITE_GRAPHQL_ENDPOINT = 'http://localhost:4000/graphql'
-  process.env.NODE_ENV = 'debug'
-
-  // Check if server is already running on port 4000
-  const portInUse = await checkPortInUse(4000)
-
-  if (!portInUse) {
-    // Start the backend server using npm test from backend directory
-    // This will run the backend tests which start the server
-    const backendProcess = spawn('npm', ['test', '--', '--run'], {
-      cwd: '../../backend',
-      stdio: 'inherit',
-      detached: true
-    })
-
-    // Store the process so we can kill it later
-    ;(global as any).__backendProcess = backendProcess
-
-    // Wait for server to be ready
-    let attempts = 0
-    while (attempts < 30) { // Wait up to 30 seconds
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      if (await checkPortInUse(4000)) {
-        console.log('Backend server is ready on port 4000')
-        break
-      }
-      attempts++
+  // Wait for the GraphQL endpoint to respond (best-effort). Tests assume
+  // a debug backend is running at GRAPHQL_URL. We probe for up to
+  // PROBE_TIMEOUT_MS and proceed even if the probe never succeeds.
+  const start = Date.now()
+  while (Date.now() - start < PROBE_TIMEOUT_MS) {
+    if (await probeGraphQL(GRAPHQL_URL)) {
+      logger.debug('GraphQL endpoint is responding:', GRAPHQL_URL)
+      break
     }
 
-    if (attempts >= 30) {
-      throw new Error('Backend server failed to start within 30 seconds')
-    }
-  } else {
-    console.log('Using existing server running on port 4000')
+    await new Promise((r) => setTimeout(r, PROBE_INTERVAL_MS))
   }
 
-  // Return teardown function
-  return async () => {
-    const backendProcess = (global as any).__backendProcess
-    if (backendProcess) {
-      try {
-        process.kill(-backendProcess.pid, 'SIGTERM')
-        console.log('Backend process terminated')
-      } catch (err) {
-        console.error('Error terminating backend process:', err)
+  // Run cleanup at the start to ensure clean state
+  try {
+    const utils = await import('./utils/testUsers')
+    if (utils && typeof utils.runQueuedCleanups === 'function') {
+      // Enqueue a cleanup for all test emails and run it immediately
+      utils.enqueueCleanup('@example.com')
+      await utils.runQueuedCleanups()
+      logger.debug('Ran initial test user cleanup')
+    }
+  } catch (e) {
+    // best-effort
+  }
+
+  return async function globalTeardown() {
+    try {
+      // Import dynamically to avoid pulling test helper bundles into transform step.
+      const utils = await import('./utils/testUsers')
+      if (utils && typeof utils.runQueuedCleanups === 'function') {
+        await utils.runQueuedCleanups()
+
+        logger.debug('Ran queued test user cleanups')
       }
+    } catch (e) {
+      // best-effort teardown
     }
   }
 }

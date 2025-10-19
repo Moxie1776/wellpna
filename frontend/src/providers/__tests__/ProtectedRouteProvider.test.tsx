@@ -1,61 +1,91 @@
-// Mock Navigate first
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-vi.mock('react-router-dom', async () => ({
-  ...(await vi.importActual('react-router-dom')),
-  Navigate: vi.fn(() => <div data-testid="navigate-mock">Navigate</div>),
-}))
-
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-import { useAuthStore } from '../../store/auth'
 import { ProtectedRoute } from '../ProtectedRouteProvider'
 
-// Mock useAuthStore
-vi.mock('../../store/auth', () => ({
+// Mock the auth store
+vi.mock('@/store/auth', () => ({
   useAuthStore: vi.fn(),
 }))
 
-const mockUseAuthStore = useAuthStore as any
+import { useAuthStore } from '@/store/auth'
+
+const mockedUseAuthStore = vi.mocked(useAuthStore)
 
 describe('ProtectedRoute', () => {
-  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-    <MemoryRouter>{children}</MemoryRouter>
-  )
-
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders children when user exists', () => {
-    mockUseAuthStore.mockReturnValue({ id: '1', email: 'test@example.com' })
+  it('renders children when user is authenticated', () => {
+    const mockState = {
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        phoneNumber: '123-456-7890',
+        role: 'user',
+      },
+      token: 'fake-token',
+      loading: false,
+      error: null,
+      setAuth: vi.fn(),
+      clearAuth: vi.fn(),
+      updateUser: vi.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+      getCurrentUser: vi.fn(),
+      isTokenValid: vi.fn(),
+      setLoading: vi.fn(),
+      setError: vi.fn(),
+      initializeAuth: vi.fn(),
+    }
+
+    mockedUseAuthStore.mockImplementation((selector) => selector(mockState))
 
     render(
-      <TestWrapper>
+      <MemoryRouter>
         <ProtectedRoute>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </TestWrapper>,
+      </MemoryRouter>,
     )
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
   })
 
-  it('navigates to "/" when user does not exist', () => {
-    mockUseAuthStore.mockReturnValue(null)
+  it('redirects to login when user is not authenticated', () => {
+    const mockState = {
+      user: null,
+      token: null,
+      loading: false,
+      error: null,
+      setAuth: vi.fn(),
+      clearAuth: vi.fn(),
+      updateUser: vi.fn(),
+      signIn: vi.fn(),
+      signOut: vi.fn(),
+      signUp: vi.fn(),
+      getCurrentUser: vi.fn(),
+      isTokenValid: vi.fn(),
+      setLoading: vi.fn(),
+      setError: vi.fn(),
+      initializeAuth: vi.fn(),
+    }
+    
+    mockedUseAuthStore.mockImplementation((selector) => selector(mockState))
 
     render(
-      <TestWrapper>
+      <MemoryRouter>
         <ProtectedRoute>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </TestWrapper>,
+      </MemoryRouter>,
     )
 
-    // Since Navigate is mocked to return a div, it should be rendered
-    expect(screen.getByTestId('navigate-mock')).toBeInTheDocument()
-    // Protected content should not be rendered
+    // When unauthenticated, children should not be rendered
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
   })
 })

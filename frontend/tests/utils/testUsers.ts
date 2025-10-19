@@ -1,9 +1,15 @@
-import { SIGN_UP_MUTATION } from '../../src/graphql/mutations/signUpMutation'
-import { SIGN_IN_MUTATION } from '../../src/graphql/mutations/signInMutation'
-import { VERIFY_EMAIL_MUTATION } from '../../src/graphql/mutations/verifyEmailMutation'
-import { GET_VERIFICATION_CODE_QUERY } from '../../src/graphql/queries/getVerificationCodeQuery'
-import { USERS_QUERY } from '../../src/graphql/queries/usersQuery'
-import { User, AuthResponse } from '../../src/graphql'
+import { DocumentNode } from 'graphql'
+import { print } from 'graphql'
+
+import { logger } from '@/utils'
+
+import { AuthResponse, User } from '../../src/graphql'
+import {
+  GetVerificationCodeDocument,
+  SignInDocument,
+  SignUpDocument,
+  VerifyEmailDocument,
+} from '../../src/graphql/generated/graphql'
 
 // Test-specific type for managing test user sessions
 interface TestUserSession {
@@ -15,6 +21,38 @@ interface TestUserSession {
 // Global test user sessions storage
 const testUserSessions = new Map<string, TestUserSession>()
 
+// Queue for cleanup patterns. Tests should enqueue patterns to avoid
+// deleting users while other tests are running. The queued cleanups are
+// executed once in global teardown.
+const cleanupQueue = new Set<string>()
+
+/**
+ * Enqueue a cleanup pattern to be executed in global teardown instead of
+ * running immediate deletions during tests.
+ */
+export function enqueueCleanup(pattern: string = '@example.com') {
+  cleanupQueue.add(pattern)
+}
+
+/**
+ * Run all queued cleanup operations sequentially and clear the queue.
+ * Intended to be called from the test global teardown.
+ */
+export async function runQueuedCleanups(): Promise<void> {
+  for (const pattern of Array.from(cleanupQueue)) {
+    try {
+      // call the existing cleanup implementation
+
+      await cleanupTestUsers(pattern)
+    } catch (err) {
+      // log and continue
+
+      console.warn(`Queued cleanup failed for ${pattern}:`, err)
+    }
+  }
+  cleanupQueue.clear()
+}
+
 // GraphQL endpoint
 const GRAPHQL_ENDPOINT =
   process.env.VITE_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql'
@@ -22,11 +60,14 @@ const GRAPHQL_ENDPOINT =
 /**
  * Execute a GraphQL request
  */
-async function executeGraphQL<T = any>(
-  query: string,
+export async function executeGraphQL<T = any>(
+  query: string | DocumentNode,
   variables?: Record<string, any>,
   authToken?: string,
+  opts?: { retries?: number; timeoutMs?: number },
 ): Promise<T> {
+  const queryString = typeof query === 'string' ? query : print(query)
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
@@ -35,23 +76,74 @@ async function executeGraphQL<T = any>(
     headers.authorization = `Bearer ${authToken}`
   }
 
-  const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  })
+  // Resilient fetch with retries and timeout to avoid flakes when backend is
+  // starting or under load during test runs.
+  const DEFAULT_RETRIES = 2
+  const DEFAULT_TIMEOUT_MS = 6000 // 6s
+  const retries = opts?.retries ?? DEFAULT_RETRIES
+  const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS
 
-  const result = await response.json()
-
-  if (result.errors) {
-    const error = result.errors[0]
-    throw new Error(error.message || 'GraphQL error')
+  function sleep(ms: number) {
+    return new Promise((res) => setTimeout(res, ms))
   }
 
-  return result.data
+  let lastError: unknown = null
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
+    try {
+      const response = await fetch(GRAPHQL_ENDPOINT, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          query: queryString,
+          variables,
+        }),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeout)
+
+      const result = await response.json()
+
+      if (result.errors) {
+        const error = result.errors[0]
+        throw new Error(error.message || 'GraphQL error')
+      }
+
+      return result.data
+    } catch (err) {
+      lastError = err
+
+      // If aborted due to timeout or a network failure, retry with backoff
+      const isLastAttempt = attempt === retries
+      const isAbort = err && (err as Error).name === 'AbortError'
+
+      if (isLastAttempt) {
+        // Throw a clearer error for the caller to use in test diagnostics
+        const errMsg = isAbort
+          ? `Request aborted after ${timeoutMs}ms`
+          : err instanceof Error
+            ? err.message
+            : String(err)
+        throw new Error(errMsg)
+      }
+
+      // exponential backoff: 300ms, 600ms, 1200ms, ...
+      const backoff = 200 * Math.pow(2, attempt - 1)
+      // small delay before retrying
+
+      await sleep(backoff)
+      // continue to next attempt
+    }
+  }
+
+  // If we exit loop without returning, throw the last error
+  throw new Error(
+    lastError instanceof Error ? lastError.message : 'Unknown network error',
+  )
 }
 
 /**
@@ -72,12 +164,9 @@ export async function createTestUser(
       phoneNumber: phoneNumber || '',
     }
 
-    const result = await executeGraphQL(
-      SIGN_UP_MUTATION.loc?.source.body || '',
-      {
-        data: signUpData,
-      },
-    )
+    const result = await executeGraphQL(SignUpDocument, {
+      data: signUpData,
+    })
 
     if (!result?.signUp) {
       throw new Error('No data returned from signUp mutation')
@@ -95,8 +184,163 @@ export async function createTestUser(
     // Auto-verify if requested
     if (autoVerify) {
       try {
-        const verificationCode = await getVerificationCode(email)
-        await verifyTestUser(email, verificationCode)
+        // Small pause to allow backend to finish processing the signup and
+        // make debug helpers available. This reduces races where the test
+        // immediately queries the debug endpoint and the user record isn't
+        // visible yet.
+
+        await new Promise((r) => setTimeout(r, 300))
+        // Prefer to force-verify via the debug mutation which is more
+        // reliable in test environments. If the debug mutation is not
+        // available, fall back to reading the verification code and using
+        // the verifyEmail mutation.
+        try {
+          const verifyMutation = `
+            mutation DebugVerifyUser($email: String!) {
+              debugVerifyUser(email: $email)
+            }
+          `
+
+          // Try the debug verify mutation a few times with backoff — the
+          // backend may take a short moment to expose debug-only helpers
+          // after a new user is created.
+          let debugVerified = false
+          for (let vAttempt = 1; vAttempt <= 3; vAttempt++) {
+            try {
+              const verifyResult = await executeGraphQL(
+                verifyMutation,
+                { email },
+                undefined,
+                { retries: 1, timeoutMs: 1500 },
+              )
+              if (verifyResult?.debugVerifyUser) {
+                debugVerified = true
+                break
+              }
+            } catch (e) {
+              // ignore and retry
+            }
+
+            await new Promise((r) => setTimeout(r, 200 * vAttempt))
+          }
+
+          if (debugVerified) {
+            // debug verify succeeded — sign in to obtain a token for the session
+            try {
+              const signInResp = await signInTestUser(email, password)
+              // update stored session with fresh token
+              testUserSessions.set(email, {
+                user: signInResp.user,
+                token: signInResp.token,
+                email,
+              })
+            } catch (siErr) {
+              // If sign in fails, ignore — session may remain without token
+            }
+          } else {
+            // Fallback to code-based verification
+            const verificationCode = await getVerificationCode(email)
+            if (verificationCode) {
+              try {
+                await verifyTestUser(email, verificationCode)
+              } catch (verifyErr) {
+                // If verification by code failed, try forcing debug verify and sign in
+                try {
+                  const fallback = await executeGraphQL(
+                    verifyMutation,
+                    { email },
+                    undefined,
+                    { retries: 1, timeoutMs: 1500 },
+                  )
+                  if (fallback?.debugVerifyUser) {
+                    const signInResp = await signInTestUser(email, password)
+                    testUserSessions.set(email, {
+                      user: signInResp.user,
+                      token: signInResp.token,
+                      email,
+                    })
+                  }
+                } catch (e) {
+                  // ignore
+                }
+              }
+            } else {
+              // getVerificationCode returned empty string indicating debug verify
+              try {
+                const signInResp = await signInTestUser(email, password)
+                testUserSessions.set(email, {
+                  user: signInResp.user,
+                  token: signInResp.token,
+                  email,
+                })
+              } catch (siErr) {
+                // ignore
+              }
+            }
+          }
+        } catch (err) {
+          // If debug mutation failed, try code-based flow
+          const verificationCode = await getVerificationCode(email)
+          if (verificationCode) {
+            try {
+              await verifyTestUser(email, verificationCode)
+            } catch (verifyErr) {
+              // try forcing debug verify and sign in
+              try {
+                const verifyMutation = `
+                  mutation DebugVerifyUser($email: String!) {
+                    debugVerifyUser(email: $email)
+                  }
+                `
+                const fallback = await executeGraphQL(
+                  verifyMutation,
+                  { email },
+                  undefined,
+                  { retries: 1, timeoutMs: 1500 },
+                )
+                if (fallback?.debugVerifyUser) {
+                  const signInResp = await signInTestUser(email, password)
+                  testUserSessions.set(email, {
+                    user: signInResp.user,
+                    token: signInResp.token,
+                    email,
+                  })
+                }
+              } catch (e) {
+                // ignore
+              }
+            }
+          } else {
+            // If no code could be retrieved, try forcing debug verify and sign in
+            try {
+              const verifyMutation = `
+                mutation DebugVerifyUser($email: String!) {
+                  debugVerifyUser(email: $email)
+                }
+              `
+              const verifyResult2 = await executeGraphQL(
+                verifyMutation,
+                { email },
+                undefined,
+                { retries: 1, timeoutMs: 1500 },
+              )
+              if (verifyResult2?.debugVerifyUser) {
+                try {
+                  const signInResp = await signInTestUser(email, password)
+                  testUserSessions.set(email, {
+                    user: signInResp.user,
+                    token: signInResp.token,
+                    email,
+                  })
+                } catch (siErr) {
+                  // ignore
+                }
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
       } catch (error) {
         console.warn(`Auto-verification failed for ${email}:`, error)
         // Don't fail the user creation if verification fails
@@ -115,24 +359,70 @@ export async function createTestUser(
  * Get verification code using debug GraphQL query
  */
 export async function getVerificationCode(email: string): Promise<string> {
-  try {
-    const result = await executeGraphQL(
-      GET_VERIFICATION_CODE_QUERY.loc?.source.body || '',
-      {
+  const MAX_ATTEMPTS = 12
+  const BASE_DELAY_MS = 400
+
+  let lastErr: unknown = null
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const result = await executeGraphQL(GetVerificationCodeDocument, {
         email,
+      })
+
+      if (result?.getVerificationCode) {
+        return result.getVerificationCode
+      }
+
+      // If the debug query explicitly reports user not found, retry a few
+      // times because user creation propagation to the debug query may be
+      // slightly delayed.
+      if (result && (result as any).errors) {
+        lastErr = (result as any).errors[0]
+      }
+
+      // small backoff before next attempt
+
+      await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
+    } catch (err) {
+      lastErr = err
+      // If this was the last attempt, we'll fallthrough to the debugVerifyUser
+      // fallback below.
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
+        continue
+      }
+    }
+  }
+
+  // As a last resort attempt to force-verify the user in debug mode. If the
+  // backend marks the user verified, return an empty string to indicate that
+  // no code is required.
+  try {
+    const verifyMutation = `
+      mutation DebugVerifyUser($email: String!) {
+        debugVerifyUser(email: $email)
+      }
+    `
+    const verifyResult = await executeGraphQL(
+      verifyMutation,
+      { email },
+      undefined,
+      {
+        retries: 1,
+        timeoutMs: 1500,
       },
     )
-
-    if (!result?.getVerificationCode) {
-      throw new Error('No verification code returned')
+    if (verifyResult?.debugVerifyUser) {
+      return ''
     }
-
-    return result.getVerificationCode
-  } catch (error) {
-    throw new Error(
-      `Failed to get verification code: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    )
+  } catch (err) {
+    // ignore and throw a clearer error below
   }
+
+  throw new Error(
+    `Failed to get verification code: ${lastErr instanceof Error ? lastErr.message : String(lastErr)}`,
+  )
 }
 
 /**
@@ -148,12 +438,9 @@ export async function verifyTestUser(
       code,
     }
 
-    const result = await executeGraphQL(
-      VERIFY_EMAIL_MUTATION.loc?.source.body || '',
-      {
-        data: verifyData,
-      },
-    )
+    const result = await executeGraphQL(VerifyEmailDocument, {
+      data: verifyData,
+    })
 
     if (!result?.verifyEmail) {
       throw new Error('No data returned from verifyEmail mutation')
@@ -189,12 +476,9 @@ export async function signInTestUser(
       password,
     }
 
-    const result = await executeGraphQL(
-      SIGN_IN_MUTATION.loc?.source.body || '',
-      {
-        data: signInData,
-      },
-    )
+    const result = await executeGraphQL(SignInDocument, {
+      data: signInData,
+    })
 
     if (!result?.signIn) {
       throw new Error('No data returned from signIn mutation')
@@ -224,34 +508,25 @@ export async function cleanupTestUsers(
   pattern: string = '@example.com',
 ): Promise<void> {
   try {
-    // Get all users
-    const result = await executeGraphQL(USERS_QUERY.loc?.source.body || '')
+    // Call the backend debug mutation which deletes test users matching the pattern.
+    // This mutation is guarded by NODE_ENV === 'debug' on the backend.
+    const mutation = `
+      mutation CleanupTestUsers($pattern: String!) {
+        cleanupTestUsers(pattern: $pattern)
+      }
+    `
 
-    if (!result?.users) {
-      console.warn('No users found to cleanup')
-      return
-    }
-
-    const usersToDelete = result.users.filter(
-      (user: User & { registeredAt: string }) =>
-        user.email.endsWith(pattern),
-    )
-
-    if (usersToDelete.length === 0) {
-      console.log(`No test users found with pattern ${pattern}`)
-      return
-    }
-
-    console.log(`Found ${usersToDelete.length} test users to cleanup`)
-
-    // Note: The current GraphQL schema doesn't have a deleteUser mutation
-    // This would need to be implemented in the backend for full cleanup
-    // For now, we'll just clear our local session storage
-    usersToDelete.forEach((user: User & { registeredAt: string }) => {
-      testUserSessions.delete(user.email)
+    const result = await executeGraphQL(mutation, { pattern }, undefined, {
+      retries: 1,
+      timeoutMs: 2000,
     })
 
-    console.log(`Cleaned up ${usersToDelete.length} test user sessions`)
+    if (typeof result?.cleanupTestUsers === 'number') {
+      const count = result.cleanupTestUsers
+      logger.debug(`Cleaned up ${count} test users with pattern ${pattern}`)
+    } else {
+      console.warn('cleanupTestUsers did not return a count')
+    }
   } catch (error) {
     console.warn(
       `Failed to cleanup test users: ${error instanceof Error ? error.message : 'Unknown error'}`,

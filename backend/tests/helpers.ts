@@ -37,6 +37,12 @@ export async function createTestUserAndJwt(
     }
   `
 
+  const getVerificationCodeQuery = `
+    query GetVerificationCode($email: String!) {
+      getVerificationCode(email: $email)
+    }
+  `
+
   // Sign up the user via GraphQL API
   const response = await yoga.fetch('http://localhost:4000/graphql', {
     method: 'POST',
@@ -61,21 +67,24 @@ export async function createTestUserAndJwt(
   const payload = result.data.signUp
 
   if (verified) {
-    // Extract verification code from mocked emails
-    const sentEmails: any[] = (global as any).sentEmails || []
-    const verificationEmail = sentEmails.find((email) =>
-      email.to.includes(data.email),
-    )
-    if (!verificationEmail) {
-      throw new Error('Verification email not found')
+    // Get verification code using debug query instead of intercepting emails
+    const codeResponse = await yoga.fetch('http://localhost:4000/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: getVerificationCodeQuery,
+        variables: { email: data.email },
+      }),
+    })
+    const codeResult = await codeResponse.json()
+    if (codeResult.errors) {
+      throw new Error('Failed to get verification code: ' + JSON.stringify(codeResult.errors))
     }
 
-    // Assume the code is in the email html (mocked nodemailer)
-    const codeMatch = verificationEmail.html?.match(/(\d{6})/)
-    if (!codeMatch) {
-      throw new Error('Verification code not found in email')
+    const code = codeResult.data.getVerificationCode
+    if (!code) {
+      throw new Error('No verification code returned')
     }
-    const code = codeMatch[1]
 
     // Verify the email via GraphQL API
     const verifyResp = await yoga.fetch('http://localhost:4000/graphql', {

@@ -64,18 +64,23 @@ export const SignInForm = ({
     form.formState.isSubmitted,
   ])
 
-  const onSubmit = async (values: z.infer<typeof signInSchema>) => {
-    try {
-      await signIn(values.email, values.password)
-      onSignIn()
-    } catch (error: any) {
-      // Check if email is not verified
-      if (error?.message?.includes('Email not verified')) {
-        navigate(
-          `/email-verification?email=${encodeURIComponent(values.email)}`,
-        )
+  useEffect(() => {
+    if (error?.includes('Email not verified')) {
+      const email = form.getValues('email')
+      if (email) {
+        navigate(`/email-verification?email=${encodeURIComponent(email)}`)
       }
-      // Error handling is done in the useAuth hook
+    }
+  }, [error, navigate, form])
+
+  const onSubmit = async (values: z.infer<typeof signInSchema>) => {
+    const result = await signIn(values.email, values.password)
+    if (result) {
+      onSignIn()
+    } else if (error?.includes('Email not verified')) {
+      navigate(
+        `/email-verification?email=${encodeURIComponent(values.email)}`,
+      )
     }
   }
 

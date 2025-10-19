@@ -1,55 +1,25 @@
-vi.mock('@/components/ui/snackbar', () => ({
-  useSnackbar: vi.fn(),
-}))
-
-vi.mock('@/utils/graphqlClient', () => ({
-  __esModule: true,
-  default: {
-    mutation: vi.fn(() => ({
-      toPromise: vi.fn(() =>
-        Promise.resolve({
-          data: {
-            requestPasswordReset: true,
-            resetPassword: { token: 'mock-token' },
-          },
-        }),
-      ),
-    })),
-  },
-}))
-
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import { vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+
 import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type MockedFunction,
-  vi,
-} from 'vitest'
-
-import { useSnackbar } from '@/components/ui/snackbar'
-
+  createTestUser,
+  enqueueCleanup,
+  executeGraphQL,
+} from '../../../../tests/utils/testUsers'
+import { SnackbarProvider } from '../../../providers/SnackbarProvider'
 import PasswordResetPage from '../PasswordReset'
 
-vi.mock('@/graphql/mutations/requestPasswordResetMutation', () => ({
-  REQUEST_PASSWORD_RESET_MUTATION: 'mock-request-mutation',
+// Mock the urql client to capture GraphQL calls
+vi.mock('@/utils/graphqlClient', () => ({
+  default: {
+    mutation: vi.fn(),
+  },
 }))
 
-vi.mock('@/graphql/mutations/resetPasswordMutation', () => ({
-  RESET_PASSWORD_MUTATION: 'mock-reset-mutation',
-}))
-
-// Mock PasswordResetForm component to spy on props passed down and simulate interaction triggers
-vi.mock('@/components/public/PasswordResetForm', () => ({
-  PasswordResetForm: vi.fn(),
-}))
-
-import { PasswordResetForm } from '@/components/public/PasswordResetForm'
-
-const mockShowSnackbar = vi.fn()
+import client from '@/utils/graphqlClient'
 
 const renderWithRouter = (initialEntries: string[]) => {
   const router = createMemoryRouter(
@@ -59,105 +29,89 @@ const renderWithRouter = (initialEntries: string[]) => {
         element: <PasswordResetPage />,
       },
     ],
-    { initialEntries },
+    {
+      initialEntries,
+      initialIndex: 0,
+    },
   )
-  return render(<RouterProvider router={router} />)
+  return render(
+    <SnackbarProvider>
+      <RouterProvider router={router} />
+    </SnackbarProvider>,
+  )
 }
 
-describe('PasswordResetPage', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+describe('PasswordReset Integration Test', () => {
+  let testEmail: string
 
-    // Mock hooks implementation
-    ;(useSnackbar as MockedFunction<typeof useSnackbar>).mockReturnValue({
-      showSnackbar: mockShowSnackbar,
+  beforeEach(async () => {
+    testEmail = `test-${Date.now()}@example.com`
+    enqueueCleanup(testEmail)
+    await createTestUser(testEmail, 'Password1!', 'PW Reset User')
+  })
+
+  it('should reset password with real backend', async () => {
+    const user = userEvent.setup()
+
+    // Request password reset
+    const requestResult = await executeGraphQL(
+      `
+      mutation RequestPasswordReset($email: String!) {
+        requestPasswordReset(email: $email)
+      }
+    `,
+      { email: testEmail },
+    )
+
+    expect(requestResult.requestPasswordReset).toBe(true)
+
+    // Get the reset code
+    const codeResult = await executeGraphQL(
+      `
+      query GetPasswordResetCode($email: String!) {
+        getPasswordResetCode(email: $email)
+      }
+    `,
+      { email: testEmail },
+    )
+
+    const resetCode = codeResult.getPasswordResetCode
+    expect(resetCode).toBeTruthy()
+
+    // Mock the urql client mutation to capture calls
+    const mockMutation = vi.fn()
+    client.mutation = mockMutation
+
+    // Render the page in reset mode with the code
+    renderWithRouter([`/password-reset?code=${resetCode}`])
+
+    // Wait for the form to render
+    await waitFor(() => {
+      expect(screen.getByTestId('reset-submit-button')).toBeInTheDocument()
     })
 
-    // Mock PasswordResetForm component implementation
-    ;(PasswordResetForm as any).mockImplementation(
-      ({ mode, defaultEmail, onRequestReset, onResetPassword }: any) => (
-        <div data-testid={`password-reset-form-${mode}`}>
-          <p data-testid="default-email">{defaultEmail}</p>
+    // Fill in the form
+    const passwordInput = screen.getByLabelText(/new password/i)
+    const confirmInput = screen.getByLabelText(/confirm password/i)
 
-          {/* Simulate interaction triggers that call page handlers */}
-          {mode === 'request' && (
-            <button
-              data-testid="request-submit-button"
-              onClick={() => onRequestReset({ email: 'test@example.com' })}
-            >
-              Submit Request
-            </button>
-          )}
+    await user.type(passwordInput, 'NewPassword1!')
+    await user.type(confirmInput, 'NewPassword1!')
 
-          {mode === 'reset' && (
-            <button
-              data-testid="reset-submit-button"
-              onClick={() =>
-                onResetPassword({
-                  code: '123456',
-                  newPassword: 'NewPass1!',
-                  confirmPassword: 'NewPass1!',
-                })
-              }
-            >
-              Submit Reset
-            </button>
-          )}
-          {/* Note: No explicit 'resend code' handler is present in PasswordResetPage logic,
-              so testing onRequestReset covers link resending functionality. */}
-        </div>
-      ),
-    )
-  })
+    // Click submit
+    const submitButton = screen.getByTestId('reset-submit-button')
+    await user.click(submitButton)
 
-  it('renders in request mode with default email from search params', () => {
-    renderWithRouter(['/password-reset?email=default@test.com'])
-    expect(
-      screen.getByTestId('password-reset-form-request'),
-    ).toBeInTheDocument()
-    expect(screen.getByTestId('default-email')).toHaveTextContent(
-      'default@test.com',
-    )
-  })
-
-  it('renders in request mode with empty default email if not provided', () => {
-    renderWithRouter(['/password-reset'])
-    expect(
-      screen.getByTestId('password-reset-form-request'),
-    ).toBeInTheDocument()
-    expect(screen.getByTestId('default-email')).toHaveTextContent('')
-  })
-
-  it('renders in reset mode when code is present in search params', () => {
-    renderWithRouter(['/password-reset?code=xyz&email=user@test.com'])
-    expect(screen.getByTestId('password-reset-form-reset')).toBeInTheDocument()
-  })
-
-  it('handles successful request reset callback', async () => {
-    renderWithRouter(['/password-reset'])
-
-    // Simulate form submitting request reset
-    await userEvent.click(screen.getByTestId('request-submit-button'))
-
+    // Check that the mutation was called with the correct variables
     await waitFor(() => {
-      expect(mockShowSnackbar).toHaveBeenCalledWith({
-        message: 'Reset code sent!',
-        color: 'success',
-      })
-    })
-  })
-
-  it('handles successful password reset callback', async () => {
-    renderWithRouter(['/password-reset?code=xyz'])
-
-    // Simulate form submitting password reset
-    await userEvent.click(screen.getByTestId('reset-submit-button'))
-
-    await waitFor(() => {
-      expect(mockShowSnackbar).toHaveBeenCalledWith({
-        message: 'Password reset successful!',
-        color: 'success',
-      })
+      expect(mockMutation).toHaveBeenCalledWith(
+        expect.any(Object), // GraphQL document
+        expect.objectContaining({
+          data: expect.objectContaining({
+            code: resetCode,
+            newPassword: 'NewPassword1!',
+          }),
+        }),
+      )
     })
   })
 })

@@ -1,3 +1,4 @@
+import logger from 'src/utils/logger'
 import { builder } from '../../builder'
 import { prisma } from '../../client'
 import { comparePassword, signJwt } from '../../utils/auth'
@@ -71,6 +72,42 @@ builder.queryFields((t) => ({
       }
 
       return user.verificationCode
+    },
+  }),
+
+  // Debug query to get password reset code for testing (only works in debug mode)
+  getPasswordResetCode: t.field({
+    type: 'String',
+    args: {
+      email: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, _ctx) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('getPasswordResetCode is only available in debug mode')
+      }
+
+      logger.debug('getPasswordResetCode called for email:', args.email)
+      // Find the user
+      const user = await prisma.user.findUnique({
+        where: { email: args.email },
+      })
+
+      logger.debug('User found:', user ? 'yes' : 'no')
+      if (user) {
+        logger.debug('User token:', user.passwordResetToken)
+        logger.debug('Token expires:', user.passwordResetTokenExpiresAt)
+      }
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      if (!user.passwordResetToken) {
+        throw new Error('No password reset code found for this user')
+      }
+
+      logger.debug('Returning token:', user.passwordResetToken)
+      return user.passwordResetToken
     },
   }),
 

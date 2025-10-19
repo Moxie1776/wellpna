@@ -40,6 +40,14 @@ class EmailService {
     email: string,
     verificationCode: string,
   ): Promise<void> {
+    // In debug mode, don't actually send emails to avoid failures in tests
+    if (process.env.NODE_ENV === 'debug') {
+      console.log(
+        `[DEBUG] Would send verification email to ${email} with code ${verificationCode}`,
+      )
+      return
+    }
+
     const subject = 'Verify Your Email - WellPNA'
     const html = `
       <div style="
@@ -71,6 +79,14 @@ class EmailService {
     email: string,
     resetCode: string,
   ): Promise<void> {
+    // In debug mode, don't actually send emails to avoid failures in tests
+    if (process.env.NODE_ENV === 'debug') {
+      console.log(
+        `[DEBUG] Would send password reset email to ${email} with code ${resetCode}`,
+      )
+      return
+    }
+
     const subject = 'Reset Your Password - WellPNA'
     const html = `
       <div style="

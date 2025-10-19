@@ -63,6 +63,6 @@ describe('SignInPage Component', () => {
       await userEvent.click(signInButton)
     })
 
-    expect(mockNavigate).toHaveBeenCalledWith('/')
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
   })
 })

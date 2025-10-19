@@ -74,6 +74,8 @@ export type MechanicalIsolation = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cleanupTestUsers?: Maybe<Scalars['Int']['output']>;
+  debugVerifyUser?: Maybe<Scalars['Boolean']['output']>;
   requestPasswordReset?: Maybe<Scalars['Boolean']['output']>;
   resetPassword?: Maybe<AuthPayload>;
   sendVerificationEmail?: Maybe<Scalars['Boolean']['output']>;
@@ -82,6 +84,16 @@ export type Mutation = {
   updateUser?: Maybe<User>;
   updateUserRole?: Maybe<User>;
   verifyEmail?: Maybe<AuthPayload>;
+};
+
+
+export type MutationCleanupTestUsersArgs = {
+  pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationDebugVerifyUserArgs = {
+  email: Scalars['String']['input'];
 };
 
 
@@ -166,11 +178,17 @@ export type PlugSchedule = {
 export type Query = {
   __typename?: 'Query';
   debugStatus?: Maybe<Scalars['String']['output']>;
+  getPasswordResetCode?: Maybe<Scalars['String']['output']>;
   getVerificationCode?: Maybe<Scalars['String']['output']>;
   health?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   signIn?: Maybe<AuthPayload>;
   users?: Maybe<Array<User>>;
+};
+
+
+export type QueryGetPasswordResetCodeArgs = {
+  email: Scalars['String']['input'];
 };
 
 

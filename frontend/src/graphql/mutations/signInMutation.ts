@@ -1,4 +1,5 @@
 import { gql, TypedDocumentNode } from '@urql/core'
+
 import { AuthResponse } from '../types'
 
 interface SignInInput {
