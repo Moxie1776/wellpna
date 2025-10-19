@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/Moxie1776/wellpna/compare/v1.4.0...v1.5.0) (2025-10-19)
+
+
+### Features
+
+* complete QA cleanup - fix all linting warnings and improve code quality ([b6b298d](https://github.com/Moxie1776/wellpna/commit/b6b298d1a7f320356b9782a475a4b646587620dc))
+
 # [1.4.0](https://github.com/Moxie1776/wellpna/compare/v1.3.1...v1.4.0) (2025-10-19)
 
 
