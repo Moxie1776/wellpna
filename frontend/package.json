@@ -16,7 +16,7 @@
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.908.0",
+    "@aws-sdk/client-secrets-manager": "^3.913.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.8",
