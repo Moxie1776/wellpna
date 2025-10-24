@@ -39,7 +39,7 @@ describe('HFAutocomplete', () => {
       </TestWrapper>,
     )
 
-    expect(screen.getByText('Test Label')).toBeInTheDocument()
+    expect(screen.getByLabelText('Test Label')).toBeInTheDocument()
     expect(screen.getByRole('combobox')).toBeInTheDocument()
   })
 

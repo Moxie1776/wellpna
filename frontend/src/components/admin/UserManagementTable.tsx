@@ -76,7 +76,7 @@ export const UserManagementTable = () => {
   if (queryError) {
     return (
       <>
-        <Typography variant="h1" color="error">
+        <Typography variant="h1" sx={{ color: 'error.main' }}>
           Error
         </Typography>
         <Typography variant="body1">{queryError.message}</Typography>
@@ -89,13 +89,13 @@ export const UserManagementTable = () => {
   return (
     <>
       {error && (
-        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ color: 'error.main', mb: 2 }}>
           {error}
         </Typography>
       )}
 
       {success && (
-        <Typography variant="body2" color="success" sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ color: 'success.main', mb: 2 }}>
           {success}
         </Typography>
       )}
@@ -122,7 +122,7 @@ export const UserManagementTable = () => {
                   <Select
                     value={user.role}
                     onChange={(event) => {
-                      const value = event.target.value
+                      const value = event.target.value as string
                       if (value && value !== user.role) {
                         handleRoleChange(user.id, value)
                       }
@@ -138,7 +138,7 @@ export const UserManagementTable = () => {
               <td>{new Date(user.registeredAt).toLocaleDateString()}</td>
               <td>
                 {updatingUser === user.id && (
-                  <Typography variant="body2" color="textGrey">
+                  <Typography variant="body2" sx={{ color: 'neutral.main' }}>
                     Updating...
                   </Typography>
                 )}

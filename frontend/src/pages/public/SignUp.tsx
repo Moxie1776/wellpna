@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@mui/joy'
+import { Card, CardContent } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 import { SignUpForm } from '@/components/public/SignUpForm'
@@ -13,7 +13,6 @@ const SignupPage = () => {
   return (
     <Card
       color="primary"
-      variant="soft"
       sx={{
         minWidth: 300,
         maxWidth: 400,

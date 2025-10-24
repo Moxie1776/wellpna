@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, vi } from 'vitest'
-// import { readFileSync } from 'fs'
-// import { resolve } from 'path'
+
+// Provide a minimal logger to avoid "Cannot find name 'logger'".
+const logger = console
 
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
@@ -69,10 +70,6 @@ beforeAll(() => {
   }
 })
 
-afterAll(() => {
-  logger.debug = originalLog
-  console.error = originalError
-})
 declare let global: typeof globalThis
 
 // Minimal TextEncoder/TextDecoder polyfill for Vitest

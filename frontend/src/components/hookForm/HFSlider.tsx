@@ -1,5 +1,6 @@
-// Joy UI
-import { Box, FormHelperText, Slider, SliderProps } from '@mui/joy'
+// Material UI
+import { Box, FormHelperText, Slider } from '@mui/material'
+import { SliderProps } from '@mui/material/Slider'
 import { Controller, useFormContext } from 'react-hook-form'
 
 type Props = SliderProps & {
@@ -17,7 +18,7 @@ export default function HFSlider({ name, helperText, ...other }: Props) {
         <Box>
           <Slider {...field} valueLabelDisplay="auto" {...other} />
           {(!!error || helperText) && (
-            <FormHelperText color={error ? 'danger' : undefined}>
+            <FormHelperText error={!!error}>
               {error ? error?.message : helperText}
             </FormHelperText>
           )}

@@ -63,5 +63,17 @@ export default async function globalSetup() {
     } catch {
       // best-effort teardown
     }
+    // Also call the standalone teardown script if present. Some CI setups
+    // prefer a separate teardown file that calls the GraphQL cleanup mutation.
+    try {
+      const teardown = await import('./teardown')
+      if (teardown && typeof teardown.default === 'function') {
+        await teardown.default()
+        logger.debug('Ran external teardown script')
+      }
+    } catch (err) {
+      // Don't fail teardown; log and continue
+      logger.debug('External teardown script not run:', err instanceof Error ? err.message : String(err))
+    }
   }
 }

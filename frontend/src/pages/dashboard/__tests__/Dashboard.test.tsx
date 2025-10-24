@@ -77,10 +77,10 @@ describe('Dashboard Component', () => {
           <Dashboard />
         </TestWrapper>,
       )
-      // Check for Sheet container by class name
-      const sheet = document.querySelector('.MuiSheet-root')
-      expect(sheet).toBeInTheDocument()
-      expect(sheet).toHaveStyle({ minHeight: '100vh' })
+      // Check for Paper container by class name
+      const paper = document.querySelector('.MuiPaper-root')
+      expect(paper).toBeInTheDocument()
+      expect(paper).toHaveStyle({ minHeight: '100vh' })
     })
 
     it('displays correct typography hierarchy', () => {
@@ -89,16 +89,14 @@ describe('Dashboard Component', () => {
           <Dashboard />
         </TestWrapper>,
       )
-      // Check heading text and MUI Joy class names
+      // Check heading text and MUI class names
       const title = screen.getByText('Dashboard')
       expect(title).toBeInTheDocument()
       expect(title.className).toMatch(/MuiTypography-h1/)
-      expect(title.className).toMatch(/MuiTypography-colorPrimary/)
 
       const subtitle = screen.getByText('Welcome to the WellPNA Dashboard')
       expect(subtitle).toBeInTheDocument()
       expect(subtitle.className).toMatch(/MuiTypography-h3/)
-      expect(subtitle.className).toMatch(/MuiTypography-colorNeutral/)
     })
   })
 
@@ -315,22 +313,22 @@ describe('Dashboard Component', () => {
           <Dashboard />
         </TestWrapper>,
       )
-      // Typography components should use theme colors via class names
+      // Typography components should use theme colors
       const title = screen.getByText('Dashboard')
-      expect(title.className).toMatch(/MuiTypography-colorPrimary/)
+      expect(title.className).toMatch(/MuiTypography-h1/)
       const subtitle = screen.getByText('Welcome to the WellPNA Dashboard')
-      expect(subtitle.className).toMatch(/MuiTypography-colorNeutral/)
+      expect(subtitle.className).toMatch(/MuiTypography-h3/)
     })
 
-    it('sheet component respects theme styling', () => {
+    it('paper component respects theme styling', () => {
       render(
         <TestWrapper>
           <Dashboard />
         </TestWrapper>,
       )
-      const sheet = document.querySelector('.MuiSheet-root')
-      expect(sheet).toBeInTheDocument()
-      expect(sheet).toHaveStyle({ minHeight: '100vh' })
+      const paper = document.querySelector('.MuiPaper-root')
+      expect(paper).toBeInTheDocument()
+      expect(paper).toHaveStyle({ minHeight: '100vh' })
     })
   })
 

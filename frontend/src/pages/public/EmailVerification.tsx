@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@mui/joy'
+import { Card, CardContent } from '@mui/material'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 // eslint-disable-next-line max-len
@@ -83,9 +83,12 @@ const EmailVerificationPage = () => {
 
   return (
     <Card
-      color="primary"
-      variant="soft"
-      sx={{ minWidth: 300, maxWidth: 400 }}
+      sx={{
+        minWidth: 300,
+        maxWidth: 400,
+        backgroundColor: 'primary.main',
+        color: 'primary.contrastText',
+      }}
       role="region"
     >
       <CardContent>

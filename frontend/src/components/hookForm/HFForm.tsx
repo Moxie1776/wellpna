@@ -1,7 +1,6 @@
-import FormControl from '@mui/joy/FormControl'
-import FormHelperText from '@mui/joy/FormHelperText'
-import FormLabel from '@mui/joy/FormLabel'
-import * as React from 'react'
+import FormControl from '@mui/material/FormControl'
+import FormHelperText from '@mui/material/FormHelperText'
+import FormLabel from '@mui/material/FormLabel'
 
 export { FormControl, FormHelperText, FormLabel }
 
@@ -49,15 +48,17 @@ export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
 export const FormField = ({
   label,
   inputId,
+  error,
   children,
   ...rest
 }: {
   label: string
   inputId: string
+  error?: boolean
   children: React.ReactNode
   [key: string]: unknown
 }) => (
-  <FormControl data-testid="form-control" {...rest}>
+  <FormControl data-testid="form-control" error={error} {...rest}>
     <FormLabel data-testid="form-label" htmlFor={inputId}>
       {label}
     </FormLabel>

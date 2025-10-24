@@ -1,4 +1,4 @@
-import BreadcrumbsJoy from '@mui/joy/Breadcrumbs'
+import { Breadcrumbs as MuiBreadcrumbs } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
 
 export function Breadcrumbs() {
@@ -14,7 +14,7 @@ export function Breadcrumbs() {
   ]
 
   return (
-    <BreadcrumbsJoy sx={{ px: 2, py: 1 }} separator="/">
+    <MuiBreadcrumbs sx={{ px: 2, py: 1 }} separator="/">
       {crumbs.map((crumb, idx) =>
         idx === crumbs.length - 1 ? (
           <span key={crumb.href} style={{ fontWeight: 600 }}>
@@ -34,6 +34,6 @@ export function Breadcrumbs() {
           </Link>
         ),
       )}
-    </BreadcrumbsJoy>
+    </MuiBreadcrumbs>
   )
 }

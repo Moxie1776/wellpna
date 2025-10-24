@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, Button } from '@mui/joy'
-import Typography from '@mui/joy/Typography'
+import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFInput'
+import HFInput from '@/components/hookForm/HFTextField'
 import passwordSchema from '@/utils/passwordSchema'
 
 import { useAuth } from '../../hooks/useAuth'
@@ -110,7 +109,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
     <FormProvider {...form}>
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <Box sx={{ my: 2 }}>
-          <Typography level="h4" sx={{ mb: 2 }}>
+          <Typography variant="h4" sx={{ mb: 2 }}>
             Sign Up
           </Typography>
           <FormItem>
@@ -161,7 +160,7 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
             Sign Up
           </Button>
           {error && (
-            <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
               {error}
             </Typography>
           )}

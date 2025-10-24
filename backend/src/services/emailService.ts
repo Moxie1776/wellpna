@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import logger from '../utils/logger'
 
 export interface EmailOptions {
   to: string
@@ -42,9 +43,8 @@ class EmailService {
   ): Promise<void> {
     // In debug mode, don't actually send emails to avoid failures in tests
     if (process.env.NODE_ENV === 'debug') {
-      console.log(
-        `[DEBUG] Would send verification email to ${email} ` +
-          `with code ${verificationCode}`,
+      logger.debug(
+        `Would send verification email to ${email} with code ${verificationCode}`,
       )
       return
     }
@@ -82,9 +82,8 @@ class EmailService {
   ): Promise<void> {
     // In debug mode, don't actually send emails to avoid failures in tests
     if (process.env.NODE_ENV === 'debug') {
-      console.log(
-        `[DEBUG] Would send password reset email to ${email} ` +
-          `with code ${resetCode}`,
+      logger.debug(
+        `Would send password reset email to ${email} with code ${resetCode}`,
       )
       return
     }

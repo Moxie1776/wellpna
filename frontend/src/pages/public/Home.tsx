@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Sheet, Stack, Typography } from '@mui/joy'
+import { Box, Card, CardContent, Paper, Stack, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
@@ -19,9 +19,9 @@ const HomePage = () => {
       : 'var(--joy-palette-secondary-dark)'
 
   return (
-    <Sheet
+    <Paper
+      elevation={6}
       sx={{
-        varient: 'plain',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -45,7 +45,7 @@ const HomePage = () => {
           }}
         >
           <Typography
-            level="h1"
+            variant="h1"
             sx={{
               color: primaryColor,
             }}
@@ -53,7 +53,7 @@ const HomePage = () => {
             WellPNA
           </Typography>
           <Typography
-            level="h3"
+            variant="h3"
             sx={{
               color: secondaryColor,
             }}
@@ -96,11 +96,11 @@ const HomePage = () => {
             }}
           >
             <Card
-              color="primary"
-              variant="soft"
               sx={{
                 minWidth: 300,
                 maxWidth: 400,
+                backgroundColor: 'primary.main',
+                color: 'primary.contrastText',
               }}
             >
               <CardContent>
@@ -113,7 +113,7 @@ const HomePage = () => {
           </Box>
         </Stack>
       </Box>
-    </Sheet>
+    </Paper>
   )
 }
 

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, Button, Typography } from '@mui/joy'
+import { Box, Button, Typography } from '@mui/material'
 import React, { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { MdLogin } from 'react-icons/md'
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFInput'
+import HFInput from '@/components/hookForm/HFTextField'
 
 import { useAuth } from '../../hooks/useAuth'
 
@@ -78,16 +78,14 @@ export const SignInForm = ({
     if (result) {
       onSignIn()
     } else if (error?.includes('Email not verified')) {
-      navigate(
-        `/email-verification?email=${encodeURIComponent(values.email)}`,
-      )
+      navigate(`/email-verification?email=${encodeURIComponent(values.email)}`)
     }
   }
 
   return (
     <FormProvider {...form}>
       <Box sx={{ minWidth: 300, maxWidth: 400 }}>
-        <Typography level="h4" sx={{ mb: 2 }}>
+        <Typography variant="h4" sx={{ mb: 2 }}>
           {title}
         </Typography>
         <Form onSubmit={form.handleSubmit(onSubmit)}>
@@ -115,14 +113,14 @@ export const SignInForm = ({
           </FormItem>
           <Button
             type="submit"
-            startDecorator={<MdLogin />}
+            startIcon={<MdLogin />}
             disabled={form.formState.isSubmitting}
           >
             Sign In
           </Button>
         </Form>
         {error && (
-          <Typography level="body-sm" color="danger" sx={{ mt: 2 }}>
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
             {error}
           </Typography>
         )}

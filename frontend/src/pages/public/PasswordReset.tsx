@@ -1,5 +1,5 @@
 // InputOTP removed, use Input directly
-import { Card, CardContent } from '@mui/joy'
+import { Card, CardContent } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -97,12 +97,7 @@ const PasswordResetPage = () => {
   }
 
   return (
-    <Card
-      color="primary"
-      variant="soft"
-      sx={{ minWidth: 300, maxWidth: 400 }}
-      role="region"
-    >
+    <Card color="primary" sx={{ minWidth: 300, maxWidth: 400 }} role="region">
       <CardContent>
         <PasswordResetForm
           mode={isResetMode || hasRequestedReset ? 'reset' : 'request'}

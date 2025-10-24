@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
 describe('Snackbar Theme Integration Tests', () => {
-  it('applies Joy UI theme classes', () => {
+  it('applies MUI theme classes', () => {
     const TestWithSnackbar = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
@@ -20,7 +20,7 @@ describe('Snackbar Theme Integration Tests', () => {
       </SnackbarProvider>,
     )
     const snackbar = screen.getByTestId('snackbar')
-    expect(snackbar).toHaveAttribute('data-variant', 'soft')
+    expect(snackbar).toHaveAttribute('data-variant', 'filled')
   })
 
   describe('color variants', () => {
@@ -82,7 +82,7 @@ describe('Snackbar Theme Integration Tests', () => {
       </SnackbarProvider>,
     )
     const snackbar = screen.getByTestId('snackbar')
-    expect(snackbar).toHaveAttribute('data-variant', 'soft')
+    expect(snackbar).toHaveAttribute('data-variant', 'filled')
     expect(snackbar).toHaveAttribute('data-autohideduration', '500')
   })
 })

@@ -74,7 +74,7 @@ export const colors = {
     light: '#f5c26a',
     dark: '#a65f0a',
   },
-  danger: {
+  error: {
     50: '#fce8ec',
     100: '#f9d1d8',
     200: '#f3a3b1',
@@ -127,7 +127,7 @@ export const darkModeOverrides = {
     softHoverBg: '#333333',
     softActiveBg: '#404040',
   },
-  danger: {
+  error: {
     softBg: '#2d2d2d',
     softHoverBg: '#333333',
     softActiveBg: '#404040',
@@ -165,7 +165,7 @@ export const lightModeOverrides = {
     softHoverBg: '#e9ecef',
     softActiveBg: '#dee2e6',
   },
-  danger: {
+  error: {
     softBg: '#f8f9fa',
     softHoverBg: '#e9ecef',
     softActiveBg: '#dee2e6',

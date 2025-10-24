@@ -1,8 +1,7 @@
-// Joy UI
-import { Autocomplete } from '@mui/joy'
-import { AutocompleteProps } from '@mui/joy'
-import { FormLabel } from '@mui/joy'
-import { FormHelperText } from '@mui/joy'
+// Material UI
+import { Autocomplete } from '@mui/material'
+import { AutocompleteProps } from '@mui/material'
+import { TextField } from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 
 interface Props<
@@ -39,15 +38,16 @@ export default function HFAutocomplete<
           onChange={(_, newValue) =>
             setValue(name, newValue, { shouldValidate: true })
           }
-          startDecorator={label ? <FormLabel>{label}</FormLabel> : null}
-          endDecorator={
-            <FormHelperText color={error ? 'danger' : undefined}>
-              {error ? error?.message : helperText}
-            </FormHelperText>
-          }
-          error={!!error}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              {...field}
+              label={label}
+              error={!!error}
+              helperText={error ? error?.message : helperText}
+            />
+          )}
           {...other}
-          sx={{ mb: 1, ml: 1, mt: 1, mr: -1 }}
         />
       )}
     />

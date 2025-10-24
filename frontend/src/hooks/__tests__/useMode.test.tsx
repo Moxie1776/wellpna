@@ -6,12 +6,12 @@ vi.mock('../../store/theme', () => {
   return { useModeStore }
 })
 
-vi.mock('@mui/joy/styles', () => {
+vi.mock('@mui/material/styles', () => {
   const useColorScheme = vi.fn()
   return { useColorScheme }
 })
 
-import { useColorScheme as mockUseColorScheme } from '@mui/joy/styles'
+import { useColorScheme as mockUseColorScheme } from '@mui/material/styles'
 import { renderHook } from '@testing-library/react'
 
 import { useModeStore as mockUseModeStore } from '../../store/theme'

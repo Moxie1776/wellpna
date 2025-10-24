@@ -1,4 +1,4 @@
-import { Button, Sheet, Typography } from '@mui/joy'
+import { Button, Paper, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../hooks/useAuth'
@@ -18,7 +18,8 @@ export const Dashboard = () => {
   }
 
   return (
-    <Sheet
+    <Paper
+      elevation={6}
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -27,13 +28,13 @@ export const Dashboard = () => {
         p: 2,
       }}
     >
-      <Typography level="h1" color="primary" sx={{ mb: 2 }}>
+      <Typography variant="h1" color="primary" sx={{ mb: 2 }}>
         Dashboard
       </Typography>
-      <Typography level="h3" color="neutral">
+      <Typography variant="h3" color="neutral">
         Welcome to the WellPNA Dashboard
       </Typography>
       <Button onClick={handleLogout}>Logout</Button>
-    </Sheet>
+    </Paper>
   )
 }

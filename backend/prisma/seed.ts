@@ -1,37 +1,38 @@
 import { config } from 'dotenv'
 
 import { prisma } from '../src/client'
+import logger from '../src/utils/logger'
 
 config()
 
 async function main() {
   try {
-    console.log('Seeding: Creating user role...')
+    logger.info('Seeding: Creating user role...')
     const userRole = await prisma.userRole.upsert({
       where: { role: 'user' },
       update: {},
       create: { role: 'user' },
     })
-    console.log('User role result:', userRole)
+    logger.info('User role result:', userRole)
 
-    console.log('Seeding: Creating admin role...')
+    logger.info('Seeding: Creating admin role...')
     const adminRole = await prisma.userRole.upsert({
       where: { role: 'admin' },
       update: {},
       create: { role: 'admin' },
     })
-    console.log('Admin role result:', adminRole)
+    logger.info('Admin role result:', adminRole)
 
-    console.log('Database seeded successfully')
+    logger.info('Database seeded successfully')
   } catch (error) {
-    console.error('Seeding error:', error)
+    logger.error('Seeding error:', error)
     throw error
   }
 }
 
 main()
   .catch((e) => {
-    console.error(e)
+    logger.error(e)
     process.exit(1)
   })
   .finally(async () => {

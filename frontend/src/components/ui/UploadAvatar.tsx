@@ -1,4 +1,4 @@
-import { Avatar, Box, Typography } from '@mui/joy'
+import { Avatar, Box, Typography } from '@mui/material'
 
 export interface UploadProps {
   file?: File
@@ -11,7 +11,7 @@ export default function UploadAvatar({ file, error }: UploadProps) {
   return (
     <Box sx={{ border: error ? '1px solid red' : '1px solid #ccc', p: 2 }}>
       <Avatar src={file ? URL.createObjectURL(file) : undefined} />
-      <Typography level="body-sm">Upload Avatar</Typography>
+      <Typography variant="body2">Upload Avatar</Typography>
     </Box>
   )
 }

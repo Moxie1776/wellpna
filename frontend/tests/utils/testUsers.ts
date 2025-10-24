@@ -10,6 +10,7 @@ import {
   SignUpDocument,
   VerifyEmailDocument,
 } from '../../src/graphql/generated/graphql'
+import { useAuthStore } from '../../src/store/auth'
 
 // Test-specific type for managing test user sessions
 interface TestUserSession {
@@ -555,4 +556,128 @@ export async function createMultipleTestUsers(
   }
 
   return sessions
+}
+
+/**
+ * Promote a user in the client test environment by ensuring the user has a
+ * backend-issued token (sign in if necessary) and updating the client auth
+ * store with the requested role. This keeps tokens real while allowing UI
+ * tests to reflect role-based rendering without fabricating tokens.
+ */
+export async function promoteUserInClient(
+  email: string,
+  role: 'user' | 'admin',
+  password: string = 'password',
+): Promise<void> {
+  let session = testUserSessions.get(email)
+
+  if (!session) {
+    // Attempt to sign in (this will also populate testUserSessions)
+    const authResp = await signInTestUser(email, password)
+    session = { user: authResp.user, token: authResp.token, email }
+    testUserSessions.set(email, session)
+  }
+
+  const updatedUser = { ...session.user, role }
+  // Update stored session
+  testUserSessions.set(email, { ...session, user: updatedUser })
+
+  // Update the client auth store for UI tests
+  try {
+    useAuthStore.setState({ token: session.token, user: updatedUser })
+  } catch (err) {
+    // If the store isn't available in this environment, just log and continue
+    logger.warn('promoteUserInClient: unable to set auth store', err)
+  }
+}
+
+/**
+ * Create or promote a test user to admin on the server using the debug-only
+ * mutation `debugCreateAdminUser`. This mutation is only available when the
+ * backend is running in debug mode (NODE_ENV === 'debug'). The function will
+ * store the returned token/user in the test sessions map and set the client
+ * auth store for UI tests.
+ */
+export async function createAdminTestUser(
+  email?: string,
+  password: string = 'password',
+  name: string = 'Admin Test User',
+  phoneNumber: string = '',
+): Promise<AuthResponse> {
+  const mutation = `
+    mutation DebugCreateAdminUser($email: String!, $password: String, $name: String, $phoneNumber: String) {
+      debugCreateAdminUser(email: $email, password: $password, name: $name, phoneNumber: $phoneNumber) {
+        token
+        user {
+          id
+          email
+          name
+          role
+          phoneNumber
+        }
+      }
+    }
+  `
+
+  // Attempt to create with provided email, otherwise generate a unique one.
+  let attempt = 0
+  const maxAttempts = 3
+  let lastErr: unknown = null
+
+  while (attempt < maxAttempts) {
+    attempt++
+    const tryEmail = email || `admin-${Date.now()}${attempt}@example.com`
+
+    try {
+      const variables = { email: tryEmail, password, name, phoneNumber }
+
+      const result = await executeGraphQL(mutation, variables, undefined, {
+        retries: 2,
+        timeoutMs: 4000,
+      })
+
+      if (!result?.debugCreateAdminUser) {
+        throw new Error(
+          'debugCreateAdminUser did not return data — is backend running in debug mode?',
+        )
+      }
+
+      const authResp: AuthResponse = result.debugCreateAdminUser
+
+      // Store session
+      testUserSessions.set(authResp.user.email, {
+        user: authResp.user,
+        token: authResp.token,
+        email: authResp.user.email,
+      })
+
+      // Update client auth store for UI tests
+      try {
+        useAuthStore.setState({ token: authResp.token, user: authResp.user })
+      } catch (err) {
+        logger.warn('createAdminTestUser: unable to set auth store', err)
+      }
+
+      return authResp
+    } catch (err) {
+      lastErr = err
+      const msg = err instanceof Error ? err.message : String(err)
+      // If the email already exists, try a new unique email and retry.
+      if (msg.includes('already exists') && attempt < maxAttempts) {
+        // continue to next attempt with generated email
+        email = undefined
+        await new Promise((r) => setTimeout(r, 100 * attempt))
+        continue
+      }
+
+      // For other errors or if max attempts reached, throw.
+      throw err
+    }
+  }
+
+  throw new Error(
+    `Failed to create admin user: ${
+      lastErr instanceof Error ? lastErr.message : String(lastErr)
+    }`,
+  )
 }

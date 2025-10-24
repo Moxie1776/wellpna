@@ -1,5 +1,5 @@
-// Joy UI
-import { Box, FormHelperText } from '@mui/joy'
+// Material UI
+import { Box, FormHelperText } from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import Upload, { UploadProps } from '../ui/Upload'
@@ -27,7 +27,8 @@ export function HFUploadAvatar({ name, ...other }: Props) {
           />
           {!!error && (
             <FormHelperText
-              sx={{ px: 2, textAlign: 'center', color: 'danger' }}
+              sx={{ px: 2, textAlign: 'center' }}
+              error
             >
               {error.message}
             </FormHelperText>
@@ -66,7 +67,7 @@ export function HFUpload({ name, multiple, helperText, ...other }: Props) {
             error={!!error}
             helperText={
               (!!error || helperText) && (
-                <FormHelperText sx={{ px: 2, color: 'danger' }}>
+                <FormHelperText sx={{ px: 2 }} error={!!error}>
                   {error ? error?.message : helperText}
                 </FormHelperText>
               )
@@ -80,7 +81,7 @@ export function HFUpload({ name, multiple, helperText, ...other }: Props) {
             error={!!error}
             helperText={
               (!!error || helperText) && (
-                <FormHelperText sx={{ px: 2, color: 'danger' }}>
+                <FormHelperText sx={{ px: 2 }} error={!!error}>
                   {error ? error?.message : helperText}
                 </FormHelperText>
               )

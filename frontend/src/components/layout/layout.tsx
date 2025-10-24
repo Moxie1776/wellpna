@@ -1,4 +1,4 @@
-import { Box, Sheet } from '@mui/joy'
+import { Box, Paper } from '@mui/material'
 import { ReactNode } from 'react'
 
 import { useAuthStore } from '@/store/auth'
@@ -11,8 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user)
   const isAuthenticated = !!user
   return (
-    <Sheet
-      variant="plain"
+    <Paper
       sx={{
         display: 'flex',
         minHeight: '100vh',
@@ -34,7 +33,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         <Box
           component="header"
           sx={{
-            variant: 'soft',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -47,7 +45,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <Breadcrumbs />
           <ThemeToggle />
         </Box>
-        <Sheet
+        <Paper
           sx={{
             flex: 1,
             display: 'flex',
@@ -56,8 +54,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           }}
         >
           {children}
-        </Sheet>
+        </Paper>
       </Box>
-    </Sheet>
+    </Paper>
   )
 }

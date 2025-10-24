@@ -1,5 +1,5 @@
-// Joy UI
-import { Box, FormControl, FormHelperText, FormLabel, Switch } from '@mui/joy'
+// Material UI
+import { Box, FormControl, FormHelperText, FormLabel, Switch } from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 
 interface Props {
@@ -22,7 +22,7 @@ export default function HFSwitch(props: Props) {
             {label && <FormLabel sx={{ ml: 1 }}>{label}</FormLabel>}
           </Box>
           {(!!error || helperText) && (
-            <FormHelperText color={error ? 'danger' : undefined}>
+            <FormHelperText error={!!error}>
               {error ? error?.message : helperText}
             </FormHelperText>
           )}

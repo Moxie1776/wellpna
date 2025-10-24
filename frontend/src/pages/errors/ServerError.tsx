@@ -1,11 +1,12 @@
-import { Box, Button, Sheet, Typography } from '@mui/joy'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 const ServerError = () => {
   const navigate = useNavigate()
 
   return (
-    <Sheet
+    <Paper
+      elevation={6}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -32,19 +33,19 @@ const ServerError = () => {
           />
         </Box>
 
-        <Typography level="h1" sx={{ mb: 2 }}>
+        <Typography variant="h1" sx={{ mb: 2 }}>
           500 - Server Error
         </Typography>
 
-        <Typography level="body-lg" sx={{ mb: 4, color: 'text.secondary' }}>
+        <Typography variant="body1" sx={{ mb: 4, color: 'textSecondary' }}>
           Something went wrong on our end. Please try again later.
         </Typography>
 
-        <Button size="lg" onClick={() => navigate('/')}>
+        <Button size="large" onClick={() => navigate('/')}>
           Go Home
         </Button>
       </Box>
-    </Sheet>
+    </Paper>
   )
 }
 

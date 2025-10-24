@@ -13,14 +13,14 @@ export type AppRoute = {
 // Import icons at the top of your file
 
 import {
-  MdAdminPanelSettings,
   MdDashboard,
-  MdEmail,
   MdHome,
+  MdLockReset,
   MdLogin,
+  MdOutlineAdminPanelSettings,
   MdPerson,
   MdPersonAdd,
-  MdVpnKey,
+  MdVerifiedUser,
 } from 'react-icons/md'
 
 import { Admin as AdminPage } from '../pages/admin/Admin'
@@ -60,7 +60,7 @@ export const appRoutes: AppRoute[] = [
   {
     label: 'Admin',
     href: '/admin',
-    icon: MdAdminPanelSettings,
+    icon: MdOutlineAdminPanelSettings,
     requiresAuth: true,
     requiredRole: 'admin',
     page: AdminPage,
@@ -82,14 +82,14 @@ export const appRoutes: AppRoute[] = [
   {
     label: 'Password Reset',
     href: '/reset-password',
-    icon: MdVpnKey,
+    icon: MdLockReset,
     requiresAuth: false,
     page: PasswordResetPage,
   },
   {
     label: 'Email Verification',
     href: '/verify-email',
-    icon: MdEmail,
+    icon: MdVerifiedUser,
     requiresAuth: false,
     page: EmailVerificationPage,
   },

@@ -1,11 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, FormControl, FormLabel, Input, Typography } from '@mui/joy'
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  TextField,
+  Typography,
+} from '@mui/material'
 import React, { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Form, FormItem } from '../../components/hookForm/HFForm'
-import HFInput from '../../components/hookForm/HFInput'
+import HFInput from '../hookForm/HFTextField'
 import { useUpdateUserMutation } from '../../graphql/generated/graphql'
 import { useAuthStore } from '../../store/auth'
 import logger from '../../utils/logger'
@@ -104,11 +110,11 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
       <Form onSubmit={form.handleSubmit(onSubmit)}>
         <FormControl sx={{ mb: 2 }}>
           <FormLabel>Email</FormLabel>
-          <Input
+          <TextField
             type="email"
             value={user?.email || ''}
             disabled
-            sx={{ backgroundColor: 'background.level1' }}
+            sx={{ backgroundColor: 'background.paper' }}
           />
         </FormControl>
 
@@ -137,13 +143,13 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
         </FormItem>
 
         {result.error && (
-          <Typography level="body-sm" color="danger" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="error" sx={{ mb: 2 }}>
             {result.error.message || 'Failed to update profile'}
           </Typography>
         )}
 
         {success && (
-          <Typography level="body-sm" color="success" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="success" sx={{ mb: 2 }}>
             Profile updated successfully!
           </Typography>
         )}

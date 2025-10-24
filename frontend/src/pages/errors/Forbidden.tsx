@@ -1,11 +1,12 @@
-import { Box, Button, Sheet, Typography } from '@mui/joy'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 const Forbidden = () => {
   const navigate = useNavigate()
 
   return (
-    <Sheet
+    <Paper
+      elevation={6}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -32,19 +33,19 @@ const Forbidden = () => {
           />
         </Box>
 
-        <Typography level="h1" sx={{ mb: 2 }}>
+        <Typography variant="h1" sx={{ mb: 2 }}>
           403 - Access Forbidden
         </Typography>
 
-        <Typography level="body-lg" sx={{ mb: 4, color: 'text.secondary' }}>
+        <Typography variant="body1" sx={{ mb: 4, color: 'textSecondary' }}>
           You don't have permission to access this page.
         </Typography>
 
-        <Button size="lg" onClick={() => navigate('/')}>
+        <Button size="large" onClick={() => navigate('/')}>
           Go Home
         </Button>
       </Box>
-    </Sheet>
+    </Paper>
   )
 }
 

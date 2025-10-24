@@ -1,4 +1,4 @@
-import { Sheet, Typography } from '@mui/joy'
+import { Box, Paper, Typography } from '@mui/material'
 
 import { ProfileForm } from '../../components/forms/ProfileForm'
 import { useAuth } from '../../hooks/useAuth'
@@ -7,7 +7,7 @@ export const Profile = () => {
   const { user } = useAuth()
 
   return (
-    <Sheet
+    <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -16,18 +16,18 @@ export const Profile = () => {
         p: 2,
       }}
     >
-      <Sheet
+      <Paper
         sx={{
           width: '100%',
           maxWidth: 400,
           p: 3,
-          borderRadius: 'md',
-          boxShadow: 'md',
+          borderRadius: 2,
+          boxShadow: 3,
         }}
-        variant="outlined"
+        elevation={6}
       >
         <Typography
-          level="h1"
+          variant="h1"
           color="primary"
           sx={{ mb: 3, textAlign: 'center' }}
         >
@@ -35,7 +35,7 @@ export const Profile = () => {
         </Typography>
 
         <ProfileForm user={user} />
-      </Sheet>
-    </Sheet>
+      </Paper>
+    </Box>
   )
 }

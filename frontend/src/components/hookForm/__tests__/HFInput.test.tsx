@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 import { describe, expect, it, vi } from 'vitest'
 
-import HFInput from '../HFInput'
 import HFProvider from '../HFProvider'
+import HFInput from '../HFTextField'
 
 type TestFormData = {
   testInput?: string
@@ -30,7 +30,7 @@ describe('HFInput', () => {
       </TestWrapper>,
     )
 
-    expect(screen.getByText('Test Label')).toBeInTheDocument()
+    expect(screen.getByLabelText('Test Label')).toBeInTheDocument()
     expect(screen.getByText('Helper text')).toBeInTheDocument()
     expect(screen.getByRole('textbox')).toBeInTheDocument()
   })

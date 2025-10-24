@@ -22,7 +22,7 @@ Object.defineProperty(global, 'import', {
   writable: false,
 })
 
-// Mock window.matchMedia for Joy UI/MUI tests
+// Mock window.matchMedia for MUI tests
 if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = function (query) {
     return {

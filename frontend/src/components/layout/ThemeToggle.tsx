@@ -1,5 +1,6 @@
-import { IconButton, Tooltip } from '@mui/joy'
+import { IconButton, Tooltip } from '@mui/material'
 import * as React from 'react'
+import { useEffect } from 'react'
 import { MdDarkMode, MdLightMode } from 'react-icons/md'
 
 import { useMode } from '../../hooks/useMode'
@@ -8,19 +9,17 @@ export default function ThemeToggle() {
   const { mode, setMode } = useMode()
   const [mounted, setMounted] = React.useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true)
   }, [])
   if (!mounted) {
-    return <IconButton size="sm" variant="outlined" color="neutral" disabled />
+    return <IconButton size="small" disabled sx={{ color: 'neutral' }} />
   }
 
   return (
     <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
       <IconButton
-        size="sm"
-        variant="outlined"
-        color="neutral"
+        size="small"
         onClick={() => {
           setMode(mode === 'light' ? 'dark' : 'light')
         }}

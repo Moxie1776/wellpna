@@ -1,4 +1,4 @@
-// Joy UI
+// Material UI
 import {
   Box,
   Checkbox,
@@ -6,7 +6,7 @@ import {
   FormHelperText,
   FormLabel,
   Stack,
-} from '@mui/joy'
+} from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 
 interface HFCheckboxProps {
@@ -34,7 +34,7 @@ export function HFCheckbox({
             {label && <FormLabel>{label}</FormLabel>}
           </Stack>
           {(!!error || helperText) && (
-            <FormHelperText color={error ? 'danger' : undefined}>
+            <FormHelperText error={!!error}>
               {error ? error?.message : helperText}
             </FormHelperText>
           )}
@@ -93,7 +93,7 @@ export function HFMultiCheckbox({
             ))}
           </Stack>
           {(!!error || helperText) && (
-            <FormHelperText color={error ? 'danger' : undefined} sx={{ mx: 0 }}>
+            <FormHelperText error={!!error} sx={{ mx: 0 }}>
               {error ? error?.message : helperText}
             </FormHelperText>
           )}

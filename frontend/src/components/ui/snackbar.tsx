@@ -1,4 +1,4 @@
-import Snackbar from '@mui/joy/Snackbar'
+import { Alert, Snackbar } from '@mui/material'
 import * as React from 'react'
 
 import logger from '../../utils/logger'
@@ -25,6 +25,26 @@ export interface SnackbarMessage {
   autoHideDuration?: number
 }
 
+const getSeverity = (
+  color: SnackbarColor,
+): 'error' | 'warning' | 'success' | 'info' | 'neutral' => {
+  const base = color.split('.')[0] as string
+  switch (base) {
+    case 'danger':
+      return 'error'
+    case 'warning':
+      return 'warning'
+    case 'success':
+      return 'success'
+    case 'info':
+      return 'info'
+    case 'neutral':
+      return 'info'
+    default:
+      return 'info'
+  }
+}
+
 export const SnackbarContext = React.createContext<{
   showSnackbar: (msg: SnackbarMessage) => void
 } | null>(null)
@@ -42,14 +62,7 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Extract base color and shade
   const colorValue = snackbar?.color || 'neutral'
-  const [baseColor, shade] = colorValue.split('.')
-  const sxProps = shade
-    ? {
-        backgroundColor: `var(--joy-palette-${baseColor}-${shade})`,
-      }
-    : {}
 
   return (
     <SnackbarContext.Provider value={{ showSnackbar }}>
@@ -57,28 +70,30 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
       <Snackbar
         open={open}
         onClose={() => setOpen(false)}
-        color={baseColor as any}
-        variant="soft"
         autoHideDuration={snackbar?.autoHideDuration ?? 10000}
         data-testid="snackbar"
         data-color={colorValue}
-        data-variant="soft"
+        data-variant="filled"
         data-autohideduration={String(snackbar?.autoHideDuration ?? 10000)}
         role="alert"
         aria-live="assertive"
-        sx={sxProps}
-        endDecorator={
-          <button
-            data-testid="snackbar-close"
-            aria-label="Close notification"
-            onClick={() => setOpen(false)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            ×
-          </button>
-        }
       >
-        <span>{snackbar?.message ?? ''}</span>
+        <Alert
+          severity={getSeverity(colorValue)}
+          variant="filled"
+          action={
+            <button
+              data-testid="snackbar-close"
+              aria-label="Close notification"
+              onClick={() => setOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              ×
+            </button>
+          }
+        >
+          {snackbar?.message ?? ''}
+        </Alert>
       </Snackbar>
     </SnackbarContext.Provider>
   )

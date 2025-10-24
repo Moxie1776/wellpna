@@ -1,12 +1,13 @@
-// Joy UI
+// Material UI
 import {
   FormControl,
+  FormControlLabel,
   FormHelperText,
   FormLabel,
   Radio,
   RadioGroup,
-  RadioGroupProps,
-} from '@mui/joy'
+} from '@mui/material'
+import { RadioGroupProps } from '@mui/material/RadioGroup'
 import { Controller, useFormContext } from 'react-hook-form'
 
 type Props = RadioGroupProps & {
@@ -38,15 +39,16 @@ export default function HFRadioGroup(props: Props) {
           )}
           <RadioGroup {...field} aria-labelledby={labelledby} {...other}>
             {options.map((option) => (
-              <Radio
+              <FormControlLabel
                 key={option.value}
                 value={option.value}
+                control={<Radio />}
                 label={option.label}
               />
             ))}
           </RadioGroup>
           {(!!error || helperText) && (
-            <FormHelperText sx={{ mx: 0 }} color={error ? 'danger' : undefined}>
+            <FormHelperText sx={{ mx: 0 }} error={!!error}>
               {error ? error?.message : helperText}
             </FormHelperText>
           )}

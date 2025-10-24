@@ -21,8 +21,7 @@ describe('Snackbar Error Handling Tests', () => {
     )
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toBeInTheDocument()
-    // Should contain the message span and close button
-    expect(snackbar.querySelectorAll('span').length).toBeGreaterThanOrEqual(1)
+    // Should contain the close button even with empty message
     const closeBtn = snackbar.querySelector('[data-testid="snackbar-close"]')
     expect(closeBtn).toBeInTheDocument()
   })

@@ -104,6 +104,58 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  // Debug mutation to create or promote a user to admin (only available in debug mode)
+  // Returns an AuthPayload so tests can immediately sign in with a backend-issued token.
+  debugCreateAdminUser: t.field({
+    type: AuthPayload,
+    args: {
+      email: t.arg.string({ required: true }),
+      password: t.arg.string(),
+      name: t.arg.string(),
+      phoneNumber: t.arg.string(),
+    },
+    resolve: async (_root, args, ctx: any) => {
+      if (process.env.NODE_ENV !== 'debug') {
+        throw new Error('debugCreateAdminUser is only available in debug mode')
+      }
+      const db = ctx?.prisma || prisma
+
+      // Only create a new admin user. Do not promote existing users.
+      const existing = await db.user.findUnique({
+        where: { email: args.email },
+      })
+      if (existing) {
+        throw new Error('User already exists')
+      }
+
+      const plain = args.password ?? Math.random().toString(36).slice(2, 10)
+      const hashed = await hashPassword(plain)
+      const user = await db.user.create({
+        data: {
+          email: args.email,
+          password: hashed,
+          name: args.name ?? 'Admin Test User',
+          phoneNumber: args.phoneNumber ?? '',
+          role: 'admin',
+          validatedAt: new Date(),
+          verificationCode: null,
+          verificationCodeExpiresAt: null,
+        },
+      })
+
+      // Issue a token for the test so frontend tests can use a real backend token
+      const token = signJwt({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+      })
+
+      return { token, user }
+    },
+  }),
+
   signIn: t.field({
     type: AuthPayload,
     args: {
@@ -279,14 +331,8 @@ builder.mutationFields((t) => ({
       const resetCode = generate6DigitCode()
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
 
-      logger.debug(
-        'Setting password reset token for user:',
-        user.email,
-        'token:',
-        resetCode,
-        'expires:',
-        expiresAt,
-      )
+      // Record that a reset token was set for this user (do not log the token)
+      logger.info(`Set password reset token for user: ${user.email}`)
       await db.user.update({
         where: { id: user.id },
         data: {
@@ -311,7 +357,8 @@ builder.mutationFields((t) => ({
       data: t.arg({ type: ResetPasswordInput, required: true }),
     },
     resolve: async (_root, args, ctx: any) => {
-      logger.debug('resetPassword called with code:', args.data.code)
+      // resetPassword called - do not log sensitive codes
+      logger.debug('resetPassword called')
       const db = ctx?.prisma || prisma
 
       const user = await db.user.findFirst({
@@ -321,12 +368,7 @@ builder.mutationFields((t) => ({
         },
       })
 
-      logger.debug('User found for reset code:', user ? 'yes' : 'no')
-      if (user) {
-        logger.debug('User token:', user.passwordResetToken)
-        logger.debug('Token expires:', user.passwordResetTokenExpiresAt)
-        logger.debug('Current time:', new Date())
-      }
+      logger.debug('User found for reset code: ' + (user ? 'yes' : 'no'))
 
       if (!user) throw new Error('Invalid or expired reset code')
 

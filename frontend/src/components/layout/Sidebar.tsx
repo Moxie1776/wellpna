@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Drawer,
-  IconButton,
-  IconButton as JoyIconButton,
-  Sheet,
-} from '@mui/joy'
+import { Box, Button, Drawer, IconButton, Paper, useTheme } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { MdDashboard, MdHome, MdMenu } from 'react-icons/md'
 import { Link } from 'react-router-dom'
@@ -19,12 +12,10 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { signOut, user } = useAuth()
   const isMobile = useIsMobile()
   const { mode } = useMode()
+  const theme = useTheme()
 
   // Expose linkColor variable for easy usage and discovery
-  const linkColor =
-    mode === 'dark'
-      ? 'var(--joy-palette-primary-300)'
-      : 'var(--joy-palette-primary-700)'
+  const linkColor = mode === 'dark' ? 'primary[300]' : 'primary[700]'
 
   // Filter links by auth and role
   const filteredLinks = useMemo(
@@ -78,18 +69,17 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: '#012d6c',
+          backgroundColor: theme.palette.primary.main,
           gap: 8,
           borderBottom: '1px solid',
           borderColor: 'divider',
-          color: '#fff',
+          color: theme.palette.common.white,
         }}
       >
-        {/* Theme toggle icon */}
-        <JoyIconButton
-          variant="plain"
+        {/* home/dashboard toggle icon */}
+        <IconButton
           color="neutral"
-          size="sm"
+          size="small"
           sx={{ mr: 1, color: '#fff' }}
         >
           {isAuthenticated ? (
@@ -97,7 +87,7 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
           ) : (
             <MdHome size={24} data-testid="sidebar-home-icon" />
           )}
-        </JoyIconButton>
+        </IconButton>
         {/* Home/dashboard icon and clickable WellPnA */}
         WellPnA
       </Box>
@@ -136,12 +126,19 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
       </nav>
       {isAuthenticated && (
         <Button
-          variant="outlined"
-          color="neutral"
           fullWidth
           onClick={signOut}
           role="button"
-          sx={{ padding: '1rem' }}
+          sx={{
+            padding: '1rem',
+            borderColor: 'neutral.main',
+            color: 'neutral.main',
+            '&:hover': {
+              borderColor: 'neutral.dark',
+              backgroundColor: 'neutral.main',
+              color: 'neutral.contrastText',
+            },
+          }}
         >
           Logout
         </Button>
@@ -153,21 +150,24 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
     return (
       <Box>
         <IconButton
-          variant="soft"
-          color="neutral"
-          sx={{ position: 'fixed', top: 16, left: 16, zIndex: 1200 }}
+          sx={{
+            position: 'fixed',
+            top: 16,
+            left: 16,
+            zIndex: 1200,
+            backgroundColor: 'neutral.main',
+            color: 'neutral.contrastText',
+            '&:hover': {
+              backgroundColor: 'neutral.dark',
+            },
+          }}
           onClick={() => setOpen(true)}
         >
           <MdMenu size={28} />
         </IconButton>
-        <Drawer
-          open={open}
-          onClose={() => setOpen(false)}
-          anchor="left"
-          size="sm"
-        >
-          <Sheet
-            variant="soft"
+        <Drawer open={open} onClose={() => setOpen(false)} anchor="left">
+          <Paper
+            elevation={6}
             sx={{
               width: 220,
               minHeight: '100vh',
@@ -177,15 +177,15 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
             }}
           >
             {sidebarContent}
-          </Sheet>
+          </Paper>
         </Drawer>
       </Box>
     )
   }
 
   return (
-    <Sheet
-      variant="soft"
+    <Paper
+      elevation={6}
       style={{
         width: 220,
         minHeight: '100vh',
@@ -196,6 +196,6 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
       sx={{ borderRight: '1px solid' }}
     >
       {sidebarContent}
-    </Sheet>
+    </Paper>
   )
 }
