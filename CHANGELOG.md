@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/Moxie1776/wellpna/compare/v1.5.0...v1.6.0) (2025-10-24)
+
+
+### Features
+
+* **test:** implement true integrated frontend tests with real backend flows ([2e9b6f0](https://github.com/Moxie1776/wellpna/commit/2e9b6f0cdf071119413f26440b8cf1d405daeca0))
+
 # [1.5.0](https://github.com/Moxie1776/wellpna/compare/v1.4.0...v1.5.0) (2025-10-19)
 
 
