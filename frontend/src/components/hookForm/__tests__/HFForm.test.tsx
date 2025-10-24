@@ -196,7 +196,7 @@ describe('Form Components', () => {
 
       const input = screen.getByRole('textbox')
       expect(input).toBeInTheDocument()
-      // Note: variant and color are handled by Joy UI internally
+      // Variant/color are handled by the UI library
     })
   })
 

@@ -9,9 +9,7 @@ interface TestUser extends User {
 export class TestUtils {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Creates a test user with a random email and returns the user data with JWT
-   */
+  /** Create a test user with a random email and return user + jwt. */
   async createTestUser(
     overrides: Partial<{
       email: string
@@ -25,7 +23,7 @@ export class TestUtils {
     const email = overrides.email || `test-${Date.now()}@example.com`
     const name = overrides.name || 'Test User'
     const password = overrides.password || 'password123'
-    // Generate a random phone number for test users
+    // Random phone number for test users
     const phoneNumber =
       overrides.phoneNumber ||
       `555-${Math.floor(1000 + Math.random() * 9000)}-` +
@@ -60,9 +58,7 @@ export class TestUtils {
     return { ...user, jwt } as TestUser
   }
 
-  /**
-   * Creates a verified test user (with validatedAt set)
-   */
+  /** Create a verified test user (sets validatedAt). */
   async createVerifiedTestUser(
     overrides: Partial<{
       email: string
@@ -71,10 +67,10 @@ export class TestUtils {
       role: string
     }> = {},
   ): Promise<TestUser> {
-    // Create via signUp mutation
+    // Create user via signUp mutation
     const created = await this.createTestUser(overrides)
 
-    // Ensure a verification code exists; if not, trigger sendVerificationEmail
+    // Ensure verification code exists; trigger send if absent
     const dbUser = await this.prisma.user.findUnique({
       where: { id: created.id },
     })
@@ -136,8 +132,8 @@ export class TestUtils {
   }
 
   /**
-   * One permitted direct DB write: set a verification code for an email.
-   * Use this only when a test can't intercept/mock email delivery.
+   * Set a verification code directly in the DB.
+   * Intended for tests that cannot intercept/mock email delivery.
    */
   async setVerificationCode(email: string, code: string) {
     await this.prisma.user.update({
@@ -149,9 +145,7 @@ export class TestUtils {
     })
   }
 
-  /**
-   * Cleans up test users created during tests
-   */
+  /** Delete test users created during tests. */
   async cleanupTestUsers(): Promise<void> {
     await this.prisma.user.deleteMany({
       where: {

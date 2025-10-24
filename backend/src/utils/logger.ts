@@ -19,7 +19,7 @@ class DailyLevelFileTransport extends Transport {
   log(info: any, callback: () => void) {
     const date = new Date().toISOString().split('T')[0]
     const level = info.level
-    const dir = path.join(__dirname, '../../../logs', this.source, level)
+    const dir = path.join(__dirname, '../../logs', this.source, level)
     const filename = path.join(dir, `${date}.log`)
 
     // Ensure directory exists

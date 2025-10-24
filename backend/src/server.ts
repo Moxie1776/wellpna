@@ -70,16 +70,7 @@ export const yoga = createYoga<GraphQLContext>({
       logger: logger,
     }
 
-    // Diagnostic logging: show incoming Authorization header and JWT payload
-    const authHeader =
-      request.headers.get('authorization') ||
-      request.headers.get('Authorization')
-    logger.debug(`Incoming Authorization header: ${authHeader}`)
-    logger.debug(
-      `Context JWT before user mapping: ${JSON.stringify(
-        (context as any).jwt?.payload || null,
-      )}`,
-    )
+    // Diagnostic logging removed to avoid leaking sensitive headers/payloads
 
     return context
   },

@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, vi } from 'vitest'
+import { beforeAll, vi } from 'vitest'
 
 // Provide a minimal logger to avoid "Cannot find name 'logger'".
-const logger = console
+import logger from './src/utils/logger'
 
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
@@ -50,13 +50,9 @@ declare global {
 }
 globalThis.act = act
 
-// Suppress logger.debug and console.error in tests globally
-// Use logger.info, logger.debug, etc. for debugging instead
-const originalLog = logger.debug
-const originalError = console.error
 beforeAll(() => {
   logger.debug = vi.fn()
-  console.error = (...args) => {
+  logger.error = (...args) => {
     // Allow specific important errors but suppress React act() warnings
     if (
       typeof args[0] === 'string' &&
@@ -65,7 +61,7 @@ beforeAll(() => {
     ) {
       return
     }
-    // Suppress all other console.error messages in tests
+    // Suppress all other logger.error messages in tests
     return
   }
 })

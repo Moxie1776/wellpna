@@ -35,8 +35,8 @@ describe('updateUser mutation', () => {
     })
 
     const result = await response.json()
-    // DEBUG: print full GraphQL response via logger (console.log suppressed)
-    logger.info('DEBUG updateUser full response: ' + JSON.stringify(result))
+    // DEBUG: print full GraphQL response via logger (logger.log suppressed)
+    logger.debug('updateUser full response: ' + JSON.stringify(result))
 
     expect(result.errors).toBeDefined()
     expect(result.errors[0].message).toContain('Authentication required')
@@ -79,7 +79,7 @@ describe('updateUser mutation', () => {
 
     const result = await response.json()
     // DEBUG: log full GraphQL response for diagnosis
-    logger.info('DEBUG updateUser partial response: ' + JSON.stringify(result))
+    logger.debug('updateUser partial response: ' + JSON.stringify(result))
 
     expect(result.data.updateUser).toBeDefined()
     expect(result.data.updateUser.name).toBe('Updated Name')
@@ -136,7 +136,7 @@ describe('updateUser mutation', () => {
     })
 
     const result = await response.json()
-    logger.info('DEBUG updateUser partial response: ' + JSON.stringify(result))
+    logger.debug('updateUser partial response: ' + JSON.stringify(result))
 
     expect(result.data.updateUser).toBeDefined()
     expect(result.data.updateUser.name).toBe('Partially Updated Name')
@@ -147,9 +147,7 @@ describe('updateUser mutation', () => {
     const updated = await prisma.user.findUnique({
       where: { id: testUser.user.id },
     })
-    logger.info(
-      'DEBUG updateUser partial DB record: ' + JSON.stringify(updated),
-    )
+    logger.debug('updateUser partial DB record: ' + JSON.stringify(updated))
     expect(updated?.name).toBe('Partially Updated Name')
     expect(updated?.phoneNumber).toBe('555-333-4444')
   })

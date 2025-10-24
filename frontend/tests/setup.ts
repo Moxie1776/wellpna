@@ -170,12 +170,7 @@ export async function ensureBackendRunning() {
       )
     }
 
-    // Note: fetch may not be available in Node.js test environment
-    // The global-setup.ts handles starting the backend server
-    // Here we just verify the port is in use as a basic check
-    logger.debug('Backend server verification: port 4000 is in use')
-
-    logger.debug('Backend server is running in debug mode on localhost:4000')
+    // fetch may be unavailable in Node.js tests; verify port in-use only
   } catch (error) {
     if (error instanceof Error) {
       throw error
@@ -188,18 +183,18 @@ export async function ensureBackendRunning() {
 process.env.VITE_GRAPHQL_ENDPOINT = 'http://localhost:4000/graphql'
 process.env.NODE_ENV = 'debug'
 
-// Suppress logger.debug and console.error in tests globally
-// Use logger.info, logger.debug, etc. for debugging instead
+// Suppress logger.debug and logger.error in tests globally
+// Use logger.info, logger.debug, etc. for debugging when needed
 const originalLog = logger.debug
-const originalError = console.error
+const originalError = logger.error
 beforeAll(() => {
   logger.debug = vi.fn()
-  console.error = vi.fn()
+  logger.error = vi.fn()
 })
 
 afterAll(() => {
   logger.debug = originalLog
-  console.error = originalError
+  logger.error = originalError
 })
 
 // Mock nodemailer (keep from backend tests)
@@ -229,37 +224,14 @@ vi.mock('nodemailer', () => ({
 }))
 
 beforeAll(async () => {
-  // Ensure backend server is running and in debug mode. This is a best-effort
-  // check; do not throw if the backend isn't running so tests that don't
-  // require the backend can still execute locally.
+  // Best-effort check that backend is running in debug mode; do not throw
+  // so tests that don't need the backend can still run locally.
   try {
     await ensureBackendRunning()
   } catch (err) {
-    console.warn('ensureBackendRunning failed (continuing):', err)
+    logger.warn('ensureBackendRunning failed (continuing):', err)
   }
 
   // Backend server is started in global-setup.ts (if desired)
   // Here we just set up any frontend-specific test setup
-})
-
-afterAll(async () => {
-  // Call the teardown script for cleanup if available. Guard import so
-  // that missing backend/test utilities do not cause the test runner to
-  // fail during global teardown.
-  // NOTE: Disabled per-file teardown to avoid conflicts between parallel tests.
-  // Cleanup is now handled globally in global-setup.ts
-  /*
-  try {
-    // dynamic import and guard
-
-    const mod = await import('./teardown')
-    if (mod && typeof mod.default === 'function') {
-      await mod.default()
-    }
-  } catch (err) {
-    // best-effort: log and continue
-
-    console.warn('Teardown skipped or failed:', err)
-  }
-  */
 })

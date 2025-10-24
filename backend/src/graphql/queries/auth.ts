@@ -93,12 +93,6 @@ builder.queryFields((t) => ({
         where: { email: args.email },
       })
 
-      logger.debug('User found:', user ? 'yes' : 'no')
-      if (user) {
-        logger.debug('User token:', user.passwordResetToken)
-        logger.debug('Token expires:', user.passwordResetTokenExpiresAt)
-      }
-
       if (!user) {
         throw new Error('User not found')
       }
@@ -107,7 +101,6 @@ builder.queryFields((t) => ({
         throw new Error('No password reset code found for this user')
       }
 
-      logger.debug('Returning token:', user.passwordResetToken)
       return user.passwordResetToken
     },
   }),

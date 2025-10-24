@@ -11,10 +11,10 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Form, FormItem } from '../../components/hookForm/HFForm'
-import HFInput from '../hookForm/HFTextField'
 import { useUpdateUserMutation } from '../../graphql/generated/graphql'
 import { useAuthStore } from '../../store/auth'
 import logger from '../../utils/logger'
+import HFInput from '../hookForm/HFTextField'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),

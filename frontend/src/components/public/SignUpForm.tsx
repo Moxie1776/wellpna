@@ -9,7 +9,6 @@ import HFInput from '@/components/hookForm/HFTextField'
 import passwordSchema from '@/utils/passwordSchema'
 
 import { useAuth } from '../../hooks/useAuth'
-import logger from '../../utils/logger'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -20,7 +19,7 @@ const signupSchema = z.object({
 
 export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   const { signUp, error } = useAuth()
-  logger.debug('SignupForm error:', error)
+  // Debug logs removed: keep error handling via hook
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -83,7 +82,6 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
   ])
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
-    logger.debug('SignUpForm submit', values)
     try {
       await signUp(
         values.email,
@@ -91,16 +89,8 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
         values.name,
         values.phoneNumber,
       )
-      logger.debug(
-        'SignUpForm signUp callback called',
-        values.email,
-        values.password,
-        values.name,
-      )
       onSignup()
-      logger.debug('SignUpForm onSignup callback called')
-    } catch (err) {
-      logger.debug('SignUpForm error in submit', err)
+    } catch {
       // Error handling is done in the useAuth hook
     }
   }

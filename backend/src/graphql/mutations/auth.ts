@@ -104,8 +104,10 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  // Debug mutation to create or promote a user to admin (only available in debug mode)
-  // Returns an AuthPayload so tests can immediately sign in with a backend-issued token.
+  // Debug mutation to create or promote a user to admin
+  // (only available in debug mode)
+  // Returns an AuthPayload so tests can immediately sign
+  // in with a backend-issued token.
   debugCreateAdminUser: t.field({
     type: AuthPayload,
     args: {
@@ -143,7 +145,7 @@ builder.mutationFields((t) => ({
         },
       })
 
-      // Issue a token for the test so frontend tests can use a real backend token
+      // Issue a token for tests so frontend can use a real backend token.
       const token = signJwt({
         id: user.id,
         email: user.email,
@@ -358,7 +360,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, args, ctx: any) => {
       // resetPassword called - do not log sensitive codes
-      logger.debug('resetPassword called')
       const db = ctx?.prisma || prisma
 
       const user = await db.user.findFirst({
@@ -368,7 +369,7 @@ builder.mutationFields((t) => ({
         },
       })
 
-      logger.debug('User found for reset code: ' + (user ? 'yes' : 'no'))
+      // User lookup for reset code; do not log sensitive details
 
       if (!user) throw new Error('Invalid or expired reset code')
 

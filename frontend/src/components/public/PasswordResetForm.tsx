@@ -8,7 +8,7 @@ import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
 import HFInput from '@/components/hookForm/HFTextField'
 import { passwordSchema } from '@/utils/'
 
-import logger from '../../utils/logger'
+// logger removed: no longer used for transient debug in this form
 
 const requestResetSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -113,13 +113,8 @@ export function PasswordResetForm({
     <FormProvider {...requestForm}>
       <Form
         onSubmit={requestForm.handleSubmit((data) => {
-          logger.debug('PasswordResetForm request mode submit', data)
           if (onRequestReset) {
             onRequestReset(data)
-            logger.debug(
-              'PasswordResetForm onRequestReset callback called',
-              data,
-            )
           }
         })}
       >
@@ -144,16 +139,11 @@ export function PasswordResetForm({
       </Form>
     </FormProvider>
   ) : (
-    <FormProvider {...resetForm}>
+      <FormProvider {...resetForm}>
       <Form
         onSubmit={resetForm.handleSubmit((data) => {
-          logger.debug('PasswordResetForm reset mode submit', data)
           if (onResetPassword) {
             onResetPassword(data)
-            logger.debug(
-              'PasswordResetForm onResetPassword callback called',
-              data,
-            )
           }
         })}
       >

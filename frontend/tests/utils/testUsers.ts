@@ -45,7 +45,7 @@ export async function runQueuedCleanups(): Promise<void> {
     } catch (err) {
       // log and continue
 
-      console.warn(`Queued cleanup failed for ${pattern}:`, err)
+      logger.warn(`Queued cleanup failed for ${pattern}:`, err)
     }
   }
   cleanupQueue.clear()
@@ -182,16 +182,11 @@ export async function createTestUser(
     // Auto-verify if requested
     if (autoVerify) {
       try {
-        // Small pause to allow backend to finish processing the signup and
-        // make debug helpers available. This reduces races where the test
-        // immediately queries the debug endpoint and the user record isn't
-        // visible yet.
+        // Pause briefly to reduce signup/verification race conditions.
 
         await new Promise((r) => setTimeout(r, 300))
-        // Prefer to force-verify via the debug mutation which is more
-        // reliable in test environments. If the debug mutation is not
-        // available, fall back to reading the verification code and using
-        // the verifyEmail mutation.
+        // Try debug-verify mutation first.
+        // Otherwise fall back to code-based verification.
         try {
           const verifyMutation = `
             mutation DebugVerifyUser($email: String!) {
@@ -308,7 +303,7 @@ export async function createTestUser(
           }
         }
       } catch (error) {
-        console.warn(`Auto-verification failed for ${email}:`, error)
+        logger.warn(`Auto-verification failed for ${email}:`, error)
         // Don't fail the user creation if verification fails
       }
     }
@@ -341,9 +336,7 @@ export async function getVerificationCode(email: string): Promise<string> {
       return result.getVerificationCode
     }
 
-    // If the debug query explicitly reports user not found, retry a few
-    // times because user creation propagation to the debug query may be
-    // slightly delayed.
+    // Retry on transient 'user not found' errors (propagation delay).
     if (result && (result as any).errors) {
       lastErr = (result as any).errors[0]
     }
@@ -353,9 +346,7 @@ export async function getVerificationCode(email: string): Promise<string> {
     await new Promise((r) => setTimeout(r, BASE_DELAY_MS * attempt))
   }
 
-  // As a last resort attempt to force-verify the user in debug mode. If the
-  // backend marks the user verified, return an empty string to indicate that
-  // no code is required.
+  // Last-resort: try force-verify via debug mutation; return '' if verified.
 
   const verifyMutation = `
       mutation DebugVerifyUser($email: String!) {
@@ -470,9 +461,7 @@ export async function cleanupTestUsers(
   pattern: string = '@example.com',
 ): Promise<void> {
   try {
-    // Call the backend debug mutation which deletes test users
-    // matching the pattern. This mutation is guarded by
-    // NODE_ENV === 'debug' on the backend.
+    // Call debug cleanup mutation (guarded by NODE_ENV === 'debug').
     const mutation = `
       mutation CleanupTestUsers($pattern: String!) {
         cleanupTestUsers(pattern: $pattern)
@@ -485,13 +474,12 @@ export async function cleanupTestUsers(
     })
 
     if (typeof result?.cleanupTestUsers === 'number') {
-      const count = result.cleanupTestUsers
-      logger.debug(`Cleaned up ${count} test users with pattern ${pattern}`)
+      // cleanup succeeded; result.cleanupTestUsers contains the count
     } else {
-      console.warn('cleanupTestUsers did not return a count')
+      logger.warn('cleanupTestUsers did not return a count')
     }
   } catch (error) {
-    console.warn(
+    logger.warn(
       `Failed to cleanup test users: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`,
@@ -551,19 +539,14 @@ export async function createMultipleTestUsers(
         email,
       })
     } catch (error) {
-      console.error(`Failed to create test user ${email}:`, error)
+      logger.error(`Failed to create test user ${email}:`, error)
     }
   }
 
   return sessions
 }
 
-/**
- * Promote a user in the client test environment by ensuring the user has a
- * backend-issued token (sign in if necessary) and updating the client auth
- * store with the requested role. This keeps tokens real while allowing UI
- * tests to reflect role-based rendering without fabricating tokens.
- */
+/** Promote user in client for UI tests (keeps backend-issued tokens). */
 export async function promoteUserInClient(
   email: string,
   role: 'user' | 'admin',
@@ -591,13 +574,7 @@ export async function promoteUserInClient(
   }
 }
 
-/**
- * Create or promote a test user to admin on the server using the debug-only
- * mutation `debugCreateAdminUser`. This mutation is only available when the
- * backend is running in debug mode (NODE_ENV === 'debug'). The function will
- * store the returned token/user in the test sessions map and set the client
- * auth store for UI tests.
- */
+/** Create or promote an admin test user via debug mutation. */
 export async function createAdminTestUser(
   email?: string,
   password: string = 'password',
@@ -605,8 +582,10 @@ export async function createAdminTestUser(
   phoneNumber: string = '',
 ): Promise<AuthResponse> {
   const mutation = `
-    mutation DebugCreateAdminUser($email: String!, $password: String, $name: String, $phoneNumber: String) {
-      debugCreateAdminUser(email: $email, password: $password, name: $name, phoneNumber: $phoneNumber) {
+    mutation DebugCreateAdminUser($email: String!, $password: String,
+      $name: String, $phoneNumber: String) {
+      debugCreateAdminUser(email: $email, password: $password, name: $name,
+      phoneNumber: $phoneNumber) {
         token
         user {
           id
@@ -638,7 +617,7 @@ export async function createAdminTestUser(
 
       if (!result?.debugCreateAdminUser) {
         throw new Error(
-          'debugCreateAdminUser did not return data — is backend running in debug mode?',
+          'debugCreateAdminUser not responding—backend running in debug mode?',
         )
       }
 

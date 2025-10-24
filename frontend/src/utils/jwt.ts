@@ -1,10 +1,7 @@
 import { DecodedToken } from '../graphql'
+import logger from './logger'
 
-/**
- * Decodes a JWT token and returns the payload
- * @param token - The JWT token string
- * @returns The decoded payload or null if invalid
- */
+/** Decode a JWT and return its payload, or null if invalid. */
 export function decodeToken(token: string): DecodedToken | null {
   try {
     const parts = token.split('.')
@@ -24,16 +21,12 @@ export function decodeToken(token: string): DecodedToken | null {
 
     return JSON.parse(decoded)
   } catch (error) {
-    console.error('Error decoding JWT token:', error)
+    logger.error('Error decoding JWT token:', error)
     return null
   }
 }
 
-/**
- * Checks if a JWT token is expired
- * @param token - The JWT token string
- * @returns true if expired or invalid, false otherwise
- */
+/** Return true if the token is expired or invalid. */
 export function isTokenExpired(token: string): boolean {
   const decoded = decodeToken(token)
   if (!decoded || typeof decoded.exp !== 'number') {
@@ -44,11 +37,7 @@ export function isTokenExpired(token: string): boolean {
   return decoded.exp < currentTime
 }
 
-/**
- * Validates the basic structure of a JWT token
- * @param token - The JWT token string
- * @returns true if valid format, false otherwise
- */
+/** Basic format validation for JWT (three base64url parts). */
 export function isValidJWTFormat(token: string): boolean {
   if (typeof token !== 'string' || token.length === 0) {
     return false
@@ -64,11 +53,7 @@ export function isValidJWTFormat(token: string): boolean {
   return parts.every((part) => base64urlRegex.test(part) && part.length > 0)
 }
 
-/**
- * Hashes a password using SHA-256
- * @param password - The plain text password
- * @returns Promise resolving to the hashed password as a hex string
- */
+/** Hash a password with SHA-256 and return hex string. */
 export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(password)
@@ -77,11 +62,7 @@ export async function hashPassword(password: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-/**
- * Validates if a stored token is valid and not expired
- * @param token - The JWT token string
- * @returns true if token is valid and not expired, false otherwise
- */
+/** Check token format and expiry. */
 export function isValidToken(token: string): boolean {
   return isValidJWTFormat(token) && !isTokenExpired(token)
 }

@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { logger } from '@/utils'
+
 import {
   createTestUser,
   enqueueCleanup,
@@ -74,7 +76,7 @@ beforeEach(async () => {
       } catch (err2) {
         // If both strategies fail, log for diagnostics but continue; many
         // tests handle unverified users by redirecting to verification.
-        console.warn(
+        logger.warn(
           'Manual verification failed, user may already be verified or debug endpoint unavailable:',
           err2,
         )
@@ -90,14 +92,14 @@ beforeEach(async () => {
         await executeGraphQL(verifyMutation, { email: testUserEmail })
         await signInTestUser(testUserEmail, 'password123')
       } catch (finalErr) {
-        console.warn(
+        logger.warn(
           'Final sign-in attempt failed; test may exercise unverified flow:',
           finalErr,
         )
       }
     }
   } catch (error) {
-    console.warn('Verification attempt failed (non-fatal):', error)
+    logger.warn('Verification attempt failed (non-fatal):', error)
   }
 })
 

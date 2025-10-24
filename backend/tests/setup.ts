@@ -27,35 +27,30 @@ const checkPortInUse = (port: number): Promise<boolean> => {
 // Load test environment variables
 config()
 
-// Suppress console.log and console.error in tests globally
-// Use logger.info, logger.debug, etc. for debugging instead
-const originalLog = console.log
-const originalError = console.error
+// Silence logger.log/error in tests; use other levels if needed
+const originalLog = logger.log
+const originalError = logger.error
 beforeAll(() => {
-  console.log = vi.fn()
-  console.error = vi.fn()
+  logger.log = vi.fn()
+  logger.error = vi.fn()
 })
 
 afterAll(() => {
-  console.log = originalLog
-  console.error = originalError
+  logger.log = originalLog
+  logger.error = originalError
 })
 
-// Mock nodemailer
-// Renamed to avoid conflict with the mock target
-// import nodemailerMock from 'nodemailer-mock'
-
-// Mock nodemailer to return an object with a createTransporter method
+// Mock nodemailer to capture sent emails for tests
 vi.mock('nodemailer', () => ({
   default: {
     createTransport: vi.fn(() => {
-      // Ensure a global place to collect sent emails for tests to inspect
+      // Ensure a global place to collect sent emails
       ;(global as any).sentEmails = (global as any).sentEmails || []
 
-      // Create a mock transporter object
+      // Create a mock transporter
       const mockTransporter: any = {
         sendMail: vi.fn().mockImplementation((mailOptions: any) => {
-          // Push the sent email data into global.sentEmails
+          // Record the sent email
           ;(global as any).sentEmails.push(mailOptions)
           return Promise.resolve({
             messageId: 'mock-message-id',
@@ -70,9 +65,6 @@ vi.mock('nodemailer', () => ({
     }),
   },
 }))
-
-// Global test database client
-// Use imported prisma from src/client
 
 beforeAll(async () => {
   // Set global test prisma for server context
@@ -93,7 +85,7 @@ beforeAll(async () => {
 
   // Check if server is already running on port 4000
   const portInUse = await checkPortInUse(4000)
-  // Track whether this setup started the server so we only close it if started
+  // Track if this process started the test server
   ;(global as any).__testServerStartedByThisProcess = false
   if (!portInUse) {
     // Start the test server if not already running

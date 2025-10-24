@@ -386,7 +386,7 @@ describe('AppSidebar', () => {
       expect(screen.getByRole('button')).toBeInTheDocument()
 
       // Drawer should be present (though closed by default)
-      // Note: Testing drawer open state requires more complex setup
+      // Drawer open state is not asserted here
     })
 
     it('renders fixed sidebar for desktop devices', () => {
@@ -452,7 +452,7 @@ describe('AppSidebar', () => {
       await user.click(homeLink)
 
       // Drawer should close (content hidden again)
-      // Note: This test may need adjustment based on actual drawer behavior
+      // Drawer behavior not asserted here
     })
 
     it('calls signOut when logout button is clicked', async () => {
@@ -653,7 +653,7 @@ describe('AppSidebar', () => {
       )
 
       // Check for Drawer component presence
-      // Note: Testing actual animations requires more setup
+      // Animation assertions omitted
     })
   })
 })

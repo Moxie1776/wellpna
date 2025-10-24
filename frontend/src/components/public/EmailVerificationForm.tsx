@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
 import HFInput from '@/components/hookForm/HFTextField'
 
-import logger from '../../utils/logger'
+// logger removed: no longer used for transient debug in this form
 
 const emailVerificationSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -33,7 +33,6 @@ export const EmailVerificationForm = ({
   })
 
   const onSubmit = form.handleSubmit((data) => {
-    logger.debug('EmailVerificationForm submit', data)
     onVerify({
       email: data.email,
       code: data.code,
@@ -42,7 +41,6 @@ export const EmailVerificationForm = ({
 
   const handleResend = () => {
     const email = form.getValues('email')
-    logger.debug('EmailVerificationForm resend', email)
     onResendCode(email)
   }
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import { prisma } from '../src/client'
 import { yoga } from '../src/server'
-import logger from '../src/utils/logger'
 import { createTestUserAndJwt } from './helpers'
 
 // Tests focused on role updates
@@ -37,9 +36,6 @@ describe('updateUserRole mutation', () => {
     })
 
     const result = await response.json()
-    logger.info(
-      'DEBUG updateUserRole non-admin response: ' + JSON.stringify(result),
-    )
     expect(result.errors).toBeDefined()
     expect(result.errors[0].message).toContain('Admin access required')
   })
@@ -78,7 +74,6 @@ describe('updateUserRole mutation', () => {
       }),
     })
     const signInResult = await signInResponse.json()
-    logger.info('DEBUG admin signIn result: ' + JSON.stringify(signInResult))
     expect(signInResult.data.signIn).not.toBeNull()
     const adminJwt = signInResult.data.signIn.token
 
@@ -112,9 +107,6 @@ describe('updateUserRole mutation', () => {
     })
 
     const result = await response.json()
-    logger.info(
-      'DEBUG updateUserRole admin response: ' + JSON.stringify(result),
-    )
     expect(result.data.updateUserRole).toBeDefined()
     expect(result.data.updateUserRole.role).toBe('admin')
   })

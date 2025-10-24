@@ -37,7 +37,8 @@ class SecretsManager {
     }
 
     try {
-      logger.debug(`Fetching secret: ${secretName}`)
+      // Avoid logging secret identifiers
+      logger.debug('Fetching secret')
       const command = new GetSecretValueCommand({
         SecretId: secretName,
       })

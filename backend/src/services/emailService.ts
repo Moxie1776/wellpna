@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+
 import logger from '../utils/logger'
 
 export interface EmailOptions {
@@ -44,7 +45,7 @@ class EmailService {
     // In debug mode, don't actually send emails to avoid failures in tests
     if (process.env.NODE_ENV === 'debug') {
       logger.debug(
-        `Would send verification email to ${email} with code ${verificationCode}`,
+        `Sends verification email to ${email} with code ${verificationCode}`,
       )
       return
     }
@@ -73,7 +74,11 @@ class EmailService {
       </div>
     `
 
-    await this.sendEmail({ to: email, subject, html })
+    try {
+      await this.sendEmail({ to: email, subject, html })
+    } catch (error) {
+      logger.error('Failed to send verification email:', error)
+    }
   }
 
   async sendPasswordResetEmail(
@@ -113,7 +118,11 @@ class EmailService {
       </div>
     `
 
-    await this.sendEmail({ to: email, subject, html })
+    try {
+      await this.sendEmail({ to: email, subject, html })
+    } catch (error) {
+      logger.error('Failed to send password reset email:', error)
+    }
   }
 }
 export const emailService = new EmailService()

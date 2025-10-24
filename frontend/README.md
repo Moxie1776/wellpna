@@ -287,7 +287,6 @@ Example: `VITE_GRAPHQL_ENDPOINT=https://your-api.example.com/graphql`
 
 ### Console Output in Tests
 
-- **Console suppression**: `logger.debug` and `console.error` are suppressed globally in Jest tests to keep test output clean
 - **Debugging**: Use the winston logger for debugging instead: `logger.info()`, `logger.debug()`, `logger.error()`, etc.
 - **Important errors**: Critical test failures and assertion errors will still appear in test output
 

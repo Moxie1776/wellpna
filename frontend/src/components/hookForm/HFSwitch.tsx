@@ -1,5 +1,11 @@
 // Material UI
-import { Box, FormControl, FormHelperText, FormLabel, Switch } from '@mui/material'
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Switch,
+} from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 
 interface Props {
