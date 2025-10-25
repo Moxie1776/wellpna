@@ -7,12 +7,13 @@ The WellPNA frontend is a React application that provides the user interface for
 ## Technology Stack
 
 - React with TypeScript
-- Joy UI - Component library for accessible interfaces
+- MUI (Material-UI) - Component library for accessible interfaces
+- MUI DataGrid - Advanced data table component
 - React Router - Routing library
 - Zustand - State management
 - urql - GraphQL client
 - React Hook Form + Zod - Form handling and validation
-- Jest + React Testing Library - Testing framework
+- Vitest + React Testing Library - Testing framework
 
 ## Project Structure
 
@@ -174,7 +175,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import RHFInputJoy from '@/components/hook-form/RHFInputJoy'
+import HFTextField from '@/components/hookForm/HFTextField'
 import { Form, FormControl, FormItem } from '@/components/ui/form'
 
 const schema = z.object({
@@ -196,12 +197,12 @@ const MyForm = () => {
     <Form onSubmit={form.handleSubmit(onSubmit)}>
       <FormItem>
         <FormControl>
-          <RHFInputJoy name="email" label="Email" type="email" />
+          <HFTextField name="email" label="Email" type="email" />
         </FormControl>
       </FormItem>
       <FormItem>
         <FormControl>
-          <RHFInputJoy name="name" label="Name" />
+          <HFTextField name="name" label="Name" />
         </FormControl>
       </FormItem>
       <button type="submit">Submit</button>
@@ -278,12 +279,14 @@ Example: `VITE_GRAPHQL_ENDPOINT=https://your-api.example.com/graphql`
 ## Development Guidelines
 
 - Use TypeScript for all new code
-- Follow Joy UI component patterns
+- Follow MUI component patterns
 - Test all components and pages
 - Use the established color scheme and design tokens
 - Keep components small and focused on single responsibilities
 
 ## Testing Best Practices
+
+Tests now use real data for integration testing with the backend, ensuring comprehensive validation of user flows. Only external services like email are mocked where necessary.
 
 ### Console Output in Tests
 
@@ -325,4 +328,4 @@ describe('MyComponent', () => {
 - **Primary:** #012d6c (Dark Blue)
 - **Secondary:** #c51230 (Red)
 
-Use Joy UI color tokens: `primary`, `secondary`, etc.
+Use MUI color tokens: `primary`, `secondary`, etc.

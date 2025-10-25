@@ -41,17 +41,17 @@ sequenceDiagram;
 The `src` directory is organized as follows:
 
 - `src/`
-   - `builder.ts`: Pothos schema builder configuration.
-   - `client.ts`: Prisma client instance.
-   - `schema/index.ts`: Root schema definition, where all types, queries, and mutations are imported.
-   - `server.ts`: Standalone GraphQL Yoga server setup.
-   - `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
-   - `graphql/`: Contains all GraphQL-related code.
-     - `types/`: GraphQL object type definitions (e.g., `User.ts`, `Auth.ts`).
-     - `queries/`: GraphQL queries (e.g., `user.ts`).
-     - `mutations/`: GraphQL mutations (e.g., `auth.ts`).
-   - `services/`: Service layer for external integrations (e.g., `emailService.ts`).
-   - `utils/`: Utility functions (e.g., `auth.ts` for password hashing and JWT).
+  - `builder.ts`: Pothos schema builder configuration.
+  - `client.ts`: Prisma client instance.
+  - `schema/index.ts`: Root schema definition, where all types, queries, and mutations are imported.
+  - `server.ts`: Standalone GraphQL Yoga server setup.
+  - `generated/`: Auto-generated files from Prisma and Pothos. **Do not edit manually.**
+  - `graphql/`: Contains all GraphQL-related code.
+    - `types/`: GraphQL object type definitions (e.g., `User.ts`, `Auth.ts`).
+    - `queries/`: GraphQL queries (e.g., `user.ts`).
+    - `mutations/`: GraphQL mutations (e.g., `auth.ts`).
+  - `services/`: Service layer for external integrations (e.g., `emailService.ts`).
+  - `utils/`: Utility functions (e.g., `auth.ts` for password hashing and JWT).
 
 ## Development Rules
 
@@ -63,6 +63,17 @@ The `src` directory is organized as follows:
 6. **Schema Imports:** All types, queries, and mutations must be imported into `src/schema.ts` to be included in the final schema.
 7. **Logging:** Use the logger utility (`src/utils/logger.ts`) instead of `console.log` or `console.error`. Available methods: `logger.info()`, `logger.debug()`, `logger.warn()`, `logger.error()`.
 
+## Testing
+
+Run `npm test` to execute the test suite using Vitest. Tests are configured to use real data for integration testing, ensuring comprehensive validation of GraphQL operations and database interactions. Only email services are mocked to avoid external dependencies.
+
+The test suite includes:
+
+- Authentication tests (`auth.test.ts`)
+- User management tests (`updateUser.test.ts`, `updateUserRole.test.ts`)
+- Utility function tests (`utils.spec.ts`)
+- Helper functions and setup/teardown scripts
+
 ## Building for Production
 
 Run `npm run build` to compile the TypeScript code and generate the GraphQL schema. The build artifacts will be stored in the `dist/` directory.
@@ -71,64 +82,70 @@ Run `npm run build` to compile the TypeScript code and generate the GraphQL sche
 
 Unlike the frontend, the backend is a Node.js server and cannot be deployed as static files. It requires a runtime environment that supports Node.js.
 
-### AWS Deployment Options
+### Production Deployment
 
-#### Option 1: AWS Elastic Beanstalk (Recommended for beginners)
-
-1. Build the app: `npm run build`
-2. Create a `Procfile` in the root directory:
-
-   ```
-   web: npm start
-   ```
-
-3. Zip the entire project (including `dist/`, `node_modules/`, etc.)
-4. Upload to Elastic Beanstalk as a Node.js application
-5. Configure environment variables (DATABASE_URL, JWT_SECRET, etc.)
-
-#### Option 2: AWS EC2
-
-1. Launch an EC2 instance with Node.js installed
-2. Build and deploy the code to the instance
-3. Use PM2 or similar to keep the server running
-4. Configure security groups for port access
-
-#### Option 3: AWS Lambda + API Gateway (Serverless)
-
-1. Use a framework like Serverless Framework or AWS CDK
-2. Adapt the code for Lambda (may require changes for cold starts)
-3. Deploy as Lambda functions triggered by API Gateway
+1. Build the backend: `npm run build:backend` (from root directory)
+2. Install dependencies: `npm run install:backend` (from root directory)
+3. Set environment variables (DATABASE_URL, JWT_SECRET, NODE_ENV=production)
+4. Start with PM2: `pm2 start dist/server.js --name wellpna-backend`
 
 ### Environment Variables
 
-Required for production:
+Required for production (set in .env file):
 
-- `DATABASE_URL`: PostgreSQL connection string (automatically set by setup-db script)
-- `JWT_SECRET`: Secret key for JWT signing (automatically retrieved from AWS Secrets Manager)
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: Secret key for JWT signing
 - `NODE_ENV`: Set to 'production'
 
-### AWS Secrets Manager Integration
+### PM2 Configuration
 
-The application uses AWS Secrets Manager to securely store database credentials and JWT secrets. The `setup-db` script automatically retrieves these secrets and sets the required environment variables.
+Use PM2 ecosystem file for production deployment:
 
-**Before running the application:**
-
-1. Ensure AWS credentials are configured (via AWS CLI, environment variables, or IAM roles)
-2. Run `npm run setup-db` to fetch secrets and set DATABASE_URL
-3. Start the application with `npm run dev` or `npm start`
-
-The setup script fetches:
-
-- Database credentials from `arn:aws:secretsmanager:us-east-2:747034604465:secret:wellpna/database/app-credentials-t2medS`
-- JWT secret from `arn:aws:secretsmanager:us-east-2:747034604465:secret:wellpna/jwt/secret-RERkFY`
+```json
+module.exports = {
+  apps: [
+    {
+      name: 'wellpna-backend',
+      cwd: '/home/admin/wellpna/backend',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        // Will be loaded from secrets script
+      }
+    },
+    {
+      name: 'wellpna-frontend', 
+      cwd: '/home/admin/wellpna/frontend',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production'
+      }
+    }
+  ]
+};
+```
 
 **Available Scripts:**
 
-- `npm run setup-db`: Fetch AWS secrets and set DATABASE_URL
-- `npm run dev`: Run setup-db then start development server
-- `npm start`: Run setup-db then start production server
-- `npm run generate`: Run setup-db then generate Prisma client
+- `npm run build`: Generate Prisma client, compile TypeScript, build GraphQL schema, and fix ESM imports
+- `npm run build:schema`: Build the GraphQL schema using Pothos
+- `npm run start`: Start the production server
+- `npm run dev`: Start the development server with hot reload
+- `npm run generate`: Generate Prisma client from schema
+- `npm run test`: Run test suite with Vitest
+- `npm run test:watch`: Run tests in watch mode
+- `npm run lint`: Run ESLint for code quality checks
+- `npm run lint:fix`: Run ESLint and auto-fix issues
+- `npm run format`: Format code with Prettier
+- `npm run format:check`: Check code formatting without changes
 
-### Database
+### Database Setup
 
-Ensure your PostgreSQL database is accessible from your deployment environment. For AWS, use RDS PostgreSQL.
+Run database setup before deployment:
+
+```bash
+npx prisma generate  # Generate Prisma client
+npx prisma migrate deploy  # Apply pending migrations
+```

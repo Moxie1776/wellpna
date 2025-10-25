@@ -13,7 +13,7 @@ WellPnA is a comprehensive well permit and notification application built with m
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite, Material-UI (Joy UI), GraphQL
+- **Frontend**: React, TypeScript, Vite, Material-UI (MUI), MUI DataGrid, GraphQL
 - **Backend**: Node.js, TypeScript, GraphQL Yoga, Prisma, PostgreSQL
 - **Testing**: Vitest, React Testing Library
 - **Deployment**: Docker, CI/CD with GitHub Actions
