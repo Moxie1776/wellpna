@@ -183,45 +183,17 @@ export async function ensureBackendRunning() {
 process.env.VITE_GRAPHQL_ENDPOINT = 'http://localhost:4000/graphql'
 process.env.NODE_ENV = 'debug'
 
-// Suppress logger.debug and logger.error in tests globally
-// Use logger.info, logger.debug, etc. for debugging when needed
+// Suppress only logger.debug in tests globally to keep output quiet.
+// Do NOT override logger.error so tests that assert console.error behavior
+// (logger tests) continue to work.
 const originalLog = logger.debug
-const originalError = logger.error
 beforeAll(() => {
   logger.debug = vi.fn()
-  logger.error = vi.fn()
 })
 
 afterAll(() => {
   logger.debug = originalLog
-  logger.error = originalError
 })
-
-// Mock nodemailer (keep from backend tests)
-vi.mock('nodemailer', () => ({
-  default: {
-    createTransport: vi.fn(() => {
-      // Ensure a global place to collect sent emails for tests to inspect
-      ;(global as any).sentEmails = (global as any).sentEmails || []
-
-      // Create a mock transporter object
-      const mockTransporter: any = {
-        sendMail: vi.fn().mockImplementation((mailOptions: any) => {
-          // Push the sent email data into global.sentEmails
-          ;(global as any).sentEmails.push(mailOptions)
-          return Promise.resolve({
-            messageId: 'mock-message-id',
-            envelope: {
-              from: mailOptions.from || 'test@example.com',
-              to: mailOptions.to || ['user@example.com'],
-            },
-          })
-        }),
-      }
-      return mockTransporter
-    }),
-  },
-}))
 
 beforeAll(async () => {
   // Best-effort check that backend is running in debug mode; do not throw

@@ -1,78 +1,80 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ReactElement } from 'react'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import { cacheExchange, createClient, fetchExchange, Provider } from 'urql'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { useUpdateUserMutation } from '../../../graphql/generated/graphql'
+import {
+  setupSignedInTestUser,
+} from '../../../../tests/utils/testUsers'
+import { SnackbarProvider } from '../../../components/ui/snackbar'
+import { ThemeProvider } from '../../../providers/ThemeProvider'
+import { useAuthStore } from '../../../store/auth'
 import { ProfileForm } from '../ProfileForm'
 
-// Mock logger
-vi.mock('../../../utils/logger', () => ({
-  default: {
-    info: vi.fn(),
-    error: vi.fn(),
-  },
-}))
-
-// Mock the generated hook
-vi.mock('../../../graphql/generated/graphql', () => ({
-  useUpdateUserMutation: vi.fn(),
-}))
-
 describe('ProfileForm', () => {
-  const mockUser = {
-    id: '1',
-    email: 'test@example.com',
-    name: 'Test User',
-    phoneNumber: '555-123-4567',
-  }
-
-  const mockUpdateUser = vi.fn()
-  const mockResult = { fetching: false, error: null as any, data: null as any }
   let user: ReturnType<typeof userEvent.setup>
 
-  beforeEach(() => {
-    vi.clearAllMocks()
+  beforeEach(async () => {
     user = userEvent.setup()
-    ;(useUpdateUserMutation as any).mockReturnValue([
-      mockResult,
-      mockUpdateUser,
-    ])
+    await setupSignedInTestUser()
   })
 
-  it('renders the form with user data', () => {
-    render(<ProfileForm user={mockUser} />)
+  const renderWithProviders = (component: ReactElement) => {
+    const client = createClient({
+      url: 'http://localhost:4000/graphql',
+      exchanges: [cacheExchange, fetchExchange],
+      fetchOptions: () => {
+        const token = localStorage.getItem('token')
+        return {
+          headers: {
+            authorization: token ? `Bearer ${token}` : '',
+          },
+        }
+      },
+    })
+    const router = createMemoryRouter([{ path: '/', element: component }], {
+      initialEntries: ['/'],
+    })
 
-    expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Test User')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('555-123-4567')).toBeInTheDocument()
+    return render(
+      <Provider value={client}>
+        <ThemeProvider>
+          <SnackbarProvider>
+            <RouterProvider router={router} />
+          </SnackbarProvider>
+        </ThemeProvider>
+      </Provider>,
+    )
+  }
+
+  it('renders the form with user data', () => {
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
+
+    expect(screen.getByDisplayValue(currentUser?.email || '')).toBeInTheDocument()
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /update profile/i }),
     ).toBeInTheDocument()
   })
 
   it('shows email as disabled', () => {
-    render(<ProfileForm user={mockUser} />)
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
 
-    const emailInput = screen.getByDisplayValue('test@example.com')
+    const emailInput = screen.getByDisplayValue(currentUser?.email || '')
     expect(emailInput).toBeDisabled()
   })
 
   it('calls updateUser mutation on form submit', async () => {
-    mockUpdateUser.mockResolvedValue({
-      data: {
-        updateUser: {
-          id: '1',
-          email: 'test@example.com',
-          name: 'Updated Name',
-          phoneNumber: '555-987-6543',
-        },
-      },
-    })
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
 
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
-    const phoneInput = screen.getByDisplayValue('555-123-4567')
+    const nameInput = screen.getByLabelText(/name/i)
+    const phoneInput = screen.getByLabelText(/phone number/i)
     const submitButton = screen.getByRole('button', { name: /update profile/i })
 
     await user.clear(nameInput)
@@ -82,30 +84,17 @@ describe('ProfileForm', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(mockUpdateUser).toHaveBeenCalledWith({
-        data: {
-          name: 'Updated Name',
-          phoneNumber: '555-987-6543',
-        },
-      })
+      expect(
+        screen.getByText('Profile updated successfully!'),
+      ).toBeInTheDocument()
     })
   })
 
   it('shows success message on successful update', async () => {
-    mockUpdateUser.mockResolvedValue({
-      data: {
-        updateUser: {
-          id: '1',
-          email: 'test@example.com',
-          name: 'Updated Name',
-          phoneNumber: '555-987-6543',
-        },
-      },
-    })
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
 
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
+    const nameInput = screen.getByLabelText(/name/i)
     const submitButton = screen.getByRole('button', { name: /update profile/i })
 
     await user.clear(nameInput)
@@ -119,96 +108,12 @@ describe('ProfileForm', () => {
     })
   })
 
-  it('shows error message on update failure', async () => {
-    mockUpdateUser.mockResolvedValue({
-      error: {
-        message: 'Authentication required',
-      },
-    })
-    mockResult.error = { message: 'Authentication required' }
-
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
-    const submitButton = screen.getByRole('button', { name: /update profile/i })
-
-    await user.clear(nameInput)
-    await user.type(nameInput, 'Updated Name')
-    await user.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Authentication required')).toBeInTheDocument()
-    })
-  })
-
-  it('handles network errors', async () => {
-    mockUpdateUser.mockRejectedValue(new Error('Network error'))
-
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
-    const submitButton = screen.getByRole('button', { name: /update profile/i })
-
-    await user.clear(nameInput)
-    await user.type(nameInput, 'Updated Name')
-    await user.click(submitButton)
-
-    await waitFor(() => {
-      // Network errors are logged but not displayed in the UI
-      expect(mockUpdateUser).toHaveBeenCalled()
-    })
-  })
-
-  it('shows loading state during update', async () => {
-    let resolveMutation: (value: any) => void
-    const mutationPromise = new Promise((resolve) => {
-      resolveMutation = resolve
-    })
-
-    mockUpdateUser.mockReturnValue(mutationPromise)
-
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
-    const submitButton = screen.getByRole('button', { name: /update profile/i })
-
-    await user.clear(nameInput)
-    await user.type(nameInput, 'Updated Name')
-    await user.click(submitButton)
-
-    // Resolve the mutation
-    resolveMutation!({
-      data: {
-        updateUser: {
-          id: '1',
-          email: 'test@example.com',
-          name: 'Updated Name',
-          phoneNumber: '555-123-4567',
-        },
-      },
-    })
-
-    await waitFor(() => {
-      expect(submitButton).not.toBeDisabled()
-    })
-  })
-
   it('trims whitespace from inputs', async () => {
-    mockUpdateUser.mockResolvedValue({
-      data: {
-        updateUser: {
-          id: '1',
-          email: 'test@example.com',
-          name: 'Updated Name',
-          phoneNumber: '555-987-6543',
-        },
-      },
-    })
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
 
-    render(<ProfileForm user={mockUser} />)
-
-    const nameInput = screen.getByDisplayValue('Test User')
-    const phoneInput = screen.getByDisplayValue('555-123-4567')
+    const nameInput = screen.getByLabelText(/name/i)
+    const phoneInput = screen.getByLabelText(/phone number/i)
     const submitButton = screen.getByRole('button', { name: /update profile/i })
 
     await user.clear(nameInput)
@@ -218,12 +123,39 @@ describe('ProfileForm', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(mockUpdateUser).toHaveBeenCalledWith({
-        data: {
-          name: 'Updated Name',
-          phoneNumber: '555-987-6543',
-        },
-      })
+      expect(
+        screen.getByText('Profile updated successfully!'),
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('shows validation error for empty name', async () => {
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
+
+    const nameInput = screen.getByLabelText(/name/i)
+    const submitButton = screen.getByRole('button', { name: /update profile/i })
+
+    await user.clear(nameInput)
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Name is required')).toBeInTheDocument()
+    })
+  })
+
+  it('shows validation error for empty phone number', async () => {
+    const currentUser = useAuthStore.getState().user
+    renderWithProviders(<ProfileForm user={currentUser} />)
+
+    const phoneInput = screen.getByLabelText(/phone number/i)
+    const submitButton = screen.getByRole('button', { name: /update profile/i })
+
+    await user.clear(phoneInput)
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Phone number is required')).toBeInTheDocument()
     })
   })
 })

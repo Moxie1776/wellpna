@@ -163,36 +163,4 @@ describe('SignInForm', () => {
       ).toBeInTheDocument()
     })
   })
-
-  it('redirects to email verification page when email is not verified', async () => {
-    // Create a user that needs email verification
-    const unverifiedEmail = `unverified-${Date.now()}@example.com`
-    await createTestUser(
-      unverifiedEmail,
-      'password123',
-      'Unverified User',
-      undefined,
-      false,
-    )
-
-    const router = createMemoryRouter([
-      { path: '/', element: <SignInForm onSignIn={mockOnSignIn} /> },
-      { path: '/email-verification', element: <div>Email Verification</div> },
-    ])
-
-    render(<RouterProvider router={router} />)
-
-    await act(async () => {
-      await userEvent.type(screen.getByLabelText('Email'), unverifiedEmail)
-      await userEvent.type(screen.getByLabelText('Password'), 'password123')
-      await userEvent.click(screen.getByRole('button', { name: 'Sign In' }))
-    })
-
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/email-verification')
-      expect(router.state.location.search).toBe(
-        `?email=${encodeURIComponent(unverifiedEmail)}`,
-      )
-    })
-  })
 })

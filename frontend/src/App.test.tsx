@@ -1,245 +1,173 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import { cacheExchange, createClient, fetchExchange, Provider } from 'urql'
+import { beforeEach, describe, expect, it } from 'vitest'
 
+import {
+  createAdminTestUser,
+  setupSignedInTestUser,
+} from '../tests/utils/testUsers'
 import { AppContent } from './App'
-
-// Mock the auth store
-vi.mock('@/store/auth', () => ({
-  useAuthStore: vi.fn(),
-}))
-
-import { useAuthStore } from '@/store/auth'
-
-const mockedUseAuthStore = vi.mocked(useAuthStore)
-
-// Mock the routes
-vi.mock('@/lib/routes', () => ({
-  appRoutes: [
-    {
-      label: 'Home',
-      href: '/',
-      requiresAuth: false,
-      page: () => <div>Home Page</div>,
-    },
-    {
-      label: 'Dashboard',
-      href: '/dashboard',
-      requiresAuth: true,
-      page: () => <div>Dashboard Page</div>,
-    },
-    {
-      label: 'Admin',
-      href: '/admin',
-      requiresAuth: true,
-      requiredRole: 'admin',
-      page: () => <div>Admin Page</div>,
-    },
-    {
-      label: 'Sign In',
-      href: '/signin',
-      requiresAuth: false,
-      page: () => <div>Sign In Page</div>,
-    },
-    {
-      label: 'Forbidden',
-      href: '/forbidden',
-      requiresAuth: false,
-      page: () => <div>Forbidden Page</div>,
-    },
-  ],
-}))
-
-// Mock the Layout component
-vi.mock('@/components/layout/layout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}))
-
-// Mock the ProtectedRoute component
-vi.mock('@/providers/ProtectedRouteProvider', () => ({
-  ProtectedRoute: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}))
+import { appRoutes } from './lib/routes'
+import { SnackbarProvider } from './providers/SnackbarProvider'
+import { ThemeProvider } from './providers/ThemeProvider'
+import { useAuthStore } from './store/auth'
 
 describe('App Route Protection', () => {
+  const renderWithProviders = (initialEntries: string[] = ['/']) => {
+    const client = createClient({
+      url: 'http://localhost:4000/graphql',
+      exchanges: [cacheExchange, fetchExchange],
+      fetchOptions: () => {
+        const token = localStorage.getItem('token')
+        return {
+          headers: {
+            authorization: token ? `Bearer ${token}` : '',
+          },
+        }
+      },
+    })
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/*',
+          element: <AppContent />,
+        },
+      ],
+      {
+        initialEntries,
+        initialIndex: 0,
+      },
+    )
+
+    return render(
+      <Provider value={client}>
+        <ThemeProvider>
+          <SnackbarProvider>
+            <RouterProvider router={router} />
+          </SnackbarProvider>
+        </ThemeProvider>
+      </Provider>,
+    )
+  }
+
   beforeEach(() => {
-    vi.clearAllMocks()
+    useAuthStore.setState({ user: null, token: null })
+    localStorage.removeItem('token')
   })
 
-  it('allows access to public routes for unauthenticated users', () => {
-    mockedUseAuthStore.mockImplementation((selector) =>
-      selector({
-        user: null,
-        token: null,
-        loading: false,
-        error: null,
-        setAuth: vi.fn(),
-        clearAuth: vi.fn(),
-        updateUser: vi.fn(),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        getCurrentUser: vi.fn(),
-        isTokenValid: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-        initializeAuth: vi.fn(),
-      }),
+  describe('Public Routes', () => {
+    const publicRoutes = appRoutes.filter(
+      route => !route.requiresAuth && route.href !== '*',
     )
 
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <AppContent />
-      </MemoryRouter>,
-    )
+    it.each(publicRoutes.map(route => [route.label, route.href]))(
+      'allows access to %s (%s) for unauthenticated users',
+      (_label, href) => {
+        renderWithProviders([href])
 
-    expect(screen.getByText('Home Page')).toBeInTheDocument()
+        // For home page, check for specific content
+        if (href === '/') {
+          expect(screen.getByText('WellPNA')).toBeInTheDocument()
+          expect(
+            screen.getByText('Well Plug & Abandonment Solutions'),
+          ).toBeInTheDocument()
+        }
+        // For other public routes, just ensure we don't get redirected to home
+        else {
+          expect(screen.queryByText('WellPNA')).not.toBeInTheDocument()
+        }
+      },
+    )
   })
 
-  it('redirects unauthenticated users from protected routes to signin', () => {
-    mockedUseAuthStore.mockImplementation((selector) =>
-      selector({
-        user: null,
-        token: null,
-        loading: false,
-        error: null,
-        setAuth: vi.fn(),
-        clearAuth: vi.fn(),
-        updateUser: vi.fn(),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        getCurrentUser: vi.fn(),
-        isTokenValid: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-        initializeAuth: vi.fn(),
-      }),
+  describe('Protected Routes', () => {
+    const protectedRoutes = appRoutes.filter(
+      route => route.requiresAuth && !route.requiredRole,
     )
 
-    render(
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <AppContent />
-      </MemoryRouter>,
+    it.each(protectedRoutes.map(route => [route.label, route.href]))(
+      'redirects unauthenticated users from %s (%s) to home',
+      (_label, href) => {
+        renderWithProviders([href])
+
+        expect(screen.getByText('WellPNA')).toBeInTheDocument()
+        expect(
+          screen.getByText('Well Plug & Abandonment Solutions'),
+        ).toBeInTheDocument()
+      },
     )
 
-    expect(screen.getByText('Sign In Page')).toBeInTheDocument()
+    it.each(protectedRoutes.map(route => [route.label, route.href]))(
+      'allows authenticated users to access %s (%s)',
+      async (_label, href) => {
+        await setupSignedInTestUser()
+
+        renderWithProviders([href])
+
+        // For dashboard, check for specific content
+        if (href === '/dashboard') {
+          expect(
+            screen.getByText('Welcome to the WellPNA Dashboard'),
+          ).toBeInTheDocument()
+        }
+        // For other protected routes, just ensure we don't get redirected
+        else {
+          expect(screen.queryByText('WellPNA')).not.toBeInTheDocument()
+        }
+      },
+    )
   })
 
-  it('allows authenticated users to access protected routes', () => {
-    const mockUser = {
-      id: '1',
-      email: 'user@example.com',
-      name: 'Test User',
-      phoneNumber: '123-456-7890',
-      role: 'user',
-    }
-
-    mockedUseAuthStore.mockImplementation((selector) =>
-      selector({
-        user: mockUser,
-        token: 'fake-token',
-        loading: false,
-        error: null,
-        setAuth: vi.fn(),
-        clearAuth: vi.fn(),
-        updateUser: vi.fn(),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        getCurrentUser: vi.fn(),
-        isTokenValid: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-        initializeAuth: vi.fn(),
-      }),
+  describe('Admin Routes', () => {
+    const adminRoutes = appRoutes.filter(
+      route => route.requiredRole === 'admin',
     )
 
-    render(
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <AppContent />
-      </MemoryRouter>,
+    it.each(adminRoutes.map(route => [route.label, route.href]))(
+      'redirects non-admin users from %s (%s) to forbidden',
+      async (_label, href) => {
+        await setupSignedInTestUser()
+
+        renderWithProviders([href])
+
+        expect(screen.getByText('403 - Access Forbidden')).toBeInTheDocument()
+        expect(
+          screen.getByText('You don\'t have permission to access this page.'),
+        ).toBeInTheDocument()
+      },
     )
 
-    expect(screen.getByText('Dashboard Page')).toBeInTheDocument()
+    it.each(adminRoutes.map(route => [route.label, route.href]))(
+      'allows admin users to access %s (%s)',
+      async (_label, href) => {
+        await createAdminTestUser()
+
+        renderWithProviders([href])
+
+        // For admin page, check for specific content
+        if (href === '/admin') {
+          expect(screen.getByText('User Management')).toBeInTheDocument()
+        }
+        // For other admin routes, just ensure we don't get redirected
+        else {
+          expect(
+            screen.queryByText('403 - Access Forbidden'),
+          ).not.toBeInTheDocument()
+        }
+      },
+    )
   })
 
-  it('redirects non-admin users from admin routes to forbidden', () => {
-    const mockUser = {
-      id: '1',
-      email: 'user@example.com',
-      name: 'Test User',
-      phoneNumber: '123-456-7890',
-      role: 'user',
-    }
+  describe('Special Routing Behavior', () => {
+    it('redirects authenticated users from home to dashboard', async () => {
+      await setupSignedInTestUser()
 
-    mockedUseAuthStore.mockImplementation((selector) =>
-      selector({
-        user: mockUser,
-        token: 'fake-token',
-        loading: false,
-        error: null,
-        setAuth: vi.fn(),
-        clearAuth: vi.fn(),
-        updateUser: vi.fn(),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        getCurrentUser: vi.fn(),
-        isTokenValid: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-        initializeAuth: vi.fn(),
-      }),
-    )
+      renderWithProviders(['/'])
 
-    render(
-      <MemoryRouter initialEntries={['/admin']}>
-        <AppContent />
-      </MemoryRouter>,
-    )
-
-    expect(screen.getByText('Forbidden Page')).toBeInTheDocument()
-  })
-
-  it('allows admin users to access admin routes', () => {
-    const mockAdminUser = {
-      id: '1',
-      email: 'admin@example.com',
-      name: 'Admin User',
-      phoneNumber: '123-456-7890',
-      role: 'admin',
-    }
-
-    mockedUseAuthStore.mockImplementation((selector) =>
-      selector({
-        user: mockAdminUser,
-        token: 'fake-token',
-        loading: false,
-        error: null,
-        setAuth: vi.fn(),
-        clearAuth: vi.fn(),
-        updateUser: vi.fn(),
-        signIn: vi.fn(),
-        signOut: vi.fn(),
-        signUp: vi.fn(),
-        getCurrentUser: vi.fn(),
-        isTokenValid: vi.fn(),
-        setLoading: vi.fn(),
-        setError: vi.fn(),
-        initializeAuth: vi.fn(),
-      }),
-    )
-
-    render(
-      <MemoryRouter initialEntries={['/admin']}>
-        <AppContent />
-      </MemoryRouter>,
-    )
-
-    expect(screen.getByText('Admin Page')).toBeInTheDocument()
+      expect(
+        screen.getByText('Welcome to the WellPNA Dashboard'),
+      ).toBeInTheDocument()
+    })
   })
 })

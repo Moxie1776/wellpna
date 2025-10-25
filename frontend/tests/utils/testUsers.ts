@@ -76,8 +76,9 @@ export async function executeGraphQL<T = any>(
 
   // Resilient fetch with retries and timeout to avoid flakes when backend is
   // starting or under load during test runs.
-  const DEFAULT_RETRIES = 2
-  const DEFAULT_TIMEOUT_MS = 6000 // 6s
+  const DEFAULT_RETRIES = 3
+  // Increase default timeout to accommodate CI/backends starting slowly.
+  const DEFAULT_TIMEOUT_MS = 15000 // 15s
   const retries = opts?.retries ?? DEFAULT_RETRIES
   const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS
 
@@ -611,8 +612,10 @@ export async function createAdminTestUser(
       const variables = { email: tryEmail, password, name, phoneNumber }
 
       const result = await executeGraphQL(mutation, variables, undefined, {
-        retries: 2,
-        timeoutMs: 4000,
+        // Use higher retries/timeouts for admin creation since it's used at
+        // the start of integration tests and may encounter cold-starts.
+        retries: 3,
+        timeoutMs: 15000,
       })
 
       if (!result?.debugCreateAdminUser) {
@@ -633,6 +636,7 @@ export async function createAdminTestUser(
       // Update client auth store for UI tests
       try {
         useAuthStore.setState({ token: authResp.token, user: authResp.user })
+        localStorage.setItem('token', authResp.token)
       } catch (err) {
         logger.warn('createAdminTestUser: unable to set auth store', err)
       }
@@ -659,4 +663,27 @@ export async function createAdminTestUser(
       lastErr instanceof Error ? lastErr.message : String(lastErr)
     }`,
   )
+}
+
+/**
+ * Create and sign in a test user, set up the auth store and localStorage for frontend tests.
+ * Returns the test user session.
+ */
+export async function setupSignedInTestUser(
+  email?: string,
+  password: string = 'Password1!',
+  name: string = 'Test User',
+  phone: string = '555-123-4567',
+): Promise<TestUserSession> {
+  const testEmail = email || `test-${Date.now()}@example.com`
+  await createTestUser(testEmail, password, name, phone)
+  await signInTestUser(testEmail, password)
+  const session = getTestUserSession(testEmail)
+  if (!session) {
+    throw new Error('Failed to get test user session')
+  }
+  useAuthStore.setState({ user: session.user, token: session.token })
+  localStorage.setItem('token', session.token)
+  enqueueCleanup(testEmail)
+  return session
 }

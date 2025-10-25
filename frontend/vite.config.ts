@@ -15,4 +15,9 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
   },
+  test: {
+    deps: {
+      inline: ['@mui/x-data-grid'],
+    },
+  },
 })

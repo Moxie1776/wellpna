@@ -28,8 +28,11 @@ export function AppContent() {
       {appRoutes.map((route) => {
         let element = route.page ? <route.page /> : null
 
-        if (route.requiresAuth && !user) {
-          element = <Navigate to="/signin" replace />
+        // Redirect authenticated users from home to dashboard
+        if (route.href === '/' && user) {
+          element = <Navigate to="/dashboard" replace />
+        } else if (route.requiresAuth && !user) {
+          element = <Navigate to="/" replace />
         } else if (route.requiredRole && user?.role !== route.requiredRole) {
           element = <Navigate to="/forbidden" replace />
         } else if (route.requiresAuth) {
