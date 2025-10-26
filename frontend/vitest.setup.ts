@@ -1,8 +1,5 @@
 import { beforeAll, vi } from 'vitest'
 
-// Provide a minimal logger to avoid "Cannot find name 'logger'".
-// const logger = console
-
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
 
@@ -42,32 +39,53 @@ if (typeof document !== 'undefined' && !document.elementFromPoint) {
     return document.body
   }
 }
+
 import '@testing-library/jest-dom'
 
 import { act } from '@testing-library/react'
-
-// const originalLog = logger.debug
-// const originalError = logger.error
 
 declare global {
   var act: (typeof import('@testing-library/react'))['act']
 }
 globalThis.act = act
 
-beforeAll(() => {
-  console.error = (...args) => {
-    // Allow specific important errors but suppress React act() warnings
+// Keep originals so we can forward unexpected errors
+const _originalConsole = {
+  error: console.error.bind(console),
+  warn: console.warn.bind(console),
+  info: console.info.bind(console),
+  log: console.log.bind(console),
+  debug: console.debug.bind(console),
+}
+
+// Immediately suppress noisy console output during tests and filter
+// common React "act(...)" warnings. Doing this at module-load prevents
+// messages emitted during imports from slipping through before beforeAll.
+;(function suppressConsoleForTests() {
+  console.log = () => {}
+  console.info = () => {}
+  console.debug = () => {}
+  console.warn = () => {}
+
+  console.error = (...args: any[]) => {
+    const first = typeof args[0] === 'string' ? args[0] : ''
+    const msg = (first || '').toLowerCase()
+
+    // Suppress noisy act-related messages
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: An update to') &&
-      args[0].includes('inside a test was not wrapped in act(...)')
+      msg.includes('not wrapped in act(') ||
+      msg.includes('overlapping act() calls') ||
+      msg.includes('without await') ||
+      msg.includes('a component suspended inside an `act` scope') ||
+      msg.includes('you called act(async')
     ) {
       return
     }
-    // Suppress all other console.error messages in tests
-    return
+
+    // Forward real errors
+    _originalConsole.error(...args)
   }
-})
+})()
 
 declare let global: typeof globalThis
 

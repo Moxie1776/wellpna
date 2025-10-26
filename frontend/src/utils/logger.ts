@@ -3,43 +3,33 @@ import { Logger } from '../graphql/types/logger'
 const isTestEnv =
   typeof process !== 'undefined' &&
   process.env &&
-  // Treat vitest and debug runs test-like for logger output stable for tests
-  (process.env.NODE_ENV === 'test' ||
-    process.env.NODE_ENV === 'debug' ||
-    (process.env as any).VITEST === 'true')
+  (process.env.NODE_ENV === 'test' || (process.env as any).VITEST === 'true')
 
-const logger: Logger = {
+const makeOut = (level: string, msg: string) =>
+  isTestEnv
+    ? `[${level}] ${msg}`
+    : `[${new Date().toISOString()}] ${level}: ${msg}`
+
+const loggerImpl: Logger = {
   error: (message: string, ...args: any[]) => {
-    const out = isTestEnv
-      ? `[ERROR] ${message}`
-      : `[${new Date().toISOString()}] ERROR: ${message}`
-    // Use console.error so test spies (vi.spyOn(console, 'error')) work
-    // and avoid recursive calls to logger.error.
-    // Keep args forwarded for structured logging.
-     
-    ;(globalThis as any).console.error(out, ...args)
+    ;(globalThis as any).console.error(
+      makeOut('ERROR', String(message)),
+      ...args,
+    )
   },
   warn: (message: string, ...args: any[]) => {
-    const out = isTestEnv
-      ? `[WARN] ${message}`
-      : `[${new Date().toISOString()}] WARN: ${message}`
-     
-    ;(globalThis as any).console.warn(out, ...args)
+    ;(globalThis as any).console.warn(makeOut('WARN', String(message)), ...args)
   },
   info: (message: string, ...args: any[]) => {
-    const out = isTestEnv
-      ? `[INFO] ${message}`
-      : `[${new Date().toISOString()}] INFO: ${message}`
-     
-    ;(globalThis as any).console.info(out, ...args)
+    ;(globalThis as any).console.info(makeOut('INFO', String(message)), ...args)
   },
   debug: (message: string, ...args: any[]) => {
-    const out = isTestEnv
-      ? `[DEBUG] ${message}`
-      : `[${new Date().toISOString()}] DEBUG: ${message}`
-     
-    ;(globalThis as any).console.debug(out, ...args)
+    ;(globalThis as any).console.debug(
+      makeOut('DEBUG', String(message)),
+      ...args,
+    )
   },
 }
 
-export default logger
+export const logger = loggerImpl
+export default loggerImpl
