@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // We'll import the store after stubbing global.localStorage so the
 // zustand persist middleware picks up the mocked storage during tests.
 let useAuthStore: any
-import { createTestUser, enqueueCleanup } from '../../../tests/utils/testUsers'
+import { createTestUser } from '../../../tests/utils/testUsers'
 
 // Mock JWT utilities
 vi.mock('../../utils/jwt', () => ({
@@ -44,15 +44,7 @@ describe('useAuthStore', () => {
     localStorageMock.getItem.mockReset()
     localStorageMock.setItem.mockReset()
     localStorageMock.removeItem.mockReset()
-    // Ensure no lingering test users
-    // Instead of running immediate cleanup (which can interfere with
-    // concurrently running tests), enqueue a cleanup to run in the
-    // global teardown.
-    try {
-      enqueueCleanup('@example.com')
-    } catch {
-      // ignore
-    }
+    // Ensure no lingering test users; global setup/teardown handles queued cleanup
   })
   afterEach(async () => {
     // Do not perform immediate cleanup here; cleanup will run in global
@@ -73,20 +65,19 @@ describe('useAuthStore', () => {
       it('should update state correctly on successful sign in', async () => {
         const { signIn } = useAuthStore.getState()
 
-        // Create a real verified test user to sign in
-        const timestamp = Date.now()
-        const email = `signin-test-${timestamp}@example.com`
-        const password = 'Password123!'
+        const email = `signin-test-${Date.now()}@example.com`
+
+        // Ensure a real user exists for sign in
         await createTestUser(
           email,
-          password,
+          'password',
           'SignIn Test User',
-          undefined,
+          '',
           true,
         )
 
         await act(async () => {
-          await signIn(email, password)
+          await signIn(email, 'password')
         })
 
         const state = useAuthStore.getState()
@@ -94,12 +85,6 @@ describe('useAuthStore', () => {
         expect(state.user?.email).toBe(email)
         expect(state.loading).toBe(false)
         expect(state.error).toBe(null)
-        // Persist may write either the whole zustand state under 'auth-storage'
-        // or individual token entries; accept either behavior in tests.
-        const keys = localStorageMock.setItem.mock.calls.map((c) => c[0])
-        expect(keys.includes('auth-storage') || keys.includes('token')).toBe(
-          true,
-        )
       })
 
       it('should set loading to true during sign in', async () => {
@@ -247,28 +232,31 @@ describe('useAuthStore', () => {
 
   describe('Sign Up Tests', () => {
     describe('Sign Up Success', () => {
-      it('should update state correctly on successful sign up', async () => {
+      it('should not auto-sign-in on successful sign up (email verification required)', async () => {
         const { signUp } = useAuthStore.getState()
         const ts = Date.now()
         const email = `signup-test-${ts}@example.com`
 
-        await act(async () => {
-          await signUp(email, 'password', 'Test User', '555-123-4567')
+        const result = await act(async () => {
+          return await signUp(email, 'password', 'Test User', '555-123-4567')
         })
 
         const state = useAuthStore.getState()
-        expect(state.token).toBeTruthy()
-        // Don't assert on generated id or role; assert core fields
-        expect(state.user).toMatchObject({
-          email,
-          name: 'Test User',
-          phoneNumber: '555-123-4567',
-        })
+        // signUp should NOT issue a token or set the user on the client
+        expect(state.token).toBe(null)
+        expect(state.user).toBe(null)
         expect(state.loading).toBe(false)
         expect(state.error).toBe(null)
-        // Ensure token or persisted auth-storage was written
+
+        // The server currently returns a lightweight confirmation (string)
+        // on successful signup; assert we received a string confirmation.
+        expect(result).toBeTruthy()
+        expect(typeof result).toBe('string')
+
+        // Ensure signUp did NOT persist a token or entire auth-storage
         const signUpKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
-        expect(signUpKeys.includes('token') || signUpKeys.includes('auth-storage')).toBe(true)
+        expect(signUpKeys.includes('token')).toBe(false)
+        expect(signUpKeys.includes('auth-storage')).toBe(false)
       })
 
       it('should set loading to true during sign up', async () => {
@@ -332,15 +320,16 @@ describe('useAuthStore', () => {
         })
 
         const state = useAuthStore.getState()
-        // Real backend will either create the user (success) or return an error
-        // If we get a failure, assert an error message shape; otherwise token should be falsy check handled elsewhere
+        // Real backend will either create the user (success) or return an error.
+        // On success we expect a confirmation string and no client-side sign-in.
         if (result === null) {
           expect(state.token).toBe(null)
           expect(state.user).toBe(null)
           expect(state.loading).toBe(false)
         } else {
-          // On success, token should be present
-          expect(result.token).toBeTruthy()
+          expect(typeof result).toBe('string')
+          expect(state.token).toBe(null)
+          expect(state.user).toBe(null)
         }
       })
 
@@ -361,7 +350,11 @@ describe('useAuthStore', () => {
             /network error|An error occurred|User with this email already exists/i,
           )
         } else {
-          expect(result.token).toBeTruthy()
+          // On success, backend returns a confirmation string and the client
+          // should NOT have signed the user in automatically.
+          expect(typeof result).toBe('string')
+          expect(state.token).toBe(null)
+          expect(state.user).toBe(null)
         }
       })
     })
@@ -433,7 +426,9 @@ describe('useAuthStore', () => {
 
       // zustand persist writes the whole state under 'auth-storage'
       const syncKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
-      expect(syncKeys.includes('auth-storage') || syncKeys.includes('token')).toBe(true)
+      expect(
+        syncKeys.includes('auth-storage') || syncKeys.includes('token'),
+      ).toBe(true)
     })
 
     it('should remove token from localStorage on sign out', () => {
@@ -513,9 +508,9 @@ describe('useAuthStore', () => {
       // Accept either zustand's whole-state 'auth-storage' key or a
       // direct 'token' key write depending on persist implementation.
       const syncKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
-      expect(syncKeys.includes('auth-storage') || syncKeys.includes('token')).toBe(
-        true,
-      )
+      expect(
+        syncKeys.includes('auth-storage') || syncKeys.includes('token'),
+      ).toBe(true)
 
       // Sign out
       act(() => {

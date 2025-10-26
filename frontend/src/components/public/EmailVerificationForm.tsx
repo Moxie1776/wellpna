@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Box } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFTextField'
+import { Form } from '@/components/hookForm/HFForm'
+import HFTextField from '@/components/hookForm/HFTextField'
+import { ResetButton, StandardButton } from '@/components/ui'
 
 // logger removed: no longer used for transient debug in this form
 
@@ -44,71 +44,45 @@ export const EmailVerificationForm = ({
     onResendCode(email)
   }
 
-  // Helper text state for email and code
-  const [emailHelperText, setEmailHelperText] = useState(
-    'Enter your email address.',
-  )
-  const [codeHelperText, setCodeHelperText] = useState(
-    'Enter the code sent to your email.',
-  )
-
-  useEffect(() => {
-    if (form.formState.errors.email) {
-      setEmailHelperText(
-        form.formState.errors.email.message || 'Enter your email address.',
-      )
-    } else {
-      setEmailHelperText('Enter your email address.')
-    }
-    if (form.formState.errors.code) {
-      setCodeHelperText(
-        form.formState.errors.code.message ||
-          'Enter the code sent to your email.',
-      )
-    } else {
-      setCodeHelperText('Enter the code sent to your email.')
-    }
-  }, [
-    form.formState.errors.email,
-    form.formState.errors.code,
-    form.formState.isSubmitted,
-    form.formState.isLoading,
-  ])
-
   return (
     <FormProvider {...form}>
       <Form onSubmit={onSubmit}>
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="email"
-              label="Email"
-              type="email"
-              helperText={emailHelperText}
-            />
-          </FormControl>
-        </FormItem>
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="code"
-              label="Verification Code"
-              type="text"
-              helperText={codeHelperText}
-            />
-          </FormControl>
-        </FormItem>
-        <Button type="submit" disabled={form.formState.isLoading}>
-          {form.formState.isLoading ? 'Verifying...' : 'Verify Email'}
-        </Button>
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={handleResend}
-          disabled={form.formState.isLoading}
-        >
-          Resend Code
-        </Button>
+        <HFTextField
+          label="Email"
+          inputId="email"
+          name="email"
+          type="email"
+          placeholder="Enter your email address"
+        />
+        <HFTextField
+          label="Verification Code"
+          inputId="code"
+          name="code"
+          type="text"
+          placeholder="Enter the code sent to your email"
+        />
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <StandardButton type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Verifying...' : 'Verify Email'}
+          </StandardButton>
+          <ResetButton
+            type="button"
+            onClick={() => form.reset()}
+            disabled={form.formState.isSubmitting}
+          >
+            Reset
+          </ResetButton>
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          <StandardButton
+            type="button"
+            color="neutral"
+            onClick={handleResend}
+            disabled={form.formState.isSubmitting}
+          >
+            Resend Code
+          </StandardButton>
+        </Box>
       </Form>
     </FormProvider>
   )

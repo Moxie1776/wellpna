@@ -1,8 +1,12 @@
 import { Breadcrumbs as MuiBreadcrumbs } from '@mui/material'
 import { Link, useLocation } from 'react-router-dom'
 
+import { useIsMobile } from '@/hooks/useMobile'
+
 export function Breadcrumbs() {
   const location = useLocation()
+  const isMobile = useIsMobile()
+
   const pathnames = location.pathname.split('/').filter(Boolean)
 
   const crumbs = [
@@ -14,7 +18,14 @@ export function Breadcrumbs() {
   ]
 
   return (
-    <MuiBreadcrumbs sx={{ px: 2, py: 1 }} separator="/">
+    <MuiBreadcrumbs
+      sx={{
+        px: 2,
+        py: 1,
+        ...(isMobile && { pl: 8 }),
+      }}
+      separator="/"
+    >
       {crumbs.map((crumb, idx) =>
         idx === crumbs.length - 1 ? (
           <span key={crumb.href} style={{ fontWeight: 600 }}>

@@ -8,9 +8,9 @@ const SignInPage = () => {
 
   return (
     <Card
-      color="primary"
+      elevation={8}
       sx={{
-        minWidth: 300,
+        width: '100%',
         maxWidth: 400,
       }}
     >

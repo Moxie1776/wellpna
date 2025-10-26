@@ -75,12 +75,13 @@ export type MechanicalIsolation = {
 export type Mutation = {
   __typename?: 'Mutation';
   cleanupTestUsers?: Maybe<Scalars['Int']['output']>;
+  debugCreateAdminUser?: Maybe<AuthPayload>;
   debugVerifyUser?: Maybe<Scalars['Boolean']['output']>;
   requestPasswordReset?: Maybe<Scalars['Boolean']['output']>;
   resetPassword?: Maybe<AuthPayload>;
   sendVerificationEmail?: Maybe<Scalars['Boolean']['output']>;
   signIn?: Maybe<AuthPayload>;
-  signUp?: Maybe<AuthPayload>;
+  signUp?: Maybe<Scalars['String']['output']>;
   updateUser?: Maybe<User>;
   updateUserRole?: Maybe<User>;
   verifyEmail?: Maybe<AuthPayload>;
@@ -89,6 +90,14 @@ export type Mutation = {
 
 export type MutationCleanupTestUsersArgs = {
   pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationDebugCreateAdminUserArgs = {
+  email: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -183,6 +192,7 @@ export type Query = {
   health?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   signIn?: Maybe<AuthPayload>;
+  userRoles?: Maybe<Array<UserRole>>;
   users?: Maybe<Array<User>>;
 };
 
@@ -327,7 +337,7 @@ export type SignUpMutationVariables = Exact<{
 }>;
 
 
-export type SignUpMutation = { __typename?: 'Mutation', signUp?: { __typename?: 'AuthPayload', token?: string | null, user?: { __typename?: 'User', id?: string | null, email?: string | null, name?: string | null, phoneNumber?: string | null } | null } | null };
+export type SignUpMutation = { __typename?: 'Mutation', signUp?: string | null };
 
 export type UpdateUserMutationVariables = Exact<{
   data: UpdateUserInput;
@@ -357,10 +367,15 @@ export type GetVerificationCodeQueryVariables = Exact<{
 
 export type GetVerificationCodeQuery = { __typename?: 'Query', getVerificationCode?: string | null };
 
+export type UserRolesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserRolesQuery = { __typename?: 'Query', userRoles?: Array<{ __typename?: 'UserRole', role?: string | null }> | null };
+
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id?: string | null, email?: string | null, name?: string | null, phoneNumber?: string | null, role?: string | null, registeredAt?: any | null }> | null };
+export type UsersQuery = { __typename?: 'Query', users?: Array<{ __typename?: 'User', id?: string | null, email?: string | null, name?: string | null, phoneNumber?: string | null, role?: string | null, registeredAt?: any | null, validatedAt?: any | null, operatorUsers?: Array<{ __typename?: 'OperatorUser', operator?: { __typename?: 'Operator', operatorEnum?: string | null } | null }> | null }> | null };
 
 
 export const RequestPasswordResetDocument = gql`
@@ -417,15 +432,7 @@ export function useSignInMutation() {
 };
 export const SignUpDocument = gql`
     mutation SignUp($data: SignUpInput!) {
-  signUp(data: $data) {
-    token
-    user {
-      id
-      email
-      name
-      phoneNumber
-    }
-  }
+  signUp(data: $data)
 }
     `;
 
@@ -487,6 +494,17 @@ export const GetVerificationCodeDocument = gql`
 export function useGetVerificationCodeQuery(options: Omit<Urql.UseQueryArgs<GetVerificationCodeQueryVariables>, 'query'>) {
   return Urql.useQuery<GetVerificationCodeQuery, GetVerificationCodeQueryVariables>({ query: GetVerificationCodeDocument, ...options });
 };
+export const UserRolesDocument = gql`
+    query UserRoles {
+  userRoles {
+    role
+  }
+}
+    `;
+
+export function useUserRolesQuery(options?: Omit<Urql.UseQueryArgs<UserRolesQueryVariables>, 'query'>) {
+  return Urql.useQuery<UserRolesQuery, UserRolesQueryVariables>({ query: UserRolesDocument, ...options });
+};
 export const UsersDocument = gql`
     query Users {
   users {
@@ -496,6 +514,12 @@ export const UsersDocument = gql`
     phoneNumber
     role
     registeredAt
+    validatedAt
+    operatorUsers {
+      operator {
+        operatorEnum
+      }
+    }
   }
 }
     `;

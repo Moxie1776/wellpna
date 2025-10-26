@@ -3,15 +3,18 @@ import { yoga } from '../src/server'
 
 // Helper: generate test user data
 export function generateTestUserData(
-  overrides: Partial<{ email: string; name: string; phoneNumber: string }> = {},
+  overrides: Partial<{
+    email: string
+    name: string
+    phoneNumber: string
+  }> = {},
 ) {
   const timestamp = Date.now()
-  return {
-    email: overrides.email || `test-${timestamp}@example.com`,
-    name:
-      overrides.name || `Test User ${timestamp}`,
-    phoneNumber: overrides.phoneNumber || '555-000-0000',
-  }
+  const email = overrides.email || 'test-' + String(timestamp) + '@example.com'
+  const name = overrides.name || `Test User ${timestamp}`
+  const phoneNumber = overrides.phoneNumber || '555-000-0000'
+
+  return { email, name, phoneNumber }
 }
 
 // Helper: create a user via GraphQL signUp mutation and optionally verify
@@ -22,14 +25,13 @@ export async function createTestUserAndJwt(
 ) {
   const data = generateTestUserData(overrides)
 
+  // signUp now returns a simple confirmation String (no token/user).
+  // Tests should not select fields from signUp since the GraphQL type is String.
   const signUpMutation = `
-    mutation SignUp($data: SignUpInput!) {
-      signUp(data: $data) {
-        token
-        user { id email name phoneNumber }
+      mutation SignUp($data: SignUpInput!) {
+        signUp(data: $data)
       }
-    }
-  `
+    `
 
   const verifyMutation = `
     mutation VerifyEmail($data: VerifyEmailInput!) {
@@ -64,7 +66,19 @@ export async function createTestUserAndJwt(
     throw new Error('Failed to signUp user: ' + JSON.stringify(result.errors))
   }
 
-  const payload = result.data.signUp
+  // signUp returns a confirmation string. Fetch the created user from the
+  // database for test helpers so callers receive the created user object.
+  const signUpPayload = result.data.signUp
+  let createdUser = null
+  if (typeof signUpPayload === 'string') {
+    // Load the user directly from the DB using Prisma
+    createdUser = await _prisma.user.findUnique({
+      where: { email: data.email },
+    })
+  } else {
+    // If older behaviour or debug mode returns an object, try to use it
+    createdUser = signUpPayload?.user ?? null
+  }
 
   if (verified) {
     // Get verification code using debug query instead of intercepting emails
@@ -109,5 +123,5 @@ export async function createTestUserAndJwt(
     }
   }
 
-  return { jwt: null, user: payload.user }
+  return { jwt: null, user: createdUser }
 }

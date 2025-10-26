@@ -11,7 +11,7 @@ describe('Snackbar Notification Types Tests', () => {
     { color: 'success', expected: 'success' },
     { color: 'neutral', expected: 'neutral' },
     { color: 'warning', expected: 'warning' },
-    { color: 'danger', expected: 'danger' },
+    { color: 'error', expected: 'error' },
     { color: 'info', expected: 'info' },
   ]
 
@@ -22,7 +22,7 @@ describe('Snackbar Notification Types Tests', () => {
         React.useEffect(() => {
           showSnackbar({
             message: `${expected} message`,
-            color: color as import('../snackbar').SnackbarColor,
+            color: color as import('../snackbar').SnackbarColorKey,
           })
           // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])

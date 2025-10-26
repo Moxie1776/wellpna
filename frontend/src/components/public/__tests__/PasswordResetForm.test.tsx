@@ -23,7 +23,7 @@ describe('PasswordResetForm', () => {
       )
       expect(screen.getByLabelText('Email')).toBeInTheDocument()
       expect(
-        screen.getByRole('button', { name: 'Send Reset Link' }),
+        screen.getByRole('button', { name: 'Send Reset Code' }),
       ).toBeInTheDocument()
     })
 
@@ -64,7 +64,7 @@ describe('PasswordResetForm', () => {
       await act(async () => {
         await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
         await userEvent.click(
-          screen.getByRole('button', { name: 'Send Reset Link' }),
+          screen.getByRole('button', { name: 'Send Reset Code' }),
         )
       })
       await waitFor(() => {
@@ -85,7 +85,7 @@ describe('PasswordResetForm', () => {
       // This test may need to be updated to use a real loading state trigger
       // For now, just check the button exists
       expect(
-        screen.getByRole('button', { name: 'Send Reset Link' }),
+        screen.getByRole('button', { name: 'Send Reset Code' }),
       ).toBeInTheDocument()
     })
   })

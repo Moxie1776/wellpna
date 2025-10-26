@@ -4,14 +4,14 @@ import { useForm } from 'react-hook-form'
 import { describe, expect, it, vi } from 'vitest'
 
 import HFProvider from '../HFProvider'
-import HFInput from '../HFTextField'
+import HFTextField from '../HFTextField'
 
 type TestFormData = {
   testInput?: string
   emailInput?: string
 }
 
-describe('HFInput', () => {
+describe('HFTextField', () => {
   const TestWrapper = ({
     children,
     defaultValues = {},
@@ -26,7 +26,12 @@ describe('HFInput', () => {
   it('renders with label and helperText', () => {
     render(
       <TestWrapper>
-        <HFInput name="testInput" label="Test Label" helperText="Helper text" />
+        <HFTextField
+          name="testInput"
+          label="Test Label"
+          inputId="testInput-id"
+          helperText="Helper text"
+        />
       </TestWrapper>,
     )
 
@@ -38,7 +43,7 @@ describe('HFInput', () => {
   it('renders email input type', () => {
     render(
       <TestWrapper>
-        <HFInput name="testInput" type="email" />
+        <HFTextField name="testInput" inputId="emailInput-id" label="Email" type="email" />
       </TestWrapper>,
     )
 
@@ -49,7 +54,7 @@ describe('HFInput', () => {
   it('renders password input type', () => {
     render(
       <TestWrapper>
-        <HFInput name="emailInput" type="password" />
+        <HFTextField name="emailInput" inputId="passwordInput-id" label="Password" type="password" />
       </TestWrapper>,
     )
 
@@ -62,7 +67,7 @@ describe('HFInput', () => {
 
     render(
       <TestWrapper>
-        <HFInput name="testInput" />
+        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
       </TestWrapper>,
     )
 
@@ -84,7 +89,7 @@ describe('HFInput', () => {
 
     render(
       <TestWrapperWithError>
-        <HFInput name="testInput" />
+        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
       </TestWrapperWithError>,
     )
 
@@ -94,7 +99,7 @@ describe('HFInput', () => {
   it('integrates with form default values', () => {
     render(
       <TestWrapper defaultValues={{ testInput: 'default value' }}>
-        <HFInput name="testInput" />
+        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
       </TestWrapper>,
     )
 
@@ -108,7 +113,7 @@ describe('HFInput', () => {
 
     render(
       <TestWrapper>
-        <HFInput name="testInput" onChange={mockOnChange} />
+        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" onChange={mockOnChange} />
       </TestWrapper>,
     )
 

@@ -26,4 +26,16 @@ builder.queryFields((t) => ({
       })
     },
   }),
+  userRoles: t.prismaField({
+    type: ['UserRole'],
+    resolve: (query, root, args, ctx, _info) => {
+      if (!ctx.jwt || ctx.jwt.payload.role !== 'admin') {
+        throw new Error('Not authorized')
+      }
+      return prisma.userRole.findMany({
+        ...query,
+        orderBy: { role: 'asc' },
+      })
+    },
+  }),
 }))

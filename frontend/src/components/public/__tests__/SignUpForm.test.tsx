@@ -2,10 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  createTestUser,
-  enqueueCleanup,
-} from '../../../../tests/utils/testUsers'
+import { createTestUser } from '../../../../tests/utils/testUsers'
 import { useAuthStore } from '../../../store/auth'
 import { SignUpForm } from '../SignUpForm'
 
@@ -41,11 +38,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks()
-  try {
-    enqueueCleanup('@example.com')
-  } catch {
-    // ignore
-  }
 })
 
 describe('SignUpForm', () => {

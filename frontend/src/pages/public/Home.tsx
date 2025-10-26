@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Paper, Stack, Typography } from '@mui/material'
+import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 import { SignInForm } from '@/components/public/SignInForm'
@@ -19,101 +19,90 @@ const HomePage = () => {
       : 'var(--joy-palette-secondary-dark)'
 
   return (
-    <Paper
-      elevation={6}
+    <Box
       sx={{
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 2,
+        p: { xs: 2, sm: 4, lg: 6 },
       }}
     >
+      {/* Header section with title and subtitle */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: { xs: 2, sm: 4, lg: 6 },
+          textAlign: 'center',
+          mb: 4,
         }}
       >
-        {/* Header section with title and subtitle */}
-        <Box
+        <Typography
+          variant="h1"
           sx={{
-            textAlign: 'center',
-            mb: 4,
+            color: primaryColor,
           }}
         >
-          <Typography
-            variant="h1"
-            sx={{
-              color: primaryColor,
-            }}
-          >
-            WellPNA
-          </Typography>
-          <Typography
-            variant="h3"
-            sx={{
-              color: secondaryColor,
-            }}
-          >
-            Well Plug & Abandonment Solutions
-          </Typography>
-        </Box>
-
-        {/* Main content with image and sign-in form */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 4, md: 6 }}
+          WellPNA
+        </Typography>
+        <Typography
+          variant="h3"
           sx={{
-            alignItems: 'center',
+            color: secondaryColor,
+          }}
+        >
+          Well Plug & Abandonment Solutions
+        </Typography>
+      </Box>
+
+      {/* Main content with image and sign-in form */}
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 4, md: 6 }}
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {/* Left side - Illustration */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
             justifyContent: 'center',
           }}
         >
-          {/* Left side - Illustration */}
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
-            <img
-              className="filter-green"
-              src="/villahermosa2.2-removebg-preview.png"
-              alt="villahermosa2.2"
-              style={{ maxWidth: isMobile ? '300px' : '555px', height: 'auto' }}
-            />
-          </Box>
+          <img
+            className="filter-green"
+            src="/villahermosa2.2-removebg-preview.png"
+            alt="villahermosa2.2"
+            style={{ maxWidth: isMobile ? '300px' : '555px', height: 'auto' }}
+          />
+        </Box>
 
-          {/* Right side - Signin Card */}
-          <Box
+        {/* Right side - Signin Card */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Card
+            elevation={8}
             sx={{
-              flex: 1,
-              display: 'flex',
-              justifyContent: 'center',
+              minWidth: 300,
+              maxWidth: 400,
             }}
           >
-            <Card
-              sx={{
-                minWidth: 300,
-                maxWidth: 400,
-                backgroundColor: 'primary.main',
-                color: 'primary.contrastText',
-              }}
-            >
-              <CardContent>
-                <SignInForm
-                  title="Sign in to your account"
-                  onSignIn={() => navigate('/dashboard')}
-                />
-              </CardContent>
-            </Card>
-          </Box>
-        </Stack>
-      </Box>
-    </Paper>
+            <CardContent>
+              <SignInForm
+                title="Sign in to your account"
+                onSignIn={() => navigate('/dashboard')}
+              />
+            </CardContent>
+          </Card>
+        </Box>
+      </Stack>
+    </Box>
   )
 }
 

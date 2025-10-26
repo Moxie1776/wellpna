@@ -1,7 +1,7 @@
 import { beforeAll, vi } from 'vitest'
 
 // Provide a minimal logger to avoid "Cannot find name 'logger'".
-const logger = console
+// const logger = console
 
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
@@ -46,8 +46,8 @@ import '@testing-library/jest-dom'
 
 import { act } from '@testing-library/react'
 
-const originalLog = logger.debug
-const originalError = logger.error
+// const originalLog = logger.debug
+// const originalError = logger.error
 
 declare global {
   var act: (typeof import('@testing-library/react'))['act']

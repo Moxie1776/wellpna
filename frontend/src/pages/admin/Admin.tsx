@@ -1,20 +1,19 @@
-import { Paper, Typography } from '@mui/material'
+import { Paper } from '@mui/material'
 
 // eslint-disable-next-line max-len
 import { UserManagementTable } from '../../components/tables/UserManagementTable'
+import { PageHeader } from '../../components/ui'
 
 export const Admin = () => {
   return (
     <Paper
-      elevation={6}
       sx={{
-        minHeight: '100vh',
         p: 2,
+        height: '100%',
+        width: '100%',
       }}
     >
-      <Typography variant="h1" color="primary" sx={{ mb: 3 }}>
-        User Management
-      </Typography>
+      <PageHeader>User Management</PageHeader>
 
       <UserManagementTable />
     </Paper>

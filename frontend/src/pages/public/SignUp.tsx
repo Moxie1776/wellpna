@@ -12,9 +12,10 @@ const SignupPage = () => {
 
   return (
     <Card
-      color="primary"
+      elevation={8}
       sx={{
-        minWidth: 300,
+        // minWidth: 300,
+        width: '100%',
         maxWidth: 400,
         justifyContent: 'center',
         justifyItems: 'center',

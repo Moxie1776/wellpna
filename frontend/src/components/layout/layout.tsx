@@ -1,15 +1,23 @@
 import { Box, Paper } from '@mui/material'
-import { ReactNode } from 'react'
+import { darken, lighten, useTheme } from '@mui/material/styles'
+import { Outlet } from 'react-router-dom'
 
+import { useMode } from '@/hooks/useMode'
 import { useAuthStore } from '@/store/auth'
 
 import { Breadcrumbs } from './Breadcrumbs'
 import { AppSidebar as Sidebar } from './Sidebar'
 import ThemeToggle from './ThemeToggle'
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout() {
   const user = useAuthStore((state) => state.user)
-  const isAuthenticated = !!user
+  const { mode } = useMode()
+  const theme = useTheme()
+
+  const backgroundColor =
+    mode === 'dark'
+      ? lighten(theme.palette.background.default, 0.2)
+      : darken(theme.palette.background.default, 0.2)
   return (
     <Paper
       sx={{
@@ -18,11 +26,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         maxHeight: '100vh',
         minWidth: '100vw',
         maxWidth: '100vw',
-        border: 'none',
-        boxShadow: 'none',
       }}
     >
-      <Sidebar isAuthenticated={isAuthenticated} key={user?.role} />
+      <Sidebar backgroundColor={backgroundColor} key={user?.role} />
       <Box
         sx={{
           flex: 1,
@@ -40,6 +46,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             borderBottom: '1px solid',
             borderColor: 'divider',
             padding: '0 1rem',
+            backgroundColor: { backgroundColor },
           }}
         >
           <Breadcrumbs />
@@ -53,7 +60,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             justifyContent: 'center',
           }}
         >
-          {children}
+          <Outlet />
         </Paper>
       </Box>
     </Paper>

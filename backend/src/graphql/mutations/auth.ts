@@ -34,6 +34,10 @@ export const VerifyEmailInput = builder.inputType('VerifyEmailInput', {
   }),
 })
 
+// A lightweight result returned by signUp: we do not issue tokens on signup.
+// Sign up will return a short confirmation message. We avoid returning
+// tokens or the full user object here so clients do not auto-authenticate.
+
 export const ResetPasswordInput = builder.inputType('ResetPasswordInput', {
   fields: (t) => ({
     code: t.string({ required: true }),
@@ -199,7 +203,7 @@ builder.mutationFields((t) => ({
   }),
 
   signUp: t.field({
-    type: AuthPayload,
+    type: 'String',
     args: {
       data: t.arg({ type: SignUpInput, required: true }),
     },
@@ -242,16 +246,10 @@ builder.mutationFields((t) => ({
         logger.error('Failed to send verification email:', error)
       }
 
-      // Generate JWT token (user still needs to verify email)
-      const token = signJwt({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        phoneNumber: user.phoneNumber,
-      })
-
-      return { token, user }
+      // Do NOT generate or return a JWT token on signup. The user must
+      // verify their email before signing in. Return only the created
+      // user object so the client can navigate to verification flows.
+      return 'Successfully registered'
     },
   }),
 

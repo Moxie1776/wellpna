@@ -1,6 +1,6 @@
 // InputOTP removed, use Input directly
 import { Card, CardContent } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { PasswordResetForm } from '@/components/public/PasswordResetForm'
@@ -9,6 +9,7 @@ import { useSnackbar } from '@/components/ui/snackbar'
 import { REQUEST_PASSWORD_RESET_MUTATION } from '@/graphql/mutations/requestPasswordResetMutation'
 // eslint-disable-next-line max-len
 import { RESET_PASSWORD_MUTATION } from '@/graphql/mutations/resetPasswordMutation'
+import { useAuthStore } from '@/store/auth'
 import client from '@/utils/graphqlClient'
 
 const PasswordResetPage = () => {
@@ -22,6 +23,18 @@ const PasswordResetPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_requestEmail, setRequestEmail] = useState('')
 
+  // Show stock warning when navigated here with an email query param
+  useEffect(() => {
+    if (defaultEmail) {
+      showSnackbar({
+        message:
+          'Please check your email for the password reset code ' +
+          'to reset your password.',
+        color: 'warning',
+      })
+    }
+  }, [defaultEmail, showSnackbar])
+
   const handleRequestReset = async (values: { email: string }) => {
     try {
       const result = await client
@@ -31,7 +44,7 @@ const PasswordResetPage = () => {
       if (result.error) {
         showSnackbar({
           message: result.error.message || 'Failed to send reset code',
-          color: 'danger',
+          color: 'error',
         })
         return
       }
@@ -42,7 +55,7 @@ const PasswordResetPage = () => {
     } catch (error: any) {
       showSnackbar({
         message: error.message || 'An error occurred',
-        color: 'danger',
+        color: 'error',
       })
     } finally {
       //
@@ -72,14 +85,19 @@ const PasswordResetPage = () => {
       if (result.error) {
         showSnackbar({
           message: result.error.message || 'Reset failed',
-          color: 'danger',
+          color: 'error',
         })
         return
       }
 
       if (result.data?.resetPassword) {
-        const { token } = result.data.resetPassword
-        localStorage.setItem('token', token)
+        const { token, user } = result.data.resetPassword
+        try {
+          localStorage.setItem('token', token)
+        } catch {
+          // ignore storage errors
+        }
+        useAuthStore.getState().setAuth(token, user)
         showSnackbar({
           message: 'Password reset successful!',
           color: 'success',
@@ -89,7 +107,7 @@ const PasswordResetPage = () => {
     } catch (error: any) {
       showSnackbar({
         message: error.message || 'An error occurred',
-        color: 'danger',
+        color: 'error',
       })
     } finally {
       //
@@ -97,7 +115,7 @@ const PasswordResetPage = () => {
   }
 
   return (
-    <Card color="primary" sx={{ minWidth: 300, maxWidth: 400 }} role="region">
+    <Card elevation={8} sx={{ width: '100%', maxWidth: 400 }} role="region">
       <CardContent>
         <PasswordResetForm
           mode={isResetMode || hasRequestedReset ? 'reset' : 'request'}

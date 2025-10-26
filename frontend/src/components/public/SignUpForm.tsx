@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, Button, Typography } from '@mui/material'
-import React from 'react'
+import { Box, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFTextField'
+import { Form } from '@/components/hookForm/HFForm'
+import HFTextField from '@/components/hookForm/HFTextField'
+import { ResetButton, StandardButton } from '@/components/ui'
 import passwordSchema from '@/utils/passwordSchema'
 
 import { useAuth } from '../../hooks/useAuth'
@@ -32,66 +32,25 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
     mode: 'onChange',
   })
 
-  // Helper text state for name, email, phone number, and password
-  const [nameHelperText, setNameHelperText] = React.useState('Enter your name.')
-  const [emailHelperText, setEmailHelperText] = React.useState(
-    'Enter your email address.',
-  )
-  const [phoneNumberHelperText, setPhoneNumberHelperText] = React.useState(
-    'Enter your phone number.',
-  )
-  const [passwordHelperText, setPasswordHelperText] = React.useState(
-    'Enter your password.',
-  )
-
-  React.useEffect(() => {
-    if (form.formState.errors.name) {
-      setNameHelperText(
-        form.formState.errors.name.message || 'Enter your name.',
-      )
-    } else {
-      setNameHelperText('Enter your name.')
-    }
-    if (form.formState.errors.email) {
-      setEmailHelperText(
-        form.formState.errors.email.message || 'Enter your email address.',
-      )
-    } else {
-      setEmailHelperText('Enter your email address.')
-    }
-    if (form.formState.errors.phoneNumber) {
-      setPhoneNumberHelperText(
-        form.formState.errors.phoneNumber.message || 'Enter your phone number.',
-      )
-    } else {
-      setPhoneNumberHelperText('Enter your phone number.')
-    }
-    if (form.formState.errors.password) {
-      setPasswordHelperText(
-        form.formState.errors.password.message || 'Enter your password.',
-      )
-    } else {
-      setPasswordHelperText('Enter your password.')
-    }
-  }, [
-    form.formState.errors.name,
-    form.formState.errors.email,
-    form.formState.errors.phoneNumber,
-    form.formState.errors.password,
-    form.formState.isSubmitted,
-  ])
-
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await signUp(
+      const result = await signUp(
         values.email,
         values.password,
         values.name,
         values.phoneNumber,
       )
-      onSignup()
-    } catch {
-      // Error handling is done in the useAuth hook
+      // Only call onSignup when signup actually succeeded
+      if (result) {
+        onSignup()
+      }
+      // else: error is surfaced via useAuth().error and shown in the form
+    } catch (err) {
+      // Unexpected errors: ensure they're surfaced (useAuth also logs)
+      // Keep silent here since useAuth sets error state for
+      // GraphQL/validation issues but still log to console in dev for debug
+
+      console.error('SignUpForm onSubmit unexpected error', err)
     }
   }
 
@@ -102,53 +61,53 @@ export const SignUpForm = ({ onSignup }: { onSignup: () => void }) => {
           <Typography variant="h4" sx={{ mb: 2 }}>
             Sign Up
           </Typography>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="name"
-                label="Name"
-                type="text"
-                helperText={nameHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="email"
-                label="Email"
-                type="email"
-                helperText={emailHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="phoneNumber"
-                label="Phone Number"
-                type="tel"
-                helperText={phoneNumberHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="password"
-                label="Password"
-                type="password"
-                helperText={passwordHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            Sign Up
-          </Button>
+          <HFTextField
+            label="Name"
+            inputId="name"
+            name="name"
+            type="text"
+            placeholder="Enter your name"
+            disabled={form.formState.isSubmitting}
+          />
+          <HFTextField
+            label="Email"
+            inputId="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email address"
+            disabled={form.formState.isSubmitting}
+          />
+          <HFTextField
+            label="Phone Number"
+            inputId="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            placeholder="Enter your phone number"
+            disabled={form.formState.isSubmitting}
+          />
+          <HFTextField
+            label="Password"
+            inputId="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            disabled={form.formState.isSubmitting}
+          />
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <StandardButton
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              Sign Up
+            </StandardButton>
+            <ResetButton
+              type="button"
+              onClick={() => form.reset()}
+              disabled={form.formState.isSubmitting}
+            >
+              Reset
+            </ResetButton>
+          </Box>
           {error && (
             <Typography variant="body2" color="error" sx={{ mt: 2 }}>
               {error}

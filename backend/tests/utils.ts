@@ -29,12 +29,10 @@ export class TestUtils {
       `555-${Math.floor(1000 + Math.random() * 9000)}-` +
         `${Math.floor(1000 + Math.random() * 9000)}`
 
+    // signUp now returns a confirmation String. Request only the scalar.
     const signUpMutation = `
       mutation SignUp($data: SignUpInput!) {
-        signUp(data: $data) {
-          token
-          user { id email name role phoneNumber registeredAt validatedAt }
-        }
+        signUp(data: $data)
       }
     `
 
@@ -43,7 +41,9 @@ export class TestUtils {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: signUpMutation,
-        variables: { data: { email, password, name, phoneNumber } },
+        variables: {
+          data: { email, password, name, phoneNumber },
+        },
       }),
     })
 
@@ -52,10 +52,79 @@ export class TestUtils {
       throw new Error('signUp failed: ' + JSON.stringify(result.errors))
     }
 
-    const payload = result.data.signUp
-    const user = payload.user as User
-    const jwt = payload.token as string
-    return { ...user, jwt } as TestUser
+    // After signUp, load the created user from the DB. Tests that need a JWT
+    // should call verifyEmail to obtain one.
+    const created = await this.prisma.user.findUnique({ where: { email } })
+    if (!created) throw new Error('User not found after signUp')
+
+    // If the caller needs a JWT, ensure the account is verified via the
+    // verifyEmail mutation. For this helper we return a JWT by verifying the
+    // fresh user immediately.
+    const getVerifyCode = created.verificationCode
+    const jwt: string | null = null
+    if (!getVerifyCode) {
+      // trigger a verification email so a code exists
+      const sendVerificationMutation = `
+        mutation SendVerificationEmail($email: String!) {
+          sendVerificationEmail(email: $email)
+        }
+      `
+      await yoga.fetch('http://localhost:4000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: sendVerificationMutation,
+          variables: { email },
+        }),
+      })
+      // reload
+      const refreshed = await this.prisma.user.findUnique({ where: { email } })
+      if (refreshed) Object.assign(created, refreshed)
+    }
+
+    // Use verifyEmail to obtain a JWT for test usage
+    const verifyMutation = `
+      mutation VerifyEmail($data: VerifyEmailInput!) {
+        verifyEmail(data: $data) {
+          token
+          user {
+            id
+            email
+            name
+            role
+            phoneNumber
+            registeredAt
+            validatedAt
+          }
+        }
+      }
+    `
+
+    // If a verification code exists, call verifyEmail to get token/user
+    const code = (created as any).verificationCode
+    if (code) {
+      const verifyResp = await yoga.fetch('http://localhost:4000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: verifyMutation,
+          variables: {
+            data: { email, code },
+          },
+        }),
+      })
+      const verifyRes = await verifyResp.json()
+      if (verifyRes.errors) {
+        throw new Error(
+          'verifyEmail failed: ' + JSON.stringify(verifyRes.errors),
+        )
+      }
+      const payload = verifyRes.data.verifyEmail
+      return { ...payload.user, jwt: payload.token } as TestUser
+    }
+
+    // If no code available, return the created user without a JWT.
+    return { ...created, jwt: jwt as any } as TestUser
   }
 
   /** Create a verified test user (sets validatedAt). */
@@ -70,11 +139,21 @@ export class TestUtils {
     // Create user via signUp mutation
     const created = await this.createTestUser(overrides)
 
+    // If createTestUser already produced a verified user, return it directly.
+    const isValidated = Boolean((created as any).validatedAt)
+    const codeMissing = (created as any).verificationCode == null
+    if (isValidated || codeMissing) {
+      // If the user is already verified (validatedAt set) return early.
+      if (isValidated) return created
+    }
+
     // Ensure verification code exists; trigger send if absent
     const dbUser = await this.prisma.user.findUnique({
       where: { id: created.id },
     })
-    if (!dbUser) throw new Error('User not found after signUp')
+    if (!dbUser) {
+      throw new Error('User not found after signUp')
+    }
 
     if (!dbUser.verificationCode) {
       const sendVerificationMutation = `
@@ -87,7 +166,9 @@ export class TestUtils {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: sendVerificationMutation,
-          variables: { email: created.email },
+          variables: {
+            email: created.email,
+          },
         }),
       })
       // refresh
@@ -97,14 +178,23 @@ export class TestUtils {
       if (refreshed) Object.assign(dbUser, refreshed)
     }
 
-    if (!dbUser.verificationCode)
+    if (!dbUser.verificationCode) {
       throw new Error('No verification code available to verify user')
+    }
 
     const verifyMutation = `
       mutation VerifyEmail($data: VerifyEmailInput!) {
         verifyEmail(data: $data) {
           token
-          user { id email name role phoneNumber registeredAt validatedAt }
+          user {
+            id
+            email
+            name
+            role
+            phoneNumber
+            registeredAt
+            validatedAt
+          }
         }
       }
     `
@@ -124,8 +214,9 @@ export class TestUtils {
     })
 
     const verifyRes = await verifyResp.json()
-    if (verifyRes.errors)
+    if (verifyRes.errors) {
       throw new Error('verifyEmail failed: ' + JSON.stringify(verifyRes.errors))
+    }
 
     const payload = verifyRes.data.verifyEmail
     return { ...payload.user, jwt: payload.token } as TestUser

@@ -1,5 +1,6 @@
-import { Box, Button, Drawer, IconButton, Paper, useTheme } from '@mui/material'
+import { Box, Drawer, IconButton, Paper, useTheme } from '@mui/material'
 import { useMemo, useState } from 'react'
+import { FaSignOutAlt } from 'react-icons/fa'
 import { MdDashboard, MdHome, MdMenu } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 
@@ -8,14 +9,67 @@ import { useIsMobile } from '@/hooks/useMobile'
 import { useMode } from '@/hooks/useMode'
 import { appRoutes } from '@/lib/routes'
 
-export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
+interface SidebarLinkProps {
+  to?: string
+  onClick?: () => void
+  icon?: React.ComponentType<{ size?: number }>
+  children: React.ReactNode
+  linkColor: string
+}
+
+function SidebarLink({
+  to,
+  onClick,
+  icon: Icon,
+  children,
+  linkColor,
+}: SidebarLinkProps) {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (to === '#') {
+      e.preventDefault()
+    }
+    onClick?.()
+  }
+
+  return (
+    <Link
+      to={to || '#'}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        padding: '12px 16px',
+        textDecoration: 'none',
+        borderRadius: 1,
+        fontWeight: 500,
+        margin: '4px 0',
+        transition: 'background 0.2s',
+        color: linkColor,
+      }}
+      onClick={handleClick}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = '#f7f7f9'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = ''
+      }}
+    >
+      {Icon && <Icon size={20} />}
+      {children}
+    </Link>
+  )
+}
+
+export function AppSidebar({ backgroundColor }: { backgroundColor?: string }) {
   const { signOut, user } = useAuth()
+  const isAuthenticated = !!user
   const isMobile = useIsMobile()
   const { mode } = useMode()
   const theme = useTheme()
 
   // Expose linkColor variable for easy usage and discovery
-  const linkColor = mode === 'dark' ? 'primary[300]' : 'primary[700]'
+  const linkColor =
+    mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main
 
   // Filter links by auth and role
   const filteredLinks = useMemo(
@@ -77,11 +131,7 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
         }}
       >
         {/* home/dashboard toggle icon */}
-        <IconButton
-          color="neutral"
-          size="small"
-          sx={{ mr: 1, color: '#fff' }}
-        >
+        <IconButton color="neutral" size="small" sx={{ mr: 1, color: '#fff' }}>
           {isAuthenticated ? (
             <MdDashboard size={24} data-testid="sidebar-dashboard-icon" />
           ) : (
@@ -92,56 +142,26 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
         WellPnA
       </Box>
       <nav style={{ flex: 1 }}>
-        {filteredLinks.map((link) => {
-          const Icon = link.icon
-          return (
-            <Link
-              key={link.label}
-              to={link.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '0.75rem 1rem',
-                textDecoration: 'none',
-                borderRadius: 6,
-                fontWeight: 500,
-                margin: '0.25rem 0',
-                transition: 'background 0.2s',
-                color: linkColor,
-              }}
-              onClick={() => isMobile && setOpen(false)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#f7f7f9'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = ''
-              }}
-            >
-              {Icon ? <Icon size={20} /> : null}
-              {link.label}
-            </Link>
-          )
-        })}
+        {filteredLinks.map((link) => (
+          <SidebarLink
+            key={link.label}
+            to={link.href}
+            icon={link.icon}
+            linkColor={linkColor}
+            onClick={() => isMobile && setOpen(false)}
+          >
+            {link.label}
+          </SidebarLink>
+        ))}
       </nav>
       {isAuthenticated && (
-        <Button
-          fullWidth
+        <SidebarLink
           onClick={signOut}
-          role="button"
-          sx={{
-            padding: '1rem',
-            borderColor: 'neutral.main',
-            color: 'neutral.main',
-            '&:hover': {
-              borderColor: 'neutral.dark',
-              backgroundColor: 'neutral.main',
-              color: 'neutral.contrastText',
-            },
-          }}
+          icon={FaSignOutAlt}
+          linkColor={linkColor}
         >
-          Logout
-        </Button>
+          Sign Out
+        </SidebarLink>
       )}
     </>
   )
@@ -167,13 +187,14 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
         </IconButton>
         <Drawer open={open} onClose={() => setOpen(false)} anchor="left">
           <Paper
-            elevation={6}
+            elevation={8}
             sx={{
               width: 220,
-              minHeight: '100vh',
+              // minHeight: '100vh',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'stretch',
+              backgroundColor: 'transparent',
             }}
           >
             {sidebarContent}
@@ -185,15 +206,18 @@ export function AppSidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   return (
     <Paper
-      elevation={6}
       style={{
         width: 220,
+        maxHeight: '100vh',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
       }}
-      sx={{ borderRight: '1px solid' }}
+      sx={{
+        backgroundColor,
+        borderRight: '1px solid',
+      }}
     >
       {sidebarContent}
     </Paper>

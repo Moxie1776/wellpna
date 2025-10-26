@@ -147,7 +147,7 @@ const MyComponent = () => {
   const handleError = () => {
     showSnackbar({
       message: 'Something went wrong',
-      color: 'danger',
+      color: 'error',
     })
   }
 
@@ -164,9 +164,18 @@ const MyComponent = () => {
 - `secondary` / `secondary.main`
 - `success` / `success.main`
 - `warning` / `warning.main`
-- `danger` / `danger.main`
+- `error` / `error.main`
 - `info` / `info.main`
 - `neutral` / `neutral.main`
+
+#### Notification durations
+
+- The Snackbar provider enforces a single standard auto-hide duration in
+  runtime to keep UX consistent.
+- In normal runs this is 10,000ms (10s).
+- When running tests (Vitest), the provider shortens the duration to 1,000ms
+  (1s) to keep tests fast and deterministic. Tests in this repo rely on this
+  behavior, so expect `data-autohideduration="1000"` in test runs.
 
 ### Form Handling with React Hook Form + Zod
 
@@ -329,3 +338,67 @@ describe('MyComponent', () => {
 - **Secondary:** #c51230 (Red)
 
 Use MUI color tokens: `primary`, `secondary`, etc.
+
+## Button Standards
+
+The application uses standardized button components for consistent styling and behavior across all forms and interfaces.
+
+### Standard Button (`StandardButton`)
+
+- **Purpose**: Primary actions, form submissions, confirmations
+- **Styling**: Contained variant with primary color (#012d6c)
+- **Icon**: LiaSignInAltSolid (sign-in icon)
+- **Usage**: Import from `@/components/ui`
+
+```tsx
+import { StandardButton } from '@/components/ui'
+
+<StandardButton type="submit" fullWidth>
+  Save Changes
+</StandardButton>
+```
+
+### Reset Button (`ResetButton`)
+
+- **Purpose**: Form resets, clearing filters, undo actions
+- **Styling**: Contained variant with secondary color (#c51230)
+- **Icon**: GrPowerReset (reset/power icon)
+- **Usage**: Import from `@/components/ui`
+
+```tsx
+import { ResetButton } from '@/components/ui'
+
+<ResetButton onClick={handleReset} />
+```
+
+### Form Implementation
+
+All forms should include both buttons for consistency:
+
+```tsx
+import { StandardButton, ResetButton } from '@/components/ui'
+
+const MyForm = () => {
+  const handleReset = () => {
+    // Reset form logic
+  }
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      {/* Form fields */}
+      <StandardButton type="submit" fullWidth sx={{ mr: 1 }}>
+        Submit
+      </StandardButton>
+      <ResetButton onClick={handleReset} sx={{ ml: 1 }} />
+    </Form>
+  )
+}
+```
+
+### Design Guidelines
+
+- **Standard buttons** use primary color and include text labels
+- **Reset buttons** use secondary color and typically show only icons
+- Both buttons use contained variants with consistent shadows and border radius
+- Buttons are designed to work in both light and dark themes
+- Icons are automatically included and properly spaced

@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, Button, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
+import { Box, Typography } from '@mui/material'
+import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { MdLogin } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFTextField'
+import { Form } from '@/components/hookForm/HFForm'
+import HFTextField from '@/components/hookForm/HFTextField'
+import { ResetButton, StandardButton } from '@/components/ui'
 
 import { useAuth } from '../../hooks/useAuth'
 
@@ -20,7 +20,7 @@ export const SignInForm = ({
   onSignIn,
   title = 'Sign In',
 }: {
-  onSignIn: () => void
+  onSignIn?: () => void
   title?: string
 }) => {
   const { signIn, error } = useAuth()
@@ -35,40 +35,11 @@ export const SignInForm = ({
     mode: 'onChange',
   })
 
-  // Helper text state for email and password
-  const [emailHelperText, setEmailHelperText] = React.useState(
-    'Enter your email address.',
-  )
-  const [passwordHelperText, setPasswordHelperText] = React.useState(
-    'Enter your password.',
-  )
-
-  useEffect(() => {
-    if (form.formState.errors.email) {
-      setEmailHelperText(
-        form.formState.errors.email.message || 'Enter your email address.',
-      )
-    } else {
-      setEmailHelperText('Enter your email address.')
-    }
-    if (form.formState.errors.password) {
-      setPasswordHelperText(
-        form.formState.errors.password.message || 'Enter your password.',
-      )
-    } else {
-      setPasswordHelperText('Enter your password.')
-    }
-  }, [
-    form.formState.errors.email,
-    form.formState.errors.password,
-    form.formState.isSubmitted,
-  ])
-
   useEffect(() => {
     if (error?.includes('Email not verified')) {
       const email = form.getValues('email')
       if (email) {
-        navigate(`/email-verification?email=${encodeURIComponent(email)}`)
+        navigate(`/verify-email?email=${encodeURIComponent(email)}`)
       }
     }
   }, [error, navigate, form])
@@ -76,48 +47,50 @@ export const SignInForm = ({
   const onSubmit = async (values: z.infer<typeof signInSchema>) => {
     const result = await signIn(values.email, values.password)
     if (result) {
-      onSignIn()
+      onSignIn?.()
     } else if (error?.includes('Email not verified')) {
-      navigate(`/email-verification?email=${encodeURIComponent(values.email)}`)
+      navigate(`/verify-email?email=${encodeURIComponent(values.email)}`)
     }
   }
 
   return (
     <FormProvider {...form}>
-      <Box sx={{ minWidth: 300, maxWidth: 400 }}>
+      <Box sx={{ width: '100%' }}>
         <Typography variant="h4" sx={{ mb: 2 }}>
           {title}
         </Typography>
         <Form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="email"
-                label="Email"
-                type="email"
-                helperText={emailHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <FormItem>
-            <FormControl>
-              <HFInput
-                name="password"
-                label="Password"
-                type="password"
-                helperText={passwordHelperText}
-                disabled={form.formState.isSubmitting}
-              />
-            </FormControl>
-          </FormItem>
-          <Button
-            type="submit"
-            startIcon={<MdLogin />}
+          <HFTextField
+            label="Email"
+            inputId="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email address"
             disabled={form.formState.isSubmitting}
-          >
-            Sign In
-          </Button>
+          />
+          <HFTextField
+            label="Password"
+            inputId="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            disabled={form.formState.isSubmitting}
+          />
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <StandardButton
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              Sign In
+            </StandardButton>
+            <ResetButton
+              type="button"
+              onClick={() => form.reset()}
+              disabled={form.formState.isSubmitting}
+            >
+              Reset
+            </ResetButton>
+          </Box>
         </Form>
         {error && (
           <Typography variant="body2" color="error" sx={{ mt: 2 }}>

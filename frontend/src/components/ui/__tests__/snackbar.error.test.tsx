@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import * as React from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
@@ -38,11 +38,10 @@ describe('Snackbar Error Handling Tests', () => {
   })
 
   it('handles malformed color values', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const TestWithSnackbar = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
-        showSnackbar({ message: 'Malformed color', color: 'danger' })
+        showSnackbar({ message: 'Malformed color', color: 'error' })
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       return null
@@ -54,6 +53,5 @@ describe('Snackbar Error Handling Tests', () => {
     )
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toBeInTheDocument()
-    consoleSpy.mockRestore()
   })
 })

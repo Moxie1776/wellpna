@@ -107,9 +107,7 @@ describe('App Route Protection', () => {
 
         // For dashboard, check for specific content
         if (href === '/dashboard') {
-          expect(
-            screen.getByText('Welcome to the WellPNA Dashboard'),
-          ).toBeInTheDocument()
+          expect(screen.getByText('WellPnA Dashboard')).toBeInTheDocument()
         }
         // For other protected routes, just ensure we don't get redirected
         else {
@@ -165,9 +163,7 @@ describe('App Route Protection', () => {
 
       renderWithProviders(['/'])
 
-      expect(
-        screen.getByText('Welcome to the WellPNA Dashboard'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('WellPnA Dashboard')).toBeInTheDocument()
     })
   })
 })

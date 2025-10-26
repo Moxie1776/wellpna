@@ -1,3 +1,4 @@
+export { ftDate, ftDateTime } from './dateUtils'
 export { default as client } from './graphqlClient'
 export {
   decodeToken,

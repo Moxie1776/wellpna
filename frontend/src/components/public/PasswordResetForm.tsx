@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@mui/material'
-import React from 'react'
+import { Box } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Form, FormControl, FormItem } from '@/components/hookForm/HFForm'
-import HFInput from '@/components/hookForm/HFTextField'
+import { Form } from '@/components/hookForm/HFForm'
+import HFTextField from '@/components/hookForm/HFTextField'
+import { ResetButton, StandardButton } from '@/components/ui'
 import { passwordSchema } from '@/utils/'
 
 // logger removed: no longer used for transient debug in this form
@@ -54,61 +54,6 @@ export function PasswordResetForm({
     mode: 'onChange',
   })
 
-  // Helper text state for request and reset forms
-  const [emailHelperText, setEmailHelperText] = React.useState(
-    'Enter your email address.',
-  )
-  const [codeHelperText, setCodeHelperText] = React.useState(
-    'Enter 6-digit code.',
-  )
-  const [newPasswordHelperText, setNewPasswordHelperText] = React.useState(
-    'Enter new password.',
-  )
-  const [confirmPasswordHelperText, setConfirmPasswordHelperText] =
-    React.useState('Confirm new password.')
-
-  React.useEffect(() => {
-    if (requestForm.formState.errors.email) {
-      setEmailHelperText(
-        requestForm.formState.errors.email.message ||
-          'Enter your email address.',
-      )
-    } else {
-      setEmailHelperText('Enter your email address.')
-    }
-    if (resetForm.formState.errors.code) {
-      setCodeHelperText(
-        resetForm.formState.errors.code.message || 'Enter 6-digit code.',
-      )
-    } else {
-      setCodeHelperText('Enter 6-digit code.')
-    }
-    if (resetForm.formState.errors.newPassword) {
-      setNewPasswordHelperText(
-        resetForm.formState.errors.newPassword.message || 'Enter new password.',
-      )
-    } else {
-      setNewPasswordHelperText('Enter new password.')
-    }
-    if (resetForm.formState.errors.confirmPassword) {
-      setConfirmPasswordHelperText(
-        resetForm.formState.errors.confirmPassword.message ||
-          'Confirm new password.',
-      )
-    } else {
-      setConfirmPasswordHelperText('Confirm new password.')
-    }
-  }, [
-    requestForm.formState.errors.email,
-    resetForm.formState.errors.code,
-    resetForm.formState.errors.newPassword,
-    resetForm.formState.errors.confirmPassword,
-    requestForm.formState.isSubmitted,
-    requestForm.formState.isLoading,
-    resetForm.formState.isSubmitted,
-    resetForm.formState.isLoading,
-  ])
-
   return mode === 'request' ? (
     <FormProvider {...requestForm}>
       <Form
@@ -118,28 +63,36 @@ export function PasswordResetForm({
           }
         })}
       >
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="email"
-              label="Email"
-              type="email"
-              helperText={emailHelperText}
-              data-testid="email-input"
-            />
-          </FormControl>
-        </FormItem>
-        <Button
-          type="submit"
-          disabled={requestForm.formState.isLoading}
-          data-testid="request-submit-button"
-        >
-          {requestForm.formState.isLoading ? 'Sending...' : 'Send Reset Link'}
-        </Button>
+        <HFTextField
+          label="Email"
+          inputId="email"
+          name="email"
+          type="email"
+          placeholder="Enter your email address"
+          data-testid="email-input"
+        />
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <StandardButton
+            type="submit"
+            disabled={requestForm.formState.isSubmitting}
+            data-testid="request-submit-button"
+          >
+            {requestForm.formState.isSubmitting
+              ? 'Sending...'
+              : 'Send Reset Code'}
+          </StandardButton>
+          <ResetButton
+            type="button"
+            onClick={() => requestForm.reset()}
+            disabled={requestForm.formState.isSubmitting}
+          >
+            Reset
+          </ResetButton>
+        </Box>
       </Form>
     </FormProvider>
   ) : (
-      <FormProvider {...resetForm}>
+    <FormProvider {...resetForm}>
       <Form
         onSubmit={resetForm.handleSubmit((data) => {
           if (onResetPassword) {
@@ -148,64 +101,56 @@ export function PasswordResetForm({
         })}
       >
         {/* hidden email field to capture autofill */}
-        <input
-          type="email"
-          name="_email"
-          autoComplete="email"
-          style={{ display: 'none' }}
-        />
 
-        {/* <FormItem>
-          <FormControl>
-            <HFInput
-              name="email"
-              label="Email"
-              type="text"
-              helperText={emailHelperText}
-              disabled={true}
-            />
-          </FormControl>
-        </FormItem> */}
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="code"
-              label="Verification Code"
-              type="text"
-              helperText={codeHelperText}
-              autoComplete="one-time-code"
-              inputMode="numeric"
-            />
-          </FormControl>
-        </FormItem>
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="newPassword"
-              label="New Password"
-              type="password"
-              helperText={newPasswordHelperText}
-            />
-          </FormControl>
-        </FormItem>
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              helperText={confirmPasswordHelperText}
-              placeholder="Confirm new password"
-            />
-          </FormControl>
-        </FormItem>
-        <Button
-          type="submit"
-          disabled={resetForm.formState.isLoading}
-          data-testid="reset-submit-button"
-        >
-          {resetForm.formState.isLoading ? 'Resetting...' : 'Reset Password'}
-        </Button>
+        <HFTextField
+          label="Email"
+          inputId="email"
+          name="email"
+          type="text"
+          disabled={true}
+          sx={{ display: 'none' }}
+        />
+        <HFTextField
+          label="Verification Code"
+          inputId="code"
+          name="code"
+          type="text"
+          placeholder="Enter 6-digit code"
+          autoComplete="one-time-code"
+          inputMode="numeric"
+        />
+        <HFTextField
+          label="New Password"
+          inputId="newPassword"
+          name="newPassword"
+          type="password"
+          placeholder="Enter new password"
+        />
+        <HFTextField
+          label="Confirm Password"
+          inputId="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          placeholder="Confirm new password"
+        />
+        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <StandardButton
+            type="submit"
+            disabled={resetForm.formState.isSubmitting}
+            data-testid="reset-submit-button"
+          >
+            {resetForm.formState.isSubmitting
+              ? 'Resetting...'
+              : 'Reset Password'}
+          </StandardButton>
+          <ResetButton
+            type="button"
+            onClick={() => resetForm.reset()}
+            disabled={resetForm.formState.isSubmitting}
+          >
+            Reset
+          </ResetButton>
+        </Box>
       </Form>
     </FormProvider>
   )

@@ -9,6 +9,12 @@ export const USERS_QUERY = gql`
       phoneNumber
       role
       registeredAt
+      validatedAt
+      operatorUsers {
+        operator {
+          operatorEnum
+        }
+      }
     }
   }
 `

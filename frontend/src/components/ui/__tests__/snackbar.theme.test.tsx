@@ -24,11 +24,11 @@ describe('Snackbar Theme Integration Tests', () => {
   })
 
   describe('color variants', () => {
-    const colors: import('../snackbar').SnackbarColor[] = [
+    const colors = [
       'primary',
       'primary.main',
-      'danger',
-      'danger.main',
+      'error',
+      'error.main',
       'warning',
       'warning.main',
       'neutral',
@@ -46,7 +46,7 @@ describe('Snackbar Theme Integration Tests', () => {
         const TestWithSnackbar = () => {
           const { showSnackbar } = useSnackbar()
           React.useEffect(() => {
-            showSnackbar({ message: `${color} variant`, color })
+            showSnackbar({ message: `${color} variant`, color: color as any })
             // eslint-disable-next-line react-hooks/exhaustive-deps
           }, [])
           return null
@@ -67,6 +67,9 @@ describe('Snackbar Theme Integration Tests', () => {
     const TestWithSnackbar = () => {
       const { showSnackbar } = useSnackbar()
       React.useEffect(() => {
+        // provider now enforces a standard duration (10000ms) for all
+        // notifications; tests should reflect that behavior instead of
+        // relying on passed durations.
         showSnackbar({
           message: 'Consistent theme',
           color: 'primary',
@@ -83,6 +86,7 @@ describe('Snackbar Theme Integration Tests', () => {
     )
     const snackbar = screen.getByTestId('snackbar')
     expect(snackbar).toHaveAttribute('data-variant', 'filled')
-    expect(snackbar).toHaveAttribute('data-autohideduration', '500')
+    // when running tests, provider uses a shorter standard duration (1000ms)
+    expect(snackbar).toHaveAttribute('data-autohideduration', '1000')
   })
 })

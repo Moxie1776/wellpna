@@ -8,24 +8,29 @@ import PasswordResetPage from '../PasswordReset'
 
 describe('PasswordResetPage Component', () => {
   it('renders the password reset form', () => {
-    const router = createMemoryRouter([
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/password-reset',
+          element: (
+            <ThemeProvider>
+              <SnackbarProvider>
+                <PasswordResetPage />
+              </SnackbarProvider>
+            </ThemeProvider>
+          ),
+        },
+      ],
       {
-        path: '/password-reset',
-        element: (
-          <ThemeProvider>
-            <SnackbarProvider>
-              <PasswordResetPage />
-            </SnackbarProvider>
-          </ThemeProvider>
-        ),
+        initialEntries: ['/password-reset'],
       },
-    ], {
-      initialEntries: ['/password-reset'],
-    })
+    )
 
     render(<RouterProvider router={router} />)
 
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Send Reset Link' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Send Reset Code' }),
+    ).toBeInTheDocument()
   })
 })

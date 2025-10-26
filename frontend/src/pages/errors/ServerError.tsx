@@ -6,12 +6,12 @@ const ServerError = () => {
 
   return (
     <Paper
-      elevation={6}
+      elevation={8}
       sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh',
+        height: '100%',
         p: 2,
       }}
     >

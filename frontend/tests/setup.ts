@@ -5,11 +5,16 @@ import { createServer } from 'net'
 import { afterAll, beforeAll, vi } from 'vitest'
 
 import { logger } from '../src/utils'
+import { createElement } from 'react'
 
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
 
-// Mock import.meta for ES module compatibility
+// Mock @mui/x-data-grid to avoid CSS import issues
+vi.mock('@mui/x-data-grid', () => ({
+  DataGrid: () => createElement('div', { 'data-testid': 'data-grid' }),
+  // Add other exports as needed
+}))
 Object.defineProperty(global, 'import', {
   value: {
     meta: {

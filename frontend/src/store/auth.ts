@@ -49,6 +49,7 @@ export const useAuthStore = create<AuthState>()(
             })
             return null
           }
+          // (urql exposes errors via result.error) - no further checks needed
           if (!result.data?.signIn) {
             set({ error: 'No data returned from sign in', loading: false })
             return null
@@ -104,14 +105,26 @@ export const useAuthStore = create<AuthState>()(
             })
             return null
           }
+          // (urql exposes errors via result.error) - no further checks needed
           if (!result.data?.signUp) {
             set({ error: 'No data returned from sign up', loading: false })
             return null
           }
-          const { token, user } = result.data.signUp
-          localStorage.setItem('token', token)
-          set({ token, user, loading: false })
-          return result.data.signUp
+          // The backend may return either an AuthPayload ({ token, user })
+          // or (after a schema change) a plain User object. In either case
+          // we do NOT automatically sign the user in on signup. If the
+          // server mistakenly returns a token here, ignore it client-side
+          // for security and consistency.
+          const payload: any = result.data.signUp
+          if (payload?.token) {
+            logger.warn('SignUp returned a token; ignoring token on client.')
+          }
+
+          // If payload has a 'user' property it was an AuthPayload; return
+          // the payload for callers. If it's already a User object, return
+          // that instead. Do NOT persist token/user here.
+          set({ loading: false })
+          return payload
         } catch (err: any) {
           logger.error('Sign up error:', err)
           set({
@@ -167,6 +180,8 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       // Only persist token and user, not loading/error
       partialize: (state) => ({ token: state.token, user: state.user }),
+      // Skip hydration in test environment to avoid persistence issues
+      skipHydration: process.env.NODE_ENV === 'test',
     },
   ),
 )

@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@mui/material'
+import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 // eslint-disable-next-line max-len
@@ -7,6 +8,7 @@ import { useSnackbar } from '@/components/ui/snackbar'
 // eslint-disable-next-line max-len
 import { SEND_VERIFICATION_EMAIL_MUTATION } from '@/graphql/mutations/sendVerificationEmailMutation'
 import { VERIFY_EMAIL_MUTATION } from '@/graphql/mutations/verifyEmailMutation'
+import { useAuthStore } from '@/store/auth'
 import client from '@/utils/graphqlClient'
 
 const EmailVerificationPage = () => {
@@ -14,6 +16,19 @@ const EmailVerificationPage = () => {
   const navigate = useNavigate()
   const { showSnackbar } = useSnackbar()
   const defaultEmail = searchParams.get('email') || ''
+
+  // Show a stock warning message when navigating here with an email query param
+  // so the user knows to check their email for the verification code.
+  useEffect(() => {
+    if (defaultEmail) {
+      showSnackbar({
+        message:
+          'Please check your email for the 6-digit verification code ' +
+          'to verify your account.',
+        color: 'warning',
+      })
+    }
+  }, [defaultEmail, showSnackbar])
 
   const handleVerify = async (values: { email: string; code: string }) => {
     try {
@@ -29,21 +44,27 @@ const EmailVerificationPage = () => {
       if (result.error) {
         showSnackbar({
           message: result.error.message || 'Verification failed',
-          color: 'danger',
+          color: 'error',
         })
         return
       }
 
       if (result.data?.verifyEmail) {
-        const { token } = result.data.verifyEmail
-        localStorage.setItem('token', token)
+        const { token, user } = result.data.verifyEmail
+        // Persist token and update auth store so the app recognizes the user
+        try {
+          localStorage.setItem('token', token)
+        } catch {
+          // ignore storage errors
+        }
+        useAuthStore.getState().setAuth(token, user)
         showSnackbar({ message: 'Email verified!', color: 'success' })
         navigate('/dashboard')
       }
     } catch (error: any) {
       showSnackbar({
         message: error.message || 'An error occurred',
-        color: 'danger',
+        color: 'error',
       })
     } finally {
       //
@@ -64,7 +85,7 @@ const EmailVerificationPage = () => {
       if (result.error) {
         showSnackbar({
           message: result.error.message || 'Failed to send code',
-          color: 'danger',
+          color: 'error',
         })
         return
       }
@@ -76,7 +97,7 @@ const EmailVerificationPage = () => {
     } catch (error: any) {
       showSnackbar({
         message: error.message || 'An error occurred',
-        color: 'danger',
+        color: 'error',
       })
     }
   }
@@ -84,10 +105,8 @@ const EmailVerificationPage = () => {
   return (
     <Card
       sx={{
-        minWidth: 300,
+        width: '100%',
         maxWidth: 400,
-        backgroundColor: 'primary.main',
-        color: 'primary.contrastText',
       }}
       role="region"
     >

@@ -1,20 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  TextField,
-  Typography,
-} from '@mui/material'
-import React, { useEffect } from 'react'
+import { FormControl, FormLabel, TextField, Typography } from '@mui/material'
+import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Form, FormItem } from '../../components/hookForm/HFForm'
+import { Form } from '../../components/hookForm/HFForm'
+import { ResetButton, StandardButton } from '../../components/ui'
 import { useUpdateUserMutation } from '../../graphql/generated/graphql'
 import { useAuthStore } from '../../store/auth'
 import logger from '../../utils/logger'
-import HFInput from '../hookForm/HFTextField'
+import HFTextField from '../hookForm/HFTextField'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -43,33 +38,6 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
     },
     mode: 'onChange',
   })
-
-  // Helper text state for name and phoneNumber
-  const [nameHelperText, setNameHelperText] = React.useState('Enter your name.')
-  const [phoneNumberHelperText, setPhoneNumberHelperText] = React.useState(
-    'Enter your phone number.',
-  )
-
-  useEffect(() => {
-    if (form.formState.errors.name) {
-      setNameHelperText(
-        form.formState.errors.name.message || 'Enter your name.',
-      )
-    } else {
-      setNameHelperText('Enter your name.')
-    }
-    if (form.formState.errors.phoneNumber) {
-      setPhoneNumberHelperText(
-        form.formState.errors.phoneNumber.message || 'Enter your phone number.',
-      )
-    } else {
-      setPhoneNumberHelperText('Enter your phone number.')
-    }
-  }, [
-    form.formState.errors.name,
-    form.formState.errors.phoneNumber,
-    form.formState.isSubmitted,
-  ])
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
     setSuccess(false)
@@ -105,6 +73,11 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
     }
   }
 
+  const onReset = () => {
+    form.reset()
+    setSuccess(false)
+  }
+
   return (
     <FormProvider {...form}>
       <Form onSubmit={form.handleSubmit(onSubmit)}>
@@ -118,29 +91,23 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
           />
         </FormControl>
 
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="name"
-              label="Name"
-              type="text"
-              helperText={nameHelperText}
-              disabled={result.fetching}
-            />
-          </FormControl>
-        </FormItem>
+        <HFTextField
+          label="Name"
+          inputId="name"
+          name="name"
+          type="text"
+          placeholder="Enter your name"
+          disabled={result.fetching}
+        />
 
-        <FormItem>
-          <FormControl>
-            <HFInput
-              name="phoneNumber"
-              label="Phone Number"
-              type="tel"
-              helperText={phoneNumberHelperText}
-              disabled={result.fetching}
-            />
-          </FormControl>
-        </FormItem>
+        <HFTextField
+          label="Phone Number"
+          inputId="phoneNumber"
+          name="phoneNumber"
+          type="tel"
+          placeholder="Enter your phone number"
+          disabled={result.fetching}
+        />
 
         {result.error && (
           <Typography variant="body2" color="error" sx={{ mb: 2 }}>
@@ -154,14 +121,20 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
           </Typography>
         )}
 
-        <Button
+        <StandardButton
           type="submit"
           disabled={result.fetching}
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          Update Profile
-        </Button>
+          sx={{ mb: 2, mr: 1, minWidth: 120 }}
+          children="Update Profile"
+        />
+
+        <ResetButton
+          type="button"
+          onClick={onReset}
+          disabled={result.fetching}
+          sx={{ mb: 2, ml: 1, minWidth: 120 }}
+          children="Reset"
+        />
       </Form>
     </FormProvider>
   )

@@ -13,7 +13,7 @@ import { ProtectedRoute } from './providers/ProtectedRouteProvider'
 import { SnackbarProvider } from './providers/SnackbarProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { useAuthStore } from './store/auth'
-import { client } from './utils'
+import { client, logger } from './utils'
 
 export function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth)
@@ -23,30 +23,69 @@ export function AppContent() {
     initializeAuth()
   }, [initializeAuth])
 
+  const adminRoutes = appRoutes.filter(
+    (route) => route.requiredRole === 'admin',
+  )
+  const authRoutes = appRoutes.filter((route) => route.requiresAuth === true)
+  const publicRoutes = appRoutes.filter(
+    (route) =>
+      !route.requiresAuth &&
+      !['/forbidden', '/server-error', '*'].includes(route.href),
+  )
+  const errorRoutes = appRoutes.filter((route) =>
+    ['/forbidden', '/server-error', '*'].includes(route.href),
+  )
+
+  logger.debug('Rendering AppContent with routes', {
+    authRoutes,
+    adminRoutes,
+    publicRoutes,
+    errorRoutes,
+    user,
+  })
+
   return (
     <Routes>
-      {appRoutes.map((route) => {
-        let element = route.page ? <route.page /> : null
+      <Route path="/" element={<Layout />}>
+        {authRoutes.map((route) => {
+          let element = route.page ? <route.page /> : null
 
-        // Redirect authenticated users from home to dashboard
-        if (route.href === '/' && user) {
-          element = <Navigate to="/dashboard" replace />
-        } else if (route.requiresAuth && !user) {
-          element = <Navigate to="/" replace />
-        } else if (route.requiredRole && user?.role !== route.requiredRole) {
-          element = <Navigate to="/forbidden" replace />
-        } else if (route.requiresAuth) {
-          element = <ProtectedRoute>{element}</ProtectedRoute>
-        }
+          // Redirect authenticated to dashboard w/ private only routes
+          if (route.requiredRole && user?.role !== route.requiredRole) {
+            element = <Navigate to="/forbidden" replace />
+          } else if (route.requiresAuth) {
+            element = <ProtectedRoute>{element}</ProtectedRoute>
+          }
 
-        return (
+          return <Route key={route.href} path={route.href} element={element} />
+        })}
+        {publicRoutes.map((route) => {
+          let element = route.page ? <route.page /> : null
+
+          // Redirect authenticated users from home to dashboard
+          if (route.href === '/' && user) {
+            element = <Navigate to="/dashboard" replace />
+          } else if (route.requiresAuth && !user) {
+            element = <Navigate to="/" replace />
+          }
+
+          return (
+            <Route
+              key={route.href}
+              path={route.href === '/' ? undefined : route.href}
+              index={route.href === '/' ? true : undefined}
+              element={element}
+            />
+          )
+        })}
+        {errorRoutes.map((route) => (
           <Route
             key={route.href}
             path={route.href}
-            element={<Layout>{element}</Layout>}
+            element={route.page ? <route.page /> : null}
           />
-        )
-      })}
+        ))}
+      </Route>
     </Routes>
   )
 }
@@ -56,6 +95,12 @@ if (
   typeof document !== 'undefined' &&
   document.getElementById('root')
 ) {
+  // Only import the CSS at runtime (not during tests). Vitest/node ESM
+  // runner doesn't handle raw CSS imports from node_modules; loading the
+  // CSS only in non-test runtime avoids the "Unknown file extension '.css'"
+  // error during tests.
+  void import('@mui/x-data-grid/index.css')
+
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <BrowserRouter>

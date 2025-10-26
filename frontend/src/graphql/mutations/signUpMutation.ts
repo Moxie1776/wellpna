@@ -1,6 +1,6 @@
 import { gql, TypedDocumentNode } from '@urql/core'
 
-import { AuthResponse } from '../types'
+// AuthResponse intentionally not needed here; signUp returns a scalar confirmation string
 
 interface SignUpInput {
   email: string
@@ -10,7 +10,7 @@ interface SignUpInput {
 }
 
 interface SignUpMutationResponse {
-  signUp: AuthResponse
+  signUp: string
 }
 
 export const SIGN_UP_MUTATION: TypedDocumentNode<
@@ -18,14 +18,6 @@ export const SIGN_UP_MUTATION: TypedDocumentNode<
   { data: SignUpInput }
 > = gql`
   mutation SignUp($data: SignUpInput!) {
-    signUp(data: $data) {
-      token
-      user {
-        id
-        email
-        name
-        phoneNumber
-      }
-    }
+    signUp(data: $data)
   }
 `

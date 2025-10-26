@@ -22,15 +22,7 @@ describe('Authentication', () => {
 
       const mutation = `
         mutation SignUp($data: SignUpInput!) {
-          signUp(data: $data) {
-            token
-            user {
-              id
-              email
-              name
-              phoneNumber
-            }
-          }
+          signUp(data: $data)
         }
       `
 
@@ -446,18 +438,23 @@ async function createTestUserAndJwt(
 ) {
   const data = generateTestUserData(overrides)
 
+  // signUp returns a confirmation String; do not select subfields.
   const signUpMutation = `
     mutation SignUp($data: SignUpInput!) {
-      signUp(data: $data) {
-        token
-        user { id email name phoneNumber }
-      }
+      signUp(data: $data)
     }
   `
 
   const signInMutation = `
     mutation SignIn($data: SignInInput!) {
-      signIn(data: $data) { token user { id email name } }
+      signIn(data: $data) {
+        token
+        user {
+          id
+          email
+          name
+        }
+      }
     }
   `
 
@@ -469,7 +466,14 @@ async function createTestUserAndJwt(
 
   const verifyMutation = `
     mutation VerifyEmail($data: VerifyEmailInput!) {
-      verifyEmail(data: $data) { token user { id email name } }
+      verifyEmail(data: $data) {
+        token
+        user {
+          id
+          email
+          name
+        }
+      }
     }
   `
 
@@ -496,8 +500,9 @@ async function createTestUserAndJwt(
     const dbUser = await prisma.user.findUnique({
       where: { email: data.email },
     })
-    if (!dbUser)
+    if (!dbUser) {
       throw new Error('Failed to signUp user: ' + JSON.stringify(result.errors))
+    }
 
     // If verified, ensure verification code and call verifyEmail
     if (verified) {
@@ -558,15 +563,30 @@ async function createTestUserAndJwt(
     }
   }
 
-  const payload = result.data.signUp
+  // After signUp, load the created user from the DB.
+  const dbUser = await prisma.user.findUnique({ where: { email: data.email } })
+  if (!dbUser) throw new Error('User not found after signUp')
 
   if (verified) {
-    // Use verifyEmail mutation (get code from DB) to mark user verified via API
-    const dbUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    })
-    if (!dbUser || !dbUser.verificationCode)
+    // Ensure a verification code is present
+    let code = dbUser.verificationCode
+    if (!code) {
+      await yoga.fetch('http://localhost:4000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: sendVerificationMutation,
+          variables: { email: data.email },
+        }),
+      })
+      const refreshed = await prisma.user.findUnique({
+        where: { email: data.email },
+      })
+      if (refreshed) code = refreshed.verificationCode
+    }
+    if (!code) {
       throw new Error('No verification code after signUp')
+    }
 
     const verifyResp = await yoga.fetch('http://localhost:4000/graphql', {
       method: 'POST',
@@ -574,7 +594,7 @@ async function createTestUserAndJwt(
       body: JSON.stringify({
         query: verifyMutation,
         variables: {
-          data: { email: data.email, code: dbUser.verificationCode },
+          data: { email: data.email, code },
         },
       }),
     })
@@ -589,5 +609,5 @@ async function createTestUserAndJwt(
     }
   }
 
-  return { jwt: payload.token, user: payload.user }
+  return { jwt: null, user: dbUser }
 }

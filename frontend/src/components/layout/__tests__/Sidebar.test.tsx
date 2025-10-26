@@ -1,22 +1,18 @@
-import { act, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
+  createAdminTestUser,
   createTestUser,
-  enqueueCleanup,
-  promoteUserInClient,
+  setupSignedInTestUser,
 } from '../../../../tests/utils/testUsers'
 import { appRoutes } from '../../../lib/routes'
 import { ThemeProvider } from '../../../providers/ThemeProvider'
 import { useAuthStore } from '../../../store/auth'
 import { useModeStore } from '../../../store/theme'
 import { AppSidebar } from '../Sidebar'
-
-// Set default desktop viewport
-;(window as any).innerWidth = 1920
-;(window as any).innerHeight = 1080
 
 // Test wrapper component with MemoryRouter and ThemeProvider
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -25,8 +21,15 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   </ThemeProvider>
 )
 
+// Generate a unique test email to avoid collisions across test runs
+const genEmail = (prefix = 'test') =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`
+
 describe('AppSidebar', () => {
   beforeEach(async () => {
+    // Clear localStorage to avoid persisted auth state interference
+    localStorage.clear()
+
     // Reset stores
     useAuthStore.setState({
       token: null,
@@ -38,121 +41,30 @@ describe('AppSidebar', () => {
       mode: 'light',
     })
 
-    // Ensure clean test database state
-    enqueueCleanup('@example.com')
+    // Ensure clean test database state is handled by global setup/teardown
 
     // Set desktop viewport for most tests
     ;(window as any).innerWidth = 1920
     ;(window as any).innerHeight = 1080
   })
 
-  afterEach(async () => {
-    // Reset stores after each test
+  afterEach(() => {
+    // Reset auth and mode stores between tests and clear localStorage
     useAuthStore.setState({
       token: null,
       user: null,
       loading: false,
       error: null,
     })
+    useModeStore.setState({ mode: 'light' })
+    localStorage.clear()
   })
-
-  const getIsAuthenticated = () => {
-    const user = useAuthStore.getState().user
-    return !!user
-  }
 
   describe('Rendering Tests', () => {
-    it('renders sidebar with correct structure for desktop', async () => {
-      render(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
-
-      // Check header
-      expect(screen.getByText('WellPnA')).toBeInTheDocument()
-
-      // Check navigation links
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Sign In')).toBeInTheDocument()
-      expect(screen.getByText('Sign Up')).toBeInTheDocument()
-
-      // Should not show Dashboard or Logout for unauthenticated
-      expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
-      expect(screen.queryByText('Logout')).not.toBeInTheDocument()
-    })
-
-    it('renders sidebar with correct structure for authenticated user', async () => {
-      // Create a real backend test user and set auth from the returned session
-      const timestamp = Date.now()
-      const email = `sidebar-test-${timestamp}@example.com`
-      const authResp = await createTestUser(email, 'password', 'Test User')
-      useAuthStore.setState({ token: authResp.token, user: authResp.user })
-
-      render(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
-      expect(screen.getByText('WellPnA')).toBeInTheDocument()
-      // Home should NOT be present for authenticated users
-      expect(screen.queryByText('Home')).not.toBeInTheDocument()
-      // Dashboard should be present with href '/dashboard'
-      const dashboardLink = screen.getByText('Dashboard').closest('a')
-      expect(dashboardLink).toBeInTheDocument()
-      expect(dashboardLink).toHaveAttribute('href', '/dashboard')
-      expect(screen.getByText('Logout')).toBeInTheDocument()
-      expect(screen.queryByText('Sign In')).not.toBeInTheDocument()
-      expect(screen.queryByText('Sign Up')).not.toBeInTheDocument()
-    })
-
-    it('renders navigation links with correct icons', () => {
-      render(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
-
-      // Check that links have proper structure (icons are rendered)
-      const homeLink = screen.getByText('Home').closest('a')
-      const signInLink = screen.getByText('Sign In').closest('a')
-
-      expect(homeLink).toBeInTheDocument()
-      expect(signInLink).toBeInTheDocument()
-      expect(homeLink).toHaveAttribute('href', '/')
-      expect(signInLink).toHaveAttribute('href', '/signin')
-    })
-
-    it('renders logout button only for authenticated users', async () => {
-      const { rerender } = render(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
-
-      expect(screen.queryByText('Logout')).not.toBeInTheDocument()
-
-      // Create and sign in a real backend test user
-      const timestamp = Date.now()
-      const email = `logout-test-${timestamp}@example.com`
-      const authResp2 = await createTestUser(email, 'password', 'Test User')
-      useAuthStore.setState({ token: authResp2.token, user: authResp2.user })
-
-      rerender(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
-
-      expect(screen.getByText('Logout')).toBeInTheDocument()
-    })
-  })
-
-  describe('Navigation Tests', () => {
     it('renders correct navigation links for unauthenticated users', () => {
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -167,24 +79,29 @@ describe('AppSidebar', () => {
       expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
     })
 
-    it('renders correct navigation links for authenticated users', async () => {
-      // Create and sign in a real backend test user for navigation layout
-      const timestamp = Date.now()
-      const email = `nav-test-${timestamp}@example.com`
-      const authResp3 = await createTestUser(email, 'password', 'Test User')
-      useAuthStore.setState({ token: authResp3.token, user: authResp3.user })
+    it('renders sidebar with correct structure for authenticated user', async () => {
+      // Create and sign in a real test user (unique email)
+      const email = genEmail('user')
+      await setupSignedInTestUser(
+        email,
+        'password123',
+        'Test User',
+        '1234567890',
+      )
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
+      expect(screen.getByText('WellPnA')).toBeInTheDocument()
       // Home should NOT be present for authenticated users
       expect(screen.queryByText('Home')).not.toBeInTheDocument()
       // Dashboard should be present with href '/dashboard'
       const dashboardLink = screen.getByText('Dashboard').closest('a')
       expect(dashboardLink).toBeInTheDocument()
       expect(dashboardLink).toHaveAttribute('href', '/dashboard')
+      expect(screen.getByText('Sign Out')).toBeInTheDocument()
       expect(screen.queryByText('Sign In')).not.toBeInTheDocument()
       expect(screen.queryByText('Sign Up')).not.toBeInTheDocument()
     })
@@ -192,7 +109,7 @@ describe('AppSidebar', () => {
     it('navigation links have correct href attributes', () => {
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -221,7 +138,7 @@ describe('AppSidebar', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
           <ThemeProvider>
-            <AppSidebar isAuthenticated={getIsAuthenticated()} />
+            <AppSidebar />
             <LocationChecker />
           </ThemeProvider>
         </MemoryRouter>,
@@ -253,43 +170,49 @@ describe('AppSidebar', () => {
       )
 
       // Test regular user - Admin link should not be present
-      const timestamp = Date.now()
-      const userEmail = `regular-user-${timestamp}@example.com`
-      await createTestUser(
-        userEmail,
-        'password',
+      // Create a regular user via backend helper and sign in the client
+      const regularEmail = genEmail('regular')
+      const regularResp = await createTestUser(
+        regularEmail,
+        'password123',
         'Regular User',
-        undefined,
-        true,
+        '1234567890',
       )
 
-      await act(async () => {
-        await useAuthStore.getState().signIn(userEmail, 'password')
+      // set client auth store to reflect regular user
+      useAuthStore.setState({
+        token: regularResp.token,
+        user: regularResp.user,
       })
+      localStorage.setItem('token', regularResp.token)
 
       const { rerender } = render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
       expect(screen.queryByText(adminRoute!.label)).not.toBeInTheDocument()
 
-      // Sign out and test admin user using a local/canned session
-      useAuthStore.getState().signOut()
-
-      const adminEmail = `admin-user-${timestamp}@example.com`
-      // Create a real admin user and set auth state from backend session
-      await createTestUser(adminEmail, 'password', 'Admin User')
-      // Promote in client via test utility which will sign in if needed and
-      // update the client auth store. This keeps tokens backend-issued while
-      // making the UI reflect the admin role for the test.
-      await promoteUserInClient(adminEmail, 'admin')
+      // Create an admin user (backend helper) and set client state to admin
+      const adminEmail = genEmail('admin')
+      const adminResp = await createAdminTestUser(
+        adminEmail,
+        'password123',
+        'Admin User',
+        '1234567890',
+      )
+      // Ensure client reflects admin role for UI tests
+      useAuthStore.setState({
+        token: adminResp.token,
+        user: { ...adminResp.user, role: 'admin' },
+      })
+      localStorage.setItem('token', adminResp.token)
 
       // Re-render with admin user
       rerender(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -302,47 +225,41 @@ describe('AppSidebar', () => {
       // Start unauthenticated
       const { rerender } = render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
       expect(screen.getByText('Home')).toBeInTheDocument()
       expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
-      expect(screen.queryByText('Logout')).not.toBeInTheDocument()
+      expect(screen.queryByText('Sign Out')).not.toBeInTheDocument()
 
-      // Simulate login - create and sign in user
-      const timestamp = Date.now()
-      const email = `state-change-${timestamp}@example.com`
-      await createTestUser(email, 'password', 'Test User', undefined, true)
-
-      await act(async () => {
-        await useAuthStore.getState().signIn(email, 'password')
-      })
+      // Simulate login - create and sign in a real test user
+      const email = genEmail('user')
+      await setupSignedInTestUser(
+        email,
+        'password123',
+        'Test User',
+        '1234567890',
+      )
 
       rerender(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
       expect(screen.queryByText('Home')).not.toBeInTheDocument()
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
-      expect(screen.getByText('Logout')).toBeInTheDocument()
+      expect(screen.getByText('Sign Out')).toBeInTheDocument()
 
-      // Simulate logout
-      await act(async () => {
-        useAuthStore.getState().signOut()
-      })
-
-      rerender(
-        <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
-        </TestWrapper>,
-      )
+      // Click Sign Out and assert UI returns to unauthenticated state
+      const logoutBtn = screen.getByText('Sign Out')
+      const user = userEvent.setup()
+      await user.click(logoutBtn)
 
       expect(screen.getByText('Home')).toBeInTheDocument()
       expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
-      expect(screen.queryByText('Logout')).not.toBeInTheDocument()
+      expect(screen.queryByText('Sign Out')).not.toBeInTheDocument()
     })
 
     it('non-admin users cannot access admin routes via sidebar', async () => {
@@ -352,17 +269,17 @@ describe('AppSidebar', () => {
       )
 
       // Test with regular authenticated user
-      const timestamp = Date.now()
-      const email = `non-admin-${timestamp}@example.com`
-      await createTestUser(email, 'password', 'Regular User', undefined, true)
-
-      await act(async () => {
-        await useAuthStore.getState().signIn(email, 'password')
-      })
+      const regularEmail = genEmail('regular')
+      await setupSignedInTestUser(
+        regularEmail,
+        'password123',
+        'Regular User',
+        '1234567890',
+      )
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -378,7 +295,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -395,7 +312,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
       // Should render Sheet directly (menu button is present for theme toggle)
@@ -412,7 +329,7 @@ describe('AppSidebar', () => {
       const user = userEvent.setup()
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
       const menuButton = screen.getByRole('button')
@@ -437,7 +354,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -456,55 +373,60 @@ describe('AppSidebar', () => {
     })
 
     it('calls signOut when logout button is clicked', async () => {
-      const user = userEvent.setup()
-
-      // Create and sign in a user first
-      const timestamp = Date.now()
-      const email = `logout-click-${timestamp}@example.com`
-      await createTestUser(email, 'password', 'Test User', undefined, true)
-
-      await act(async () => {
-        await useAuthStore.getState().signIn(email, 'password')
-      })
+      // Create and sign in a test user, then click Sign Out and assert unauthenticated UI
+      const email = genEmail('user')
+      await setupSignedInTestUser(
+        email,
+        'password123',
+        'Test User',
+        '1234567890',
+      )
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
-      const logoutButton = screen.getByText('Logout')
+      const user = userEvent.setup()
+      const logoutButton = screen.getByText('Sign Out')
       await user.click(logoutButton)
 
-      // Check that user is signed out
-      expect(useAuthStore.getState().user).toBe(null)
+      // After sign out, the Sign In link should be present again
+      expect(screen.getByText('Sign In')).toBeInTheDocument()
     })
 
     it('logout button is only present for authenticated users', async () => {
+      // Create and sign in a real test user
+      const email = genEmail('user')
+      await setupSignedInTestUser(
+        email,
+        'password123',
+        'Test User',
+        '1234567890',
+      )
+
       const { rerender } = render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
-      expect(screen.queryByText('Logout')).not.toBeInTheDocument()
+      expect(screen.getByText('Sign Out')).toBeInTheDocument()
 
-      // Create and sign in a user
-      const timestamp = Date.now()
-      const email = `logout-present-${timestamp}@example.com`
-      await createTestUser(email, 'password', 'Test User', undefined, true)
+      // Simulate sign out by clicking the button
+      const user = userEvent.setup()
+      await user.click(screen.getByText('Sign Out'))
 
-      await act(async () => {
-        await useAuthStore.getState().signIn(email, 'password')
-      })
-
+      // Re-render to ensure the component reflects updated auth store
       rerender(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
-      expect(screen.getByText('Logout')).toBeInTheDocument()
+      // Assert sign out removed from UI
+      expect(screen.queryByText('Sign Out')).not.toBeInTheDocument()
     })
   })
 
@@ -512,7 +434,7 @@ describe('AppSidebar', () => {
     it('shows public routes when not authenticated', () => {
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -523,18 +445,18 @@ describe('AppSidebar', () => {
     })
 
     it('shows authenticated routes when authenticated', async () => {
-      // Create and sign in a user
-      const timestamp = Date.now()
-      const email = `auth-routes-${timestamp}@example.com`
-      await createTestUser(email, 'password', 'Test User', undefined, true)
-
-      await act(async () => {
-        await useAuthStore.getState().signIn(email, 'password')
-      })
+      // Create and sign in a real test user
+      const email = genEmail('user')
+      await setupSignedInTestUser(
+        email,
+        'password123',
+        'Test User',
+        '1234567890',
+      )
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
       // Should show Dashboard with href="/"
@@ -550,24 +472,22 @@ describe('AppSidebar', () => {
       it('shows MdHome icon when unauthenticated', () => {
         render(
           <TestWrapper>
-            <AppSidebar isAuthenticated={getIsAuthenticated()} />
+            <AppSidebar />
           </TestWrapper>,
         )
         expect(screen.getByTestId('sidebar-home-icon')).toBeInTheDocument()
       })
       it('shows MdDashboard icon when authenticated', async () => {
-        // Create and sign in a user
-        const timestamp = Date.now()
-        const email = `icon-test-${timestamp}@example.com`
-        await createTestUser(email, 'password', 'Test User', undefined, true)
-
-        await act(async () => {
-          await useAuthStore.getState().signIn(email, 'password')
-        })
-
+        const email = genEmail('user')
+        await setupSignedInTestUser(
+          email,
+          'password123',
+          'Test User',
+          '1234567890',
+        )
         render(
           <TestWrapper>
-            <AppSidebar isAuthenticated={getIsAuthenticated()} />
+            <AppSidebar />
           </TestWrapper>,
         )
         expect(screen.getByTestId('sidebar-dashboard-icon')).toBeInTheDocument()
@@ -581,7 +501,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -598,22 +518,26 @@ describe('AppSidebar', () => {
 
     describe('logout button accessibility', () => {
       it('has proper role', async () => {
-        // Create and sign in a user
-        const timestamp = Date.now()
-        const email = `logout-access-${timestamp}@example.com`
-        await createTestUser(email, 'password', 'Test User', undefined, true)
-
-        await act(async () => {
-          await useAuthStore.getState().signIn(email, 'password')
-        })
+        // Create and sign in a real test user
+        const email = genEmail('user')
+        await setupSignedInTestUser(
+          email,
+          'password123',
+          'Test User',
+          '1234567890',
+        )
 
         render(
           <TestWrapper>
-            <AppSidebar isAuthenticated={getIsAuthenticated()} />
+            <AppSidebar />
           </TestWrapper>,
         )
-        const logoutButton = screen.getByText('Logout')
-        expect(logoutButton).toHaveAttribute('role', 'button')
+        const logoutButton = screen.getByText('Sign Out')
+        // The Sign Out UI is rendered as a link (anchor). Assert it's present
+        // and rendered as an anchor with an href so it's keyboard-focusable.
+        const logoutAnchor = logoutButton.closest('a')
+        expect(logoutAnchor).toBeInTheDocument()
+        expect(logoutAnchor).toHaveAttribute('href')
       })
     })
 
@@ -627,7 +551,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 
@@ -648,7 +572,7 @@ describe('AppSidebar', () => {
 
       render(
         <TestWrapper>
-          <AppSidebar isAuthenticated={getIsAuthenticated()} />
+          <AppSidebar />
         </TestWrapper>,
       )
 

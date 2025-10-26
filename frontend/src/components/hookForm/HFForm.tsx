@@ -1,6 +1,7 @@
 import FormControl from '@mui/material/FormControl'
 import FormHelperText from '@mui/material/FormHelperText'
 import FormLabel from '@mui/material/FormLabel'
+import type { ComponentProps } from 'react'
 
 export { FormControl, FormHelperText, FormLabel }
 
@@ -44,27 +45,30 @@ export const Form = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
     </form>
   )
 }
+export const FormField = (
+  props: {
+    label: string
+    inputId: string
+    error?: boolean
+    children: React.ReactNode
+  } & Omit<ComponentProps<typeof FormControl>, 'children'>,
+) => {
+  const { label, inputId, error, children, fullWidth = true, ...rest } = props
 
-export const FormField = ({
-  label,
-  inputId,
-  error,
-  children,
-  ...rest
-}: {
-  label: string
-  inputId: string
-  error?: boolean
-  children: React.ReactNode
-  [key: string]: unknown
-}) => (
-  <FormControl data-testid="form-control" error={error} {...rest}>
-    <FormLabel data-testid="form-label" htmlFor={inputId}>
-      {label}
-    </FormLabel>
-    {children}
-  </FormControl>
-)
+  return (
+    <FormControl
+      data-testid="form-control"
+      error={error}
+      fullWidth={fullWidth || true}
+      {...rest}
+    >
+      <FormLabel data-testid="form-label" htmlFor={inputId}>
+        {label}
+      </FormLabel>
+      {children}
+    </FormControl>
+  )
+}
 
 export const FormItem = ({
   children,
