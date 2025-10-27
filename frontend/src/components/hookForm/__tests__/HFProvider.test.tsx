@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm, useFormContext } from 'react-hook-form'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import HFProvider from '../HFProvider'
 
@@ -51,10 +51,13 @@ describe('HFProvider', () => {
 
   it('handles onSubmit callback', async () => {
     const user = userEvent.setup()
-    const mockOnSubmit = vi.fn()
+    let submitted = false
+    const onSubmit = () => {
+      submitted = true
+    }
 
     render(
-      <TestWrapper onSubmit={mockOnSubmit}>
+      <TestWrapper onSubmit={onSubmit}>
         <button type="submit">Submit</button>
       </TestWrapper>,
     )
@@ -62,7 +65,7 @@ describe('HFProvider', () => {
     const submitButton = screen.getByRole('button', { name: /submit/i })
     await user.click(submitButton)
 
-    expect(mockOnSubmit).toHaveBeenCalled()
+    expect(submitted).toBe(true)
   })
 
   it('passes form methods to FormProvider', () => {
@@ -82,17 +85,17 @@ describe('HFProvider', () => {
 
   it('handles form submission with validation', async () => {
     const user = userEvent.setup()
-    const mockOnSubmit = vi.fn()
+    let submittedData: TestFormData | undefined
 
     const TestComponentWithForm = () => {
       const methods = useForm<TestFormData>({
         defaultValues: { testField: 'value' },
       })
+      const onSubmit = (data: TestFormData) => {
+        submittedData = data
+      }
       return (
-        <HFProvider
-          methods={methods}
-          onSubmit={methods.handleSubmit(mockOnSubmit)}
-        >
+        <HFProvider methods={methods} onSubmit={methods.handleSubmit(onSubmit)}>
           <input data-testid="input" {...methods.register('testField')} />
           <button type="submit">Submit</button>
         </HFProvider>
@@ -104,7 +107,7 @@ describe('HFProvider', () => {
     const submitButton = screen.getByRole('button', { name: /submit/i })
     await user.click(submitButton)
 
-    expect(mockOnSubmit).toHaveBeenCalled()
+    expect(submittedData).toEqual({ testField: 'value' })
   })
 
   it('renders without onSubmit', () => {

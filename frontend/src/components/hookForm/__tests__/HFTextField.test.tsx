@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import HFProvider from '../HFProvider'
 import HFTextField from '../HFTextField'
@@ -43,7 +43,12 @@ describe('HFTextField', () => {
   it('renders email input type', () => {
     render(
       <TestWrapper>
-        <HFTextField name="testInput" inputId="emailInput-id" label="Email" type="email" />
+        <HFTextField
+          name="testInput"
+          inputId="emailInput-id"
+          label="Email"
+          type="email"
+        />
       </TestWrapper>,
     )
 
@@ -54,7 +59,12 @@ describe('HFTextField', () => {
   it('renders password input type', () => {
     render(
       <TestWrapper>
-        <HFTextField name="emailInput" inputId="passwordInput-id" label="Password" type="password" />
+        <HFTextField
+          name="emailInput"
+          inputId="passwordInput-id"
+          label="Password"
+          type="password"
+        />
       </TestWrapper>,
     )
 
@@ -67,7 +77,11 @@ describe('HFTextField', () => {
 
     render(
       <TestWrapper>
-        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
+        <HFTextField
+          name="testInput"
+          inputId="testInput-id"
+          label="Test Label"
+        />
       </TestWrapper>,
     )
 
@@ -89,7 +103,11 @@ describe('HFTextField', () => {
 
     render(
       <TestWrapperWithError>
-        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
+        <HFTextField
+          name="testInput"
+          inputId="testInput-id"
+          label="Test Label"
+        />
       </TestWrapperWithError>,
     )
 
@@ -99,7 +117,11 @@ describe('HFTextField', () => {
   it('integrates with form default values', () => {
     render(
       <TestWrapper defaultValues={{ testInput: 'default value' }}>
-        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" />
+        <HFTextField
+          name="testInput"
+          inputId="testInput-id"
+          label="Test Label"
+        />
       </TestWrapper>,
     )
 
@@ -109,16 +131,24 @@ describe('HFTextField', () => {
 
   it('handles onChange prop', async () => {
     const user = userEvent.setup()
-    const mockOnChange = vi.fn()
+    let changed = false
+    const onChange = () => {
+      changed = true
+    }
 
     render(
       <TestWrapper>
-        <HFTextField name="testInput" inputId="testInput-id" label="Test Label" onChange={mockOnChange} />
+        <HFTextField
+          name="testInput"
+          inputId="testInput-id"
+          label="Test Label"
+          onChange={onChange}
+        />
       </TestWrapper>,
     )
 
     const input = screen.getByRole('textbox')
     await user.type(input, 'a')
-    expect(mockOnChange).toHaveBeenCalled()
+    expect(changed).toBe(true)
   })
 })

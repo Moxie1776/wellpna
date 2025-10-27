@@ -104,7 +104,7 @@ describe('HFMultiCheckbox', () => {
     return <HFProvider methods={methods}>{children}</HFProvider>
   }
 
-  const mockOptions = [
+  const testOptions = [
     { label: 'Option 1', value: 'opt1' },
     { label: 'Option 2', value: 'opt2' },
     { label: 'Option 3', value: 'opt3' },
@@ -116,7 +116,7 @@ describe('HFMultiCheckbox', () => {
         <HFMultiCheckbox
           name="multiCheckbox"
           label="Test Label"
-          options={mockOptions}
+          options={testOptions}
           row
         />
       </TestWrapper>,
@@ -134,7 +134,7 @@ describe('HFMultiCheckbox', () => {
 
     render(
       <TestWrapper>
-        <HFMultiCheckbox name="multiCheckbox" options={mockOptions} />
+        <HFMultiCheckbox name="multiCheckbox" options={testOptions} />
       </TestWrapper>,
     )
 
@@ -167,7 +167,7 @@ describe('HFMultiCheckbox', () => {
 
     render(
       <TestWrapperWithError>
-        <HFMultiCheckbox name="multiCheckbox" options={mockOptions} />
+        <HFMultiCheckbox name="multiCheckbox" options={testOptions} />
       </TestWrapperWithError>,
     )
 

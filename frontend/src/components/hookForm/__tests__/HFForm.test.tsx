@@ -1,20 +1,12 @@
 import { TextField } from '@mui/material'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 // Mock react-hook-form
 import { Form, FormField, FormItem, FormMessage } from '../HFForm'
 
 describe('Form Components', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
   describe('Form Component', () => {
     it('renders form element with valid HTML props', () => {
       render(
@@ -47,11 +39,14 @@ describe('Form Components', () => {
     })
 
     it('handles form submission', async () => {
-      const mockOnSubmit = vi.fn()
+      let submitted = false
+      const onSubmit = () => {
+        submitted = true
+      }
       const user = userEvent.setup()
 
       render(
-        <Form onSubmit={mockOnSubmit}>
+        <Form onSubmit={onSubmit}>
           <button type="submit">Submit</button>
         </Form>,
       )
@@ -59,7 +54,7 @@ describe('Form Components', () => {
       const submitButton = screen.getByRole('button', { name: /submit/i })
       await user.click(submitButton)
 
-      expect(mockOnSubmit).toHaveBeenCalled()
+      expect(submitted).toBe(true)
     })
   })
 
@@ -441,11 +436,15 @@ describe('Form Components', () => {
     })
 
     it('form submission prevents default', async () => {
-      const mockOnSubmit = vi.fn((e) => e.preventDefault())
+      let submitted = false
+      const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        submitted = true
+      }
       const user = userEvent.setup()
 
       render(
-        <Form onSubmit={mockOnSubmit}>
+        <Form onSubmit={onSubmit}>
           <FormField label="Submit Test" inputId="submit-input">
             <TextField />
           </FormField>
@@ -456,7 +455,7 @@ describe('Form Components', () => {
       const submitButton = screen.getByRole('button', { name: /submit/i })
       await user.click(submitButton)
 
-      expect(mockOnSubmit).toHaveBeenCalled()
+      expect(submitted).toBe(true)
     })
 
     it('handles rapid interactions', async () => {

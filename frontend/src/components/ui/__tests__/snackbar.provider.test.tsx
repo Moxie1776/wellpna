@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import * as React from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { SnackbarProvider, useSnackbar } from '../snackbar'
 
@@ -15,7 +15,6 @@ describe('Snackbar Provider Tests', () => {
   })
 
   it('throws error when useSnackbar is used outside provider', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const TestWithoutProvider = () => {
       useSnackbar()
       return <div />
@@ -23,7 +22,6 @@ describe('Snackbar Provider Tests', () => {
     expect(() => {
       render(<TestWithoutProvider />)
     }).toThrow('useSnackbar must be used within a SnackbarProvider')
-    consoleSpy.mockRestore()
   })
 
   it('maintains snackbar state across re-renders', () => {

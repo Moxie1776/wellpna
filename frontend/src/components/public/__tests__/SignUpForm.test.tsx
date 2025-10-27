@@ -1,20 +1,20 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { createTestUser } from '../../../../tests/utils/testUsers'
 import { useAuthStore } from '../../../store/auth'
 import { SignUpForm } from '../SignUpForm'
 
-// Mock localStorage for auth store persistence
+// Use real localStorage functions for integrated testing
 const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+  clear: () => {},
 }
 
-const mockOnSignup = vi.fn()
+let onSignupCalled = false
 let testUserEmail: string
 
 beforeEach(() => {
@@ -24,25 +24,22 @@ beforeEach(() => {
     writable: true,
   })
 
-  // Reset localStorageMock state
-  localStorageMock.getItem.mockReset()
-  localStorageMock.setItem.mockReset()
-  localStorageMock.removeItem.mockReset()
-
-  // Reset mock
-  mockOnSignup.mockReset()
+  // Reset state
+  onSignupCalled = false
 
   // Generate unique email for this test
   testUserEmail = `signup-test-${Date.now()}@example.com`
 })
 
-afterEach(() => {
-  vi.clearAllMocks()
-})
-
 describe('SignUpForm', () => {
   it('renders form fields and button', () => {
-    render(<SignUpForm onSignup={mockOnSignup} />)
+    render(
+      <SignUpForm
+        onSignup={() => {
+          onSignupCalled = true
+        }}
+      />,
+    )
     expect(screen.getByLabelText('Name')).toBeInTheDocument()
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
@@ -52,7 +49,13 @@ describe('SignUpForm', () => {
   it('calls signUp when submitted', async () => {
     // Use a valid password according to passwordSchema
     const validPassword = 'Password123!'
-    render(<SignUpForm onSignup={mockOnSignup} />)
+    render(
+      <SignUpForm
+        onSignup={() => {
+          onSignupCalled = true
+        }}
+      />,
+    )
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), testUserEmail)
@@ -65,7 +68,7 @@ describe('SignUpForm', () => {
     })
     await waitFor(
       () => {
-        expect(mockOnSignup).toHaveBeenCalled()
+        expect(onSignupCalled).toBe(true)
       },
       { timeout: 5000 },
     )
@@ -86,7 +89,13 @@ describe('SignUpForm', () => {
     const existingEmail = `existing-${Date.now()}@example.com`
     await createTestUser(existingEmail, validPassword, 'Existing User')
 
-    render(<SignUpForm onSignup={mockOnSignup} />)
+    render(
+      <SignUpForm
+        onSignup={() => {
+          onSignupCalled = true
+        }}
+      />,
+    )
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Name'), 'Test User')
       await userEvent.type(screen.getByLabelText('Email'), existingEmail)
@@ -97,13 +106,13 @@ describe('SignUpForm', () => {
       await userEvent.type(screen.getByLabelText('Password'), validPassword)
       await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
     })
-      // The backend returns a GraphQL error for existing email. Instead of
-      // relying on the rendered error text (which can vary with GraphQL client
-      // formatting), assert the auth store contains an error message — this
-      // confirms the signUp flow failed as expected while keeping the test
-      // robust for different environments.
-      await waitFor(() => {
-        expect(useAuthStore.getState().error).toBeTruthy()
-      })
+    // The backend returns a GraphQL error for existing email. Instead of
+    // relying on the rendered error text (which can vary with GraphQL client
+    // formatting), assert the auth store contains an error message — this
+    // confirms the signUp flow failed as expected while keeping the test
+    // robust for different environments.
+    await waitFor(() => {
+      expect(useAuthStore.getState().error).toBeTruthy()
+    })
   })
 })

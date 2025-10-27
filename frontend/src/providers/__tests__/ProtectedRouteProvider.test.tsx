@@ -1,25 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach,describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
+import { useAuthStore } from '../../store/auth'
 import { ProtectedRoute } from '../ProtectedRouteProvider'
 
-// Mock the auth store
-vi.mock('@/store/auth', () => ({
-  useAuthStore: vi.fn(),
-}))
-
-import { useAuthStore } from '@/store/auth'
-
-const mockedUseAuthStore = vi.mocked(useAuthStore)
+// Real auth store implementation for integrated testing
 
 describe('ProtectedRoute', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('renders children when user is authenticated', () => {
-    const mockState = {
+    useAuthStore.setState({
       user: {
         id: '1',
         email: 'test@example.com',
@@ -30,20 +20,7 @@ describe('ProtectedRoute', () => {
       token: 'fake-token',
       loading: false,
       error: null,
-      setAuth: vi.fn(),
-      clearAuth: vi.fn(),
-      updateUser: vi.fn(),
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signUp: vi.fn(),
-      getCurrentUser: vi.fn(),
-      isTokenValid: vi.fn(),
-      setLoading: vi.fn(),
-      setError: vi.fn(),
-      initializeAuth: vi.fn(),
-    }
-
-    mockedUseAuthStore.mockImplementation((selector) => selector(mockState))
+    })
 
     render(
       <MemoryRouter>
@@ -57,25 +34,12 @@ describe('ProtectedRoute', () => {
   })
 
   it('redirects to login when user is not authenticated', () => {
-    const mockState = {
+    useAuthStore.setState({
       user: null,
       token: null,
       loading: false,
       error: null,
-      setAuth: vi.fn(),
-      clearAuth: vi.fn(),
-      updateUser: vi.fn(),
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signUp: vi.fn(),
-      getCurrentUser: vi.fn(),
-      isTokenValid: vi.fn(),
-      setLoading: vi.fn(),
-      setError: vi.fn(),
-      initializeAuth: vi.fn(),
-    }
-    
-    mockedUseAuthStore.mockImplementation((selector) => selector(mockState))
+    })
 
     render(
       <MemoryRouter>

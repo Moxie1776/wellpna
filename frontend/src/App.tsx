@@ -89,18 +89,8 @@ export function AppContent() {
     </Routes>
   )
 }
-
-if (
-  import.meta.env.MODE !== 'test' &&
-  typeof document !== 'undefined' &&
-  document.getElementById('root')
-) {
-  // Only import the CSS at runtime (not during tests). Vitest/node ESM
-  // runner doesn't handle raw CSS imports from node_modules; loading the
-  // CSS only in non-test runtime avoids the "Unknown file extension '.css'"
-  // error during tests.
-  void import('@mui/x-data-grid/index.css')
-
+// Only render to DOM when not in test environment
+if (typeof window !== 'undefined' && document.getElementById('root')) {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <BrowserRouter>

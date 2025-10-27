@@ -27,33 +27,12 @@ const cleanupQueue = new Set<string>()
 /**
  * Enqueue a cleanup pattern to be executed in global teardown instead of
  * running immediate deletions during tests.
-    }
+ */
+export function enqueueCleanup(pattern: string): void {
+  cleanupQueue.add(pattern)
+}
 
-    // Final fallback: if auto-verify attempted but we still don't have an
-    // AuthResponse, try signing in once more. This helps when verification
-    // succeeded on the server but our debug/code-based checks had timing
-    // issues.
-    if (!authResponse) {
-      try {
-        const signInResp = await signInTestUser(email, password)
-        if (signInResp?.user) {
-          testUserSessions.set(email, {
-            user: signInResp.user,
-            token: signInResp.token,
-            email,
-          })
-          authResponse = signInResp
-        }
-      } catch (err) {
-        // ignore — we'll return whatever we have below
-      }
-    }
-
-    // If we still don't have an AuthResponse (for example signUp returned a
-    // confirmation string and autoVerify ultimately failed), return a
-    // best-effort value: prefer AuthResponse, otherwise return the raw
-    // signUp payload so callers can inspect the server reply.
-    return (authResponse as any) || (signUpPayload as any)
+/**
  * Intended to be called from the test global teardown.
  */
 export async function runQueuedCleanups(): Promise<void> {

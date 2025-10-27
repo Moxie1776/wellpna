@@ -2,24 +2,34 @@ import '@testing-library/jest-dom'
 
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { EmailVerificationForm } from '../EmailVerificationForm'
 
-const mockOnVerify = vi.fn()
-const mockOnResendCode = vi.fn()
+let onVerifyCalled = false
+let onResendCodeCalled = false
+let verifyData: any = null
+let resendEmail: string | null = null
 
 beforeEach(() => {
-  mockOnVerify.mockReset()
-  mockOnResendCode.mockReset()
+  onVerifyCalled = false
+  onResendCodeCalled = false
+  verifyData = null
+  resendEmail = null
 })
 
 describe('EmailVerificationForm', () => {
   it('renders form fields and buttons', () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
@@ -35,8 +45,14 @@ describe('EmailVerificationForm', () => {
   it('renders with default email', () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
         defaultEmail="test@example.com"
       />,
     )
@@ -46,8 +62,14 @@ describe('EmailVerificationForm', () => {
   it('shows validation errors for invalid email', async () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     await act(async () => {
@@ -68,8 +90,14 @@ describe('EmailVerificationForm', () => {
   it('shows validation errors for invalid code', async () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
@@ -85,8 +113,14 @@ describe('EmailVerificationForm', () => {
   it('calls onVerify with valid data on submit', async () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     await act(async () => {
@@ -97,7 +131,8 @@ describe('EmailVerificationForm', () => {
       )
     })
     await waitFor(() => {
-      expect(mockOnVerify).toHaveBeenCalledWith({
+      expect(onVerifyCalled).toBe(true)
+      expect(verifyData).toEqual({
         email: 'test@example.com',
         code: '123456',
       })
@@ -107,22 +142,35 @@ describe('EmailVerificationForm', () => {
   it('calls onResendCode with email on resend click', async () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     await act(async () => {
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
       await userEvent.click(screen.getByRole('button', { name: 'Resend Code' }))
     })
-    expect(mockOnResendCode).toHaveBeenCalledWith('test@example.com')
+    expect(onResendCodeCalled).toBe(true)
+    expect(resendEmail).toBe('test@example.com')
   })
 
   it('disables submit button when loading', () => {
     render(
       <EmailVerificationForm
-        onVerify={mockOnVerify}
-        onResendCode={mockOnResendCode}
+        onVerify={(data) => {
+          onVerifyCalled = true
+          verifyData = data
+        }}
+        onResendCode={(email) => {
+          onResendCodeCalled = true
+          resendEmail = email
+        }}
       />,
     )
     // Simulate loading state by rerendering with isLoading true if needed

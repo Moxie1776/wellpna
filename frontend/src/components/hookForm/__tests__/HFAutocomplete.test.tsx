@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import HFAutocomplete from '../HFAutocomplete'
 import HFProvider from '../HFProvider'
@@ -22,7 +22,7 @@ describe('HFAutocomplete', () => {
     return <HFProvider methods={methods}>{children}</HFProvider>
   }
 
-  const mockOptions = [
+  const testOptions = [
     { label: 'Option 1', value: 'opt1' },
     { label: 'Option 2', value: 'opt2' },
     { label: 'Option 3', value: 'opt3' },
@@ -34,7 +34,7 @@ describe('HFAutocomplete', () => {
         <HFAutocomplete
           name="testField"
           label="Test Label"
-          options={mockOptions}
+          options={testOptions}
         />
       </TestWrapper>,
     )
@@ -45,8 +45,8 @@ describe('HFAutocomplete', () => {
 
   it('displays selected value', () => {
     render(
-      <TestWrapper defaultValues={{ testField: mockOptions[0] }}>
-        <HFAutocomplete name="testField" options={mockOptions} />
+      <TestWrapper defaultValues={{ testField: testOptions[0] }}>
+        <HFAutocomplete name="testField" options={testOptions} />
       </TestWrapper>,
     )
 
@@ -59,7 +59,7 @@ describe('HFAutocomplete', () => {
 
     render(
       <TestWrapper>
-        <HFAutocomplete name="testField" options={mockOptions} />
+        <HFAutocomplete name="testField" options={testOptions} />
       </TestWrapper>,
     )
 
@@ -83,7 +83,7 @@ describe('HFAutocomplete', () => {
 
     render(
       <TestWrapperWithError>
-        <HFAutocomplete name="testField" options={mockOptions} />
+        <HFAutocomplete name="testField" options={testOptions} />
       </TestWrapperWithError>,
     )
 
@@ -93,7 +93,7 @@ describe('HFAutocomplete', () => {
   it('has proper accessibility attributes', () => {
     render(
       <TestWrapper>
-        <HFAutocomplete name="testField" options={mockOptions} />
+        <HFAutocomplete name="testField" options={testOptions} />
       </TestWrapper>,
     )
 
@@ -103,7 +103,7 @@ describe('HFAutocomplete', () => {
 
   it('integrates with form submission', async () => {
     const user = userEvent.setup()
-    const mockOnSubmit = vi.fn()
+    let submittedData: TestFormData | undefined
 
     const TestWrapperWithSubmit = ({
       children,
@@ -111,12 +111,12 @@ describe('HFAutocomplete', () => {
       children: React.ReactNode
     }) => {
       const methods = useForm<TestFormData>({ defaultValues: {} })
+      const onSubmit = (data: TestFormData) => {
+        submittedData = data
+      }
       return (
-        <HFProvider
-          methods={methods}
-          onSubmit={methods.handleSubmit(mockOnSubmit)}
-        >
-          <form onSubmit={methods.handleSubmit(mockOnSubmit)}>
+        <HFProvider methods={methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)}>
             {children}
             <button type="submit">Submit</button>
           </form>
@@ -126,7 +126,7 @@ describe('HFAutocomplete', () => {
 
     render(
       <TestWrapperWithSubmit>
-        <HFAutocomplete name="testField" options={mockOptions} />
+        <HFAutocomplete name="testField" options={testOptions} />
       </TestWrapperWithSubmit>,
     )
 
@@ -137,9 +137,6 @@ describe('HFAutocomplete', () => {
     const submitButton = screen.getByRole('button', { name: /submit/i })
     await user.click(submitButton)
 
-    expect(mockOnSubmit).toHaveBeenCalledWith(
-      { testField: mockOptions[0] },
-      expect.any(Object),
-    )
+    expect(submittedData).toEqual({ testField: testOptions[0] })
   })
 })

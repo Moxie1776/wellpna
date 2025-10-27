@@ -2,19 +2,31 @@ import '@testing-library/jest-dom'
 
 import { act } from '@testing-library/react'
 import { createServer } from 'net'
-import { afterAll, beforeAll, vi } from 'vitest'
+import { beforeAll, vi } from 'vitest'
 
 import { logger } from '../src/utils'
-import { createElement } from 'react'
 
-// Mock CSS and font files
+// Mock CSS imports to prevent Vite from trying to process them
 vi.mock('*.css', () => ({}))
 
-// Mock @mui/x-data-grid to avoid CSS import issues
+// Mock MUI X DataGrid to prevent CSS import issues
 vi.mock('@mui/x-data-grid', () => ({
-  DataGrid: () => createElement('div', { 'data-testid': 'data-grid' }),
-  // Add other exports as needed
+  DataGrid: () => null,
 }))
+
+// Mock dynamic imports to prevent CSS loading during tests
+;(globalThis as any).import = new Proxy((globalThis as any).import || (() => Promise.resolve({})), {
+  apply(target: any, thisArg: any, args: any[]) {
+    const [moduleId] = args
+    if (moduleId === '@mui/x-data-grid/index.css' || moduleId === '@mui/x-data-grid/esm/index.css') {
+      return Promise.resolve({})
+    }
+    return target.apply(thisArg, args)
+  },
+})
+
+// CSS and font files are handled by Vite in test environment
+// @mui/x-data-grid is handled by Vite in test environment
 Object.defineProperty(global, 'import', {
   value: {
     meta: {
@@ -188,17 +200,8 @@ export async function ensureBackendRunning() {
 process.env.VITE_GRAPHQL_ENDPOINT = 'http://localhost:4000/graphql'
 process.env.NODE_ENV = 'debug'
 
-// Suppress only logger.debug in tests globally to keep output quiet.
-// Do NOT override logger.error so tests that assert console.error behavior
-// (logger tests) continue to work.
-const originalLog = logger.debug
-beforeAll(() => {
-  logger.debug = vi.fn()
-})
-
-afterAll(() => {
-  logger.debug = originalLog
-})
+// Logger debug output is allowed in integrated tests
+// Tests that need to suppress debug output can do so individually
 
 beforeAll(async () => {
   // Best-effort check that backend is running in debug mode; do not throw

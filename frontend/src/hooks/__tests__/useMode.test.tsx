@@ -1,60 +1,26 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-// Create mocks inside the factory so they are initialized when the mock is hoisted
-vi.mock('../../store/theme', () => {
-  const useModeStore = vi.fn()
-  return { useModeStore }
-})
-
-vi.mock('@mui/material/styles', () => {
-  const useColorScheme = vi.fn()
-  return { useColorScheme }
-})
-
-import { useColorScheme as mockUseColorScheme } from '@mui/material/styles'
 import { renderHook } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { useModeStore as mockUseModeStore } from '../../store/theme'
+import { useModeStore } from '../../store/theme'
 import { useMode } from '../useMode'
 
-// Mock localStorage
+// Real localStorage functions for integrated testing
 const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+  clear: () => {},
 }
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 })
 
+// Mock implementations for integrated testing
+
 describe('useMode', () => {
-  let mockSetMode: any
-
   beforeEach(() => {
-    vi.clearAllMocks()
-
-    mockSetMode = vi.fn()
-    ;(mockUseColorScheme as any).mockReturnValue({
-      mode: 'light',
-      setMode: vi.fn(),
-    })
-
-    // Mock Zustand store
-    ;(mockUseModeStore as any).mockImplementation(
-      (selector?: (state: any) => any) => {
-        const state = {
-          mode: 'light',
-          setMode: mockSetMode,
-        }
-        return selector ? selector(state) : state
-      },
-    )
-
-    // Setup localStorage mocks
-    localStorageMock.getItem.mockReturnValue(null)
-    localStorageMock.setItem.mockImplementation(() => {})
-    localStorageMock.removeItem.mockImplementation(() => {})
+    // Reset state
+    useModeStore.setState({ mode: 'light' })
   })
 
   describe('Initial State Tests', () => {
@@ -74,15 +40,7 @@ describe('useMode', () => {
 
   describe('Mode Access Tests', () => {
     it('returns dark mode when store has dark mode', () => {
-      ;(mockUseModeStore as any).mockImplementation(
-        (selector?: (state: any) => any) => {
-          const state = {
-            mode: 'dark',
-            setMode: mockSetMode,
-          }
-          return selector ? selector(state) : state
-        },
-      )
+      useModeStore.setState({ mode: 'dark' })
 
       const { result } = renderHook(() => useMode())
 
@@ -90,15 +48,7 @@ describe('useMode', () => {
     })
 
     it('returns system mode when store has system mode', () => {
-      ;(mockUseModeStore as any).mockImplementation(
-        (selector?: (state: any) => any) => {
-          const state = {
-            mode: 'system',
-            setMode: mockSetMode,
-          }
-          return selector ? selector(state) : state
-        },
-      )
+      useModeStore.setState({ mode: 'system' })
 
       const { result } = renderHook(() => useMode())
 

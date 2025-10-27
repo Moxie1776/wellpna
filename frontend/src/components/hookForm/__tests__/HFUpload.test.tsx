@@ -2,7 +2,7 @@ import '@testing-library/jest-dom'
 
 import { render, screen } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import HFProvider from '../HFProvider'
 import { HFUpload, HFUploadAvatar, HFUploadBox } from '../HFUpload'
@@ -10,7 +10,7 @@ import { HFUpload, HFUploadAvatar, HFUploadBox } from '../HFUpload'
 // Mock URL.createObjectURL
 Object.defineProperty(window.URL, 'createObjectURL', {
   writable: true,
-  value: vi.fn(() => 'mock-url'),
+  value: () => 'fake-url',
 })
 
 type TestFormData = {

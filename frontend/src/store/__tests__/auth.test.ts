@@ -1,25 +1,30 @@
 import { act } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-// We'll import the store after stubbing global.localStorage so the
-// zustand persist middleware picks up the mocked storage during tests.
+// We'll import the store after setting up real localStorage
 let useAuthStore: any
 import { createTestUser } from '../../../tests/utils/testUsers'
 
-// Mock JWT utilities
-vi.mock('../../utils/jwt', () => ({
-  hashPassword: vi.fn((password: string) => Promise.resolve(password)), // Return password as-is for testing
-  isValidToken: vi.fn((token: string) => token && token.length > 0),
-}))
+// Use real localStorage functions for integrated testing
+let localStorageData: Record<string, string> = {}
+let setItemCalls: Array<{ key: string; value: string }> = []
+let removeItemCalls: string[] = []
 
-// No graphql client mocks: tests should use the real backend (integration tests)
-
-// Mock localStorage
 const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+  getItem: (key: string) => localStorageData[key] || null,
+  setItem: (key: string, value: string) => {
+    localStorageData[key] = value
+    setItemCalls.push({ key, value })
+  },
+  removeItem: (key: string) => {
+    delete localStorageData[key]
+    removeItemCalls.push(key)
+  },
+  clear: () => {
+    localStorageData = {}
+    setItemCalls = []
+    removeItemCalls = []
+  },
 }
 
 describe('useAuthStore', () => {
@@ -27,29 +32,31 @@ describe('useAuthStore', () => {
     // Inject localStorageMock before each test and reset store state
     // Ensure the global localStorage is the mocked version before importing
     // the store module so persist middleware uses it.
-    vi.stubGlobal('localStorage', localStorageMock)
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    })
 
-    // Import the store after stubbing localStorage
-
+    // Import the store after setting localStorage
     const mod = await import('../auth')
     useAuthStore = mod.useAuthStore
-    vi.clearAllMocks()
+
     useAuthStore.setState({
       token: null,
       user: null,
       loading: false,
       error: null,
     })
-    // Reset localStorageMock state
-    localStorageMock.getItem.mockReset()
-    localStorageMock.setItem.mockReset()
-    localStorageMock.removeItem.mockReset()
+
+    // Reset tracking state
+    localStorageData = {}
+    setItemCalls = []
+    removeItemCalls = []
     // Ensure no lingering test users; global setup/teardown handles queued cleanup
   })
   afterEach(async () => {
     // Do not perform immediate cleanup here; cleanup will run in global
     // teardown via the queued cleanup mechanism.
-    vi.clearAllMocks()
   })
 
   it('should initialize with correct default values', () => {
@@ -68,13 +75,7 @@ describe('useAuthStore', () => {
         const email = `signin-test-${Date.now()}@example.com`
 
         // Ensure a real user exists for sign in
-        await createTestUser(
-          email,
-          'password',
-          'SignIn Test User',
-          '',
-          true,
-        )
+        await createTestUser(email, 'password', 'SignIn Test User', '', true)
 
         await act(async () => {
           await signIn(email, 'password')
@@ -226,7 +227,7 @@ describe('useAuthStore', () => {
       const state = useAuthStore.getState()
       expect(state.token).toBe(null)
       expect(state.user).toBe(null)
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('token')
+      expect(removeItemCalls).toContain('token')
     })
   })
 
@@ -254,7 +255,7 @@ describe('useAuthStore', () => {
         expect(typeof result).toBe('string')
 
         // Ensure signUp did NOT persist a token or entire auth-storage
-        const signUpKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
+        const signUpKeys = setItemCalls.map((c) => c.key)
         expect(signUpKeys.includes('token')).toBe(false)
         expect(signUpKeys.includes('auth-storage')).toBe(false)
       })
@@ -425,7 +426,7 @@ describe('useAuthStore', () => {
       })
 
       // zustand persist writes the whole state under 'auth-storage'
-      const syncKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
+      const syncKeys = setItemCalls.map((c) => c.key)
       expect(
         syncKeys.includes('auth-storage') || syncKeys.includes('token'),
       ).toBe(true)
@@ -449,14 +450,14 @@ describe('useAuthStore', () => {
         signOut()
       })
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('token')
+      expect(removeItemCalls).toContain('token')
     })
   })
 
   describe('Hydration Tests', () => {
     it('should restore persisted user data on store initialization', () => {
       // Simulate persisted data
-      localStorageMock.getItem.mockReturnValue('restored-token')
+      localStorageData['token'] = 'restored-token'
 
       // Create a new store instance to test hydration
       const testStore = useAuthStore
@@ -507,7 +508,7 @@ describe('useAuthStore', () => {
       expect(useAuthStore.getState().token).toBeTruthy()
       // Accept either zustand's whole-state 'auth-storage' key or a
       // direct 'token' key write depending on persist implementation.
-      const syncKeys = localStorageMock.setItem.mock.calls.map((c) => c[0])
+      const syncKeys = setItemCalls.map((c) => c.key)
       expect(
         syncKeys.includes('auth-storage') || syncKeys.includes('token'),
       ).toBe(true)
@@ -518,13 +519,13 @@ describe('useAuthStore', () => {
       })
 
       expect(useAuthStore.getState().token).toBe(null)
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('token')
+      expect(removeItemCalls).toContain('token')
     })
   })
 
   describe('getCurrentUser Tests', () => {
     it('should return user when token exists in localStorage', () => {
-      localStorageMock.getItem.mockReturnValue('existing-token')
+      localStorageData['token'] = 'existing-token'
       useAuthStore.setState({
         token: 'existing-token',
         user: {
@@ -549,7 +550,7 @@ describe('useAuthStore', () => {
     })
 
     it('should return null when no token exists in localStorage', () => {
-      localStorageMock.getItem.mockReturnValue(null)
+      delete localStorageData['token']
 
       const { getCurrentUser } = useAuthStore.getState()
 
@@ -559,8 +560,18 @@ describe('useAuthStore', () => {
   })
 
   describe('isTokenValid Tests', () => {
-    it('should return true when a valid token exists in localStorage', () => {
-      localStorageMock.getItem.mockReturnValue('valid-token')
+    it('should return true when a valid token exists in localStorage', async () => {
+      // Sign in to get a real token from the backend
+      const { signIn } = useAuthStore.getState()
+
+      const email = `token-test-${Date.now()}@example.com`
+
+      // Ensure a real user exists for sign in
+      await createTestUser(email, 'password', 'Token Test User', '', true)
+
+      await act(async () => {
+        await signIn(email, 'password')
+      })
 
       const { isTokenValid } = useAuthStore.getState()
 
@@ -569,7 +580,7 @@ describe('useAuthStore', () => {
     })
 
     it('should return false when no token exists in localStorage', () => {
-      localStorageMock.getItem.mockReturnValue(null)
+      delete localStorageData['token']
 
       const { isTokenValid } = useAuthStore.getState()
 
@@ -578,7 +589,7 @@ describe('useAuthStore', () => {
     })
 
     it('should return false when an invalid token exists in localStorage', () => {
-      localStorageMock.getItem.mockReturnValue('')
+      localStorageData['token'] = ''
 
       const { isTokenValid } = useAuthStore.getState()
 

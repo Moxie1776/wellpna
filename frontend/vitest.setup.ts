@@ -1,5 +1,4 @@
-import { beforeAll, vi } from 'vitest'
-
+import { vi } from 'vitest'
 // Mock CSS and font files
 vi.mock('*.css', () => ({}))
 
