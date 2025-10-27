@@ -9,21 +9,39 @@ import { logger } from '../src/utils'
 // Mock CSS imports to prevent Vite from trying to process them
 vi.mock('*.css', () => ({}))
 
+// Mock HTMLFormElement.requestSubmit for JSDOM
+if (!HTMLFormElement.prototype.requestSubmit) {
+  HTMLFormElement.prototype.requestSubmit = function (submitter?: HTMLElement) {
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+    ;(submitEvent as any).submitter = submitter
+    const cancelled = !this.dispatchEvent(submitEvent)
+    if (!cancelled) {
+      ;(this as any).submit()
+    }
+  }
+}
+
 // Mock MUI X DataGrid to prevent CSS import issues
 vi.mock('@mui/x-data-grid', () => ({
   DataGrid: () => null,
 }))
 
 // Mock dynamic imports to prevent CSS loading during tests
-;(globalThis as any).import = new Proxy((globalThis as any).import || (() => Promise.resolve({})), {
-  apply(target: any, thisArg: any, args: any[]) {
-    const [moduleId] = args
-    if (moduleId === '@mui/x-data-grid/index.css' || moduleId === '@mui/x-data-grid/esm/index.css') {
-      return Promise.resolve({})
-    }
-    return target.apply(thisArg, args)
+;(globalThis as any).import = new Proxy(
+  (globalThis as any).import || (() => Promise.resolve({})),
+  {
+    apply(target: any, thisArg: any, args: any[]) {
+      const [moduleId] = args
+      if (
+        moduleId === '@mui/x-data-grid/index.css' ||
+        moduleId === '@mui/x-data-grid/esm/index.css'
+      ) {
+        return Promise.resolve({})
+      }
+      return target.apply(thisArg, args)
+    },
   },
-})
+)
 
 // CSS and font files are handled by Vite in test environment
 // @mui/x-data-grid is handled by Vite in test environment
@@ -156,6 +174,42 @@ if (typeof global.TextDecoder === 'undefined') {
       }
     }
   }
+
+  // Polyfill for HTMLFormElement.requestSubmit for JSDOM
+  if (
+    typeof HTMLFormElement !== 'undefined' &&
+    !HTMLFormElement.prototype.requestSubmit
+  ) {
+    HTMLFormElement.prototype.requestSubmit = function (
+      submitter?: HTMLElement,
+    ) {
+      const submitEvent = new Event('submit', {
+        bubbles: true,
+        cancelable: true,
+      })
+      ;(submitEvent as any).submitter = submitter
+      const cancelled = !this.dispatchEvent(submitEvent)
+      if (!cancelled && !this.hasAttribute('novalidate')) {
+        // Basic form validation (simplified)
+        const inputs = this.querySelectorAll(
+          'input[required], select[required], textarea[required]',
+        )
+        for (const input of inputs) {
+          if (!(input as HTMLInputElement).value) {
+            const invalidEvent = new Event('invalid', {
+              bubbles: true,
+              cancelable: false,
+            })
+            input.dispatchEvent(invalidEvent)
+            return
+          }
+        }
+      }
+      if (!cancelled) {
+        this.submit()
+      }
+    }
+  }
 }
 
 const checkPortInUse = (port: number): Promise<boolean> => {
@@ -202,7 +256,6 @@ process.env.NODE_ENV = 'debug'
 
 // Logger debug output is allowed in integrated tests
 // Tests that need to suppress debug output can do so individually
-
 beforeAll(async () => {
   // Best-effort check that backend is running in debug mode; do not throw
   // so tests that don't need the backend can still run locally.

@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
@@ -322,7 +322,9 @@ describe('Form Components', () => {
       )
 
       const input = screen.getByRole('textbox')
-      input.focus()
+      await act(async () => {
+        input.focus()
+      })
       expect(input).toHaveFocus()
 
       await user.tab()
@@ -390,6 +392,17 @@ describe('Form Components', () => {
     })
 
     it('handles malformed props gracefully', () => {
+      // Suppress React warning for invalid prop during this test
+      const originalError = console.error
+      console.error = (...args) => {
+        if (
+          args[0]?.includes?.('React does not recognize the `invalidProp` prop')
+        ) {
+          return
+        }
+        originalError.apply(console, args)
+      }
+
       render(
         <FormField
           label="Test"
@@ -401,6 +414,9 @@ describe('Form Components', () => {
       )
 
       expect(screen.getByTestId('form-control')).toBeInTheDocument()
+
+      // Restore console.error
+      console.error = originalError
     })
   })
 

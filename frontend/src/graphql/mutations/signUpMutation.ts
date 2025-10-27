@@ -1,6 +1,7 @@
 import { gql, TypedDocumentNode } from '@urql/core'
 
-// AuthResponse intentionally not needed here; signUp returns a scalar confirm str
+// AuthResponse intentionally not needed here;
+// signUp returns a scalar confirm str
 
 interface SignUpInput {
   email: string

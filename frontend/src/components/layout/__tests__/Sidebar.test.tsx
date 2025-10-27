@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -31,14 +31,16 @@ describe('AppSidebar', () => {
     localStorage.clear()
 
     // Reset stores
-    useAuthStore.setState({
-      token: null,
-      user: null,
-      loading: false,
-      error: null,
-    })
-    useModeStore.setState({
-      mode: 'light',
+    await act(async () => {
+      useAuthStore.setState({
+        token: null,
+        user: null,
+        loading: false,
+        error: null,
+      })
+      useModeStore.setState({
+        mode: 'light',
+      })
     })
 
     // Ensure clean test database state is handled by global setup/teardown
@@ -50,13 +52,15 @@ describe('AppSidebar', () => {
 
   afterEach(() => {
     // Reset auth and mode stores between tests and clear localStorage
-    useAuthStore.setState({
-      token: null,
-      user: null,
-      loading: false,
-      error: null,
+    act(() => {
+      useAuthStore.setState({
+        token: null,
+        user: null,
+        loading: false,
+        error: null,
+      })
+      useModeStore.setState({ mode: 'light' })
     })
-    useModeStore.setState({ mode: 'light' })
     localStorage.clear()
   })
 
@@ -180,9 +184,11 @@ describe('AppSidebar', () => {
       )
 
       // set client auth store to reflect regular user
-      useAuthStore.setState({
-        token: regularResp.token,
-        user: regularResp.user,
+      act(() => {
+        useAuthStore.setState({
+          token: regularResp.token,
+          user: regularResp.user,
+        })
       })
       localStorage.setItem('token', regularResp.token)
 
@@ -203,9 +209,11 @@ describe('AppSidebar', () => {
         '1234567890',
       )
       // Ensure client reflects admin role for UI tests
-      useAuthStore.setState({
-        token: adminResp.token,
-        user: { ...adminResp.user, role: 'admin' },
+      act(() => {
+        useAuthStore.setState({
+          token: adminResp.token,
+          user: { ...adminResp.user, role: 'admin' },
+        })
       })
       localStorage.setItem('token', adminResp.token)
 
