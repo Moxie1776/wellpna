@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/Moxie1776/wellpna/compare/v1.6.0...v1.7.0) (2025-10-27)
+
+
+### Features
+
+* convert frontend tests from mocked unit tests to integrated tests ([cea22f8](https://github.com/Moxie1776/wellpna/commit/cea22f82d573e7806f7571f0e29940e56065e228))
+
 # [1.6.0](https://github.com/Moxie1776/wellpna/compare/v1.5.0...v1.6.0) (2025-10-24)
 
 
