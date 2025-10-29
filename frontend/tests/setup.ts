@@ -6,6 +6,16 @@ import { beforeAll, vi } from 'vitest'
 
 import { logger } from '../src/utils'
 
+// Suppress specific console warnings during tests
+const originalWarn = console.warn
+console.warn = (...args) => {
+  // Suppress the requestSubmit warning from JSDOM
+  if (args[0]?.includes?.("HTMLFormElement's requestSubmit() method")) {
+    return
+  }
+  originalWarn.apply(console, args)
+}
+
 // Mock CSS imports to prevent Vite from trying to process them
 vi.mock('*.css', () => ({}))
 

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 import { describe, expect, it } from 'vitest'
@@ -64,8 +64,10 @@ describe('HFAutocomplete', () => {
     )
 
     const input = screen.getByRole('combobox')
-    await user.click(input)
-    await user.click(screen.getByText('Option 2'))
+    await act(async () => {
+      await user.click(input)
+      await user.click(screen.getByText('Option 2'))
+    })
 
     expect(input).toHaveValue('Option 2')
   })
@@ -131,11 +133,13 @@ describe('HFAutocomplete', () => {
     )
 
     const input = screen.getByRole('combobox')
-    await user.click(input)
-    await user.click(screen.getByText('Option 1'))
+    await act(async () => {
+      await user.click(input)
+      await user.click(screen.getByText('Option 1'))
 
-    const submitButton = screen.getByRole('button', { name: /submit/i })
-    await user.click(submitButton)
+      const submitButton = screen.getByRole('button', { name: /submit/i })
+      await user.click(submitButton)
+    })
 
     expect(submittedData).toEqual({ testField: testOptions[0] })
   })

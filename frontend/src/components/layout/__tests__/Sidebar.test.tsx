@@ -45,9 +45,22 @@ describe('AppSidebar', () => {
 
     // Ensure clean test database state is handled by global setup/teardown
 
-    // Set desktop viewport for most tests
+    // Set desktop viewport for most tests and mock matchMedia to prevent state updates
     ;(window as any).innerWidth = 1920
     ;(window as any).innerHeight = 1080
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+      }),
+    })
   })
 
   afterEach(() => {
@@ -184,13 +197,13 @@ describe('AppSidebar', () => {
       )
 
       // set client auth store to reflect regular user
-      act(() => {
+      await act(async () => {
         useAuthStore.setState({
           token: regularResp.token,
           user: regularResp.user,
         })
+        localStorage.setItem('token', regularResp.token)
       })
-      localStorage.setItem('token', regularResp.token)
 
       const { rerender } = render(
         <TestWrapper>
@@ -209,20 +222,20 @@ describe('AppSidebar', () => {
         '1234567890',
       )
       // Ensure client reflects admin role for UI tests
-      act(() => {
+      await act(async () => {
         useAuthStore.setState({
           token: adminResp.token,
           user: { ...adminResp.user, role: 'admin' },
         })
-      })
-      localStorage.setItem('token', adminResp.token)
+        localStorage.setItem('token', adminResp.token)
 
-      // Re-render with admin user
-      rerender(
-        <TestWrapper>
-          <AppSidebar />
-        </TestWrapper>,
-      )
+        // Re-render with admin user
+        rerender(
+          <TestWrapper>
+            <AppSidebar />
+          </TestWrapper>,
+        )
+      })
 
       expect(screen.getByText(adminRoute!.label)).toBeInTheDocument()
       const adminLink = screen.getByText(adminRoute!.label).closest('a')
@@ -250,11 +263,13 @@ describe('AppSidebar', () => {
         '1234567890',
       )
 
-      rerender(
-        <TestWrapper>
-          <AppSidebar />
-        </TestWrapper>,
-      )
+      await act(async () => {
+        rerender(
+          <TestWrapper>
+            <AppSidebar />
+          </TestWrapper>,
+        )
+      })
 
       expect(screen.queryByText('Home')).not.toBeInTheDocument()
       expect(screen.getByText('Dashboard')).toBeInTheDocument()
@@ -263,7 +278,9 @@ describe('AppSidebar', () => {
       // Click Sign Out and assert UI returns to unauthenticated state
       const logoutBtn = screen.getByText('Sign Out')
       const user = userEvent.setup()
-      await user.click(logoutBtn)
+      await act(async () => {
+        await user.click(logoutBtn)
+      })
 
       expect(screen.getByText('Home')).toBeInTheDocument()
       expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()

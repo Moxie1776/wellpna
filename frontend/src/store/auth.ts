@@ -57,7 +57,6 @@ export const useAuthStore = create<AuthState>()(
           const { token, user } = result.data.signIn
           localStorage.setItem('token', token)
           set({ token, user, loading: false })
-          logger.debug('Sign in successful, user details:', user)
           return result.data.signIn
         } catch (err: any) {
           logger.error('Sign in error:', err)
@@ -74,7 +73,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           localStorage.removeItem('token')
           localStorage.removeItem('auth-storage')
-          logger.debug('Cleared token and auth-storage from localStorage')
         } catch (e) {
           logger.error('Error clearing localStorage on signOut', e)
         }
@@ -140,7 +138,6 @@ export const useAuthStore = create<AuthState>()(
           // No token: ensure persisted user is not restored
           try {
             localStorage.removeItem('auth-storage')
-            logger.debug('No token found; removed persisted auth-storage')
           } catch (e) {
             logger.error('Error clearing auth-storage during init', e)
           }
@@ -160,7 +157,6 @@ export const useAuthStore = create<AuthState>()(
               role: decoded.role,
             }
             set({ token, user })
-            logger.debug('initializeAuth: token valid, user restored', user)
             return
           }
         }
@@ -169,7 +165,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           localStorage.removeItem('token')
           localStorage.removeItem('auth-storage')
-          logger.debug('initializeAuth: invalid token cleared')
         } catch (e) {
           logger.error('Error clearing storage during initializeAuth', e)
         }
@@ -181,7 +176,7 @@ export const useAuthStore = create<AuthState>()(
       // Only persist token and user, not loading/error
       partialize: (state) => ({ token: state.token, user: state.user }),
       // Skip hydration in test environment to avoid persistence issues
-      skipHydration: process.env.NODE_ENV === 'test',
+      skipHydration: process.env.NODE_ENV === 'debug',
     },
   ),
 )

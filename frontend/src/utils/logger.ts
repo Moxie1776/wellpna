@@ -3,7 +3,7 @@ import { Logger } from '../graphql/types/logger'
 const isTestEnv =
   typeof process !== 'undefined' &&
   process.env &&
-  (process.env.NODE_ENV === 'test' || (process.env as any).VITEST === 'true')
+  (process.env.NODE_ENV === 'debug' || (process.env as any).VITEST === 'true')
 
 const makeOut = (level: string, msg: string) =>
   isTestEnv

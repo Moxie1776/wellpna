@@ -13,7 +13,7 @@ import { ProtectedRoute } from './providers/ProtectedRouteProvider'
 import { SnackbarProvider } from './providers/SnackbarProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { useAuthStore } from './store/auth'
-import { client, logger } from './utils'
+import { client } from './utils'
 
 export function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth)
@@ -23,9 +23,6 @@ export function AppContent() {
     initializeAuth()
   }, [initializeAuth])
 
-  const adminRoutes = appRoutes.filter(
-    (route) => route.requiredRole === 'admin',
-  )
   const authRoutes = appRoutes.filter((route) => route.requiresAuth === true)
   const publicRoutes = appRoutes.filter(
     (route) =>
@@ -35,14 +32,6 @@ export function AppContent() {
   const errorRoutes = appRoutes.filter((route) =>
     ['/forbidden', '/server-error', '*'].includes(route.href),
   )
-
-  logger.debug('Rendering AppContent with routes', {
-    authRoutes,
-    adminRoutes,
-    publicRoutes,
-    errorRoutes,
-    user,
-  })
 
   return (
     <Routes>

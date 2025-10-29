@@ -100,9 +100,11 @@ describe('EmailVerificationForm', () => {
         }}
       />,
     )
-    await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
-    await userEvent.type(screen.getByLabelText('Verification Code'), '12345')
-    await userEvent.click(screen.getByRole('button', { name: 'Verify Email' }))
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+      await userEvent.type(screen.getByLabelText('Verification Code'), '12345')
+      await userEvent.click(screen.getByRole('button', { name: 'Verify Email' }))
+    })
     await waitFor(() => {
       expect(
         screen.getByText('Code must be exactly 6 digits'),

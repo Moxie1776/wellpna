@@ -54,8 +54,11 @@ describe('HFSlider', () => {
     }: {
       children: React.ReactNode
     }) => {
-      const methods = useForm<TestFormData>()
-      methods.setError('sliderField', { message: 'This field is required' })
+      const methods = useForm<TestFormData>({
+        errors: {
+          sliderField: { message: 'This field is required', type: 'required' }
+        }
+      })
       return <HFProvider methods={methods}>{children}</HFProvider>
     }
 

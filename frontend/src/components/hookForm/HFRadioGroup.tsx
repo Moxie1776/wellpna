@@ -37,7 +37,12 @@ export default function HFRadioGroup(props: Props) {
               {label}
             </FormLabel>
           )}
-          <RadioGroup {...field} aria-labelledby={labelledby} {...other}>
+          <RadioGroup
+            {...field}
+            value={field.value || ''}
+            aria-labelledby={labelledby}
+            {...other}
+          >
             {options.map((option) => (
               <FormControlLabel
                 key={option.value}

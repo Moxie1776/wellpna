@@ -31,11 +31,11 @@ type InternalSnack = SnackbarMessage & { id: number }
 // test suites fast and deterministic.
 const DEFAULT_DURATION = (() => {
   try {
-    // Node/Vitest: NODE_ENV === 'test' or VITEST flag
+    // Node/Vitest: NODE_ENV === 'debug' or VITEST flag
     if (
       typeof process !== 'undefined' &&
       process?.env &&
-      (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true')
+      (process.env.NODE_ENV === 'bebug' || process.env.VITEST === 'true')
     ) {
       return 1000
     }

@@ -26,7 +26,7 @@ describe('Form Components', () => {
           onSubmit={() => {}}
           action="/test"
           method="post"
-          {...({ invalidProp: 'should-be-filtered' } as any)}
+          {...({ invalidprop: 'should-be-filtered' } as any)}
         >
           <div>Form content</div>
         </Form>,
@@ -35,7 +35,7 @@ describe('Form Components', () => {
       const form = screen.getByTestId('form')
       expect(form).toHaveAttribute('action', '/test')
       expect(form).toHaveAttribute('method', 'post')
-      expect(form).not.toHaveAttribute('invalidProp')
+      expect(form).not.toHaveAttribute('invalidprop')
     })
 
     it('handles form submission', async () => {
@@ -52,7 +52,9 @@ describe('Form Components', () => {
       )
 
       const submitButton = screen.getByRole('button', { name: /submit/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       expect(submitted).toBe(true)
     })
@@ -392,31 +394,17 @@ describe('Form Components', () => {
     })
 
     it('handles malformed props gracefully', () => {
-      // Suppress React warning for invalid prop during this test
-      const originalError = console.error
-      console.error = (...args) => {
-        if (
-          args[0]?.includes?.('React does not recognize the `invalidProp` prop')
-        ) {
-          return
-        }
-        originalError.apply(console, args)
-      }
-
       render(
         <FormField
           label="Test"
           inputId="test"
-          {...({ invalidProp: 'test' } as any)}
+          {...({ invalidprop: 'test' } as any)}
         >
           <TextField />
         </FormField>,
       )
 
       expect(screen.getByTestId('form-control')).toBeInTheDocument()
-
-      // Restore console.error
-      console.error = originalError
     })
   })
 
@@ -431,7 +419,9 @@ describe('Form Components', () => {
       )
 
       const input = screen.getByRole('textbox')
-      await user.type(input, 'test input')
+      await act(async () => {
+        await user.type(input, 'test input')
+      })
       expect(input).toHaveValue('test input')
     })
 

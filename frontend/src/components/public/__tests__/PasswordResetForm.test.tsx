@@ -58,8 +58,10 @@ describe('PasswordResetForm', () => {
           }}
         />,
       )
-      await userEvent.type(screen.getByLabelText('Email'), 'invalid-email')
-      fireEvent.submit(screen.getByTestId('form'))
+      await act(async () => {
+        await userEvent.type(screen.getByLabelText('Email'), 'invalid-email')
+        fireEvent.submit(screen.getByTestId('form'))
+      })
       await waitFor(() => {
         expect(
           screen.getByText('Please enter a valid email address'),
@@ -141,15 +143,23 @@ describe('PasswordResetForm', () => {
           }}
         />,
       )
-      await userEvent.type(screen.getByLabelText('Verification Code'), '12345')
-      await userEvent.type(screen.getByLabelText('New Password'), 'password123')
-      await userEvent.type(
-        screen.getByPlaceholderText('Confirm new password'),
-        'password123',
-      )
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Reset Password' }),
-      )
+      await act(async () => {
+        await userEvent.type(
+          screen.getByLabelText('Verification Code'),
+          '12345',
+        )
+        await userEvent.type(
+          screen.getByLabelText('New Password'),
+          'password123',
+        )
+        await userEvent.type(
+          screen.getByPlaceholderText('Confirm new password'),
+          'password123',
+        )
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Reset Password' }),
+        )
+      })
       await waitFor(() => {
         expect(screen.getByText('Code must be 6 digits')).toBeInTheDocument()
       })
@@ -165,15 +175,20 @@ describe('PasswordResetForm', () => {
           }}
         />,
       )
-      await userEvent.type(screen.getByLabelText('Verification Code'), '123456')
-      await userEvent.type(screen.getByLabelText('New Password'), '123')
-      await userEvent.type(
-        screen.getByPlaceholderText('Confirm new password'),
-        '123',
-      )
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Reset Password' }),
-      )
+      await act(async () => {
+        await userEvent.type(
+          screen.getByLabelText('Verification Code'),
+          '123456',
+        )
+        await userEvent.type(screen.getByLabelText('New Password'), '123')
+        await userEvent.type(
+          screen.getByPlaceholderText('Confirm new password'),
+          '123',
+        )
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Reset Password' }),
+        )
+      })
       await waitFor(() => {
         expect(
           screen.getAllByText('Password must be at least 8 characters'),
@@ -191,15 +206,23 @@ describe('PasswordResetForm', () => {
           }}
         />,
       )
-      await userEvent.type(screen.getByLabelText('Verification Code'), '123456')
-      await userEvent.type(screen.getByLabelText('New Password'), 'Password1!')
-      await userEvent.type(
-        screen.getByPlaceholderText('Confirm new password'),
-        'Password2!',
-      )
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Reset Password' }),
-      )
+      await act(async () => {
+        await userEvent.type(
+          screen.getByLabelText('Verification Code'),
+          '123456',
+        )
+        await userEvent.type(
+          screen.getByLabelText('New Password'),
+          'Password1!',
+        )
+        await userEvent.type(
+          screen.getByPlaceholderText('Confirm new password'),
+          'Password2!',
+        )
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Reset Password' }),
+        )
+      })
       await waitFor(() => {
         // eslint-disable-next-line quotes
         expect(screen.getByText("Passwords don't match")).toBeInTheDocument()

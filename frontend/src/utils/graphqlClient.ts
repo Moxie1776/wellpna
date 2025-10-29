@@ -17,7 +17,16 @@ const client = createClient({
     cacheExchange,
     errorExchange({
       onError: (error) => {
-        logger.error('GraphQL Error:', error)
+        // Skip logging GraphQL errors in test environment to reduce noise
+        // Tests are designed to handle these errors appropriately
+        const isTestEnv =
+          typeof process !== 'undefined' &&
+          process.env &&
+          (process.env.NODE_ENV === 'debug' ||
+            (process.env as any).VITEST === 'true')
+        if (!isTestEnv) {
+          logger.error('GraphQL Error:', error)
+        }
       },
     }),
     fetchExchange,
@@ -32,4 +41,5 @@ const client = createClient({
     }
   },
 })
+
 export default client
