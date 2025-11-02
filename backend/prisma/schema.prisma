@@ -88,20 +88,19 @@ model MechanicalIsolationEnum {
 }
 
 model Operator {
-  id             String         @id @default(cuid())
-  operatorEnum   String
-  operatorEnumId OperatorEnum   @relation(fields: [operatorEnum], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  stateAbbr      String // 2-digit state abbreviation
-  operatorNo     String // alphanumeric operator number
-  wells          Well[]
-  OperatorUsers  OperatorUser[]
+  id            String         @id @default(cuid())
+  company       String
+  companyEnum   OperatorEnum   @relation(fields: [company], references: [company], onDelete: Cascade, onUpdate: Cascade)
+  stateAbbr     String // 2-digit state abbreviation
+  operatorNo    String // alphanumeric operator number
+  wells         Well[]
+  OperatorUsers OperatorUser[]
 
-  @@unique([operatorEnum, stateAbbr])
+  @@unique([company, stateAbbr])
 }
 
 model OperatorEnum {
-  id        String     @id @default(cuid())
-  name      String
+  company   String     @id
   operators Operator[]
 }
 

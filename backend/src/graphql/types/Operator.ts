@@ -3,11 +3,11 @@ import { builder } from '../../builder'
 export const Operator = builder.prismaObject('Operator', {
   fields: (t) => ({
     id: t.exposeID('id'),
-    operatorEnum: t.exposeString('operatorEnum'),
+    company: t.exposeString('company'),
     stateAbbr: t.exposeString('stateAbbr'),
     operatorNo: t.exposeString('operatorNo'),
     wells: t.relation('wells'),
-    operatorEnumId: t.relation('operatorEnumId'),
+    companyEnum: t.relation('companyEnum'),
     userOperators: t.relation('OperatorUsers'),
   }),
 })

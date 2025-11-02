@@ -27,7 +27,9 @@
     "@prisma/client": "^6.17.1",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.2",
+    "cheerio": "^1.1.2",
     "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
     "graphql": "16.11.0",
     "graphql-scalars": "1.24.2",
     "graphql-yoga": "^5.16.0",
@@ -35,6 +37,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.9",
     "nodemailer-mock": "^2.0.9",
+    "puppeteer": "^24.27.0",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0",
     "winston-transport": "^4.9.0"

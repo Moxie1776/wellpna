@@ -7,14 +7,14 @@ WellPnA is a comprehensive well permit and notification application built with m
 - User authentication and authorization
 - Profile management
 - Admin user management
-- Operator management system
+- Operator management system with web scraping from regulatory agencies (TX RRC, NM OCD)
 - Well permit tracking
 - Comprehensive testing suite
 
 ## Tech Stack
 
 - **Frontend**: React, TypeScript, Vite, Material-UI (MUI), MUI DataGrid, GraphQL
-- **Backend**: Node.js, TypeScript, GraphQL Yoga, Prisma, PostgreSQL
+- **Backend**: Node.js, TypeScript, GraphQL Yoga, Prisma, PostgreSQL, Puppeteer, Cheerio
 - **Testing**: Vitest, React Testing Library
 - **Deployment**: Docker, CI/CD with GitHub Actions
 

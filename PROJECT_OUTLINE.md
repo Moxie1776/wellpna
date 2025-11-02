@@ -16,10 +16,11 @@ The project consists of two main components:
 The backend is responsible for:
 
 1. Mining data from PDF and Excel files related to oil/gas wells
-2. Storing this data in a SQLite database using Prisma ORM
-3. Providing APIs for accessing well data
-4. Generating reports in PDF and Excel formats
-5. Handling user authentication
+2. Web scraping operator data from regulatory agency websites (TX RRC, NM OCD)
+3. Storing this data in a PostgreSQL database using Prisma ORM
+4. Providing APIs for accessing well data
+5. Generating reports in PDF and Excel formats
+6. Handling user authentication
 
 ### Data Model
 
@@ -37,6 +38,7 @@ The system manages complex well data including:
 
 - PDF parsing using pdf2json library
 - Excel processing using ExcelJS
+- Web scraping using Puppeteer and Cheerio for operator data import and other future projects
 - Data extraction and transformation into structured format
 - Database storage using Prisma ORM
 
@@ -63,11 +65,12 @@ The frontend is a React application that provides:
 ### Backend
 
 - Node.js with TypeScript
-- Prisma ORM with SQLite database
+- Prisma ORM with PostgreSQL database
 - GraphQL API with GraphQL Yoga and Pothos
 - Authentication with JWT and bcryptjs
 - PDF processing with pdf2json
 - Excel processing with ExcelJS
+- Web scraping with Puppeteer and Cheerio
 - PDF generation with jsPDF
 - Email sending with nodemailer
 - Logging with winston
@@ -92,9 +95,20 @@ The application uses a consistent color scheme:
 - Primary color: #012d6c (dark blue)
 - Secondary color: #c51230 (red)
 
+## Current Priorities
+
+1. **Operator Management**
+   - Display and maintain operator data using MUI DataGrid
+   - Set up web scraping capabilities for importing operator data from regulatory agencies (TX Railroad Commission, NM Oil Conservation Division)
+   - Bulk import functionality for operator lists from government websites
+
+2. **Data Management Interfaces**
+   - Implement MUI DataGrid components for all major data tables (wells, casing, perforations, plug schedules, etc.)
+   - Admin interfaces for data maintenance and import operations
+
 ## Future Development
 
 - Bid generation functionality
 - Enhanced reporting capabilities
 - Advanced data analysis features
-- Integration with additional data sources
+- Additional data source integrations beyond operator scraping

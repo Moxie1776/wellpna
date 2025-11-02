@@ -1,5 +1,6 @@
 import { Paper } from '@mui/material'
 
+import { OperatorImport } from '../../components/admin/OperatorImport'
 // eslint-disable-next-line max-len
 import { UserManagementTable } from '../../components/tables/UserManagementTable'
 import { PageHeader } from '../../components/ui'
@@ -16,6 +17,8 @@ export const Admin = () => {
       <PageHeader>User Management</PageHeader>
 
       <UserManagementTable />
+
+      <OperatorImport />
     </Paper>
   )
 }

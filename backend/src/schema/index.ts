@@ -21,6 +21,7 @@ import '../graphql/queries/user'
 import '../graphql/queries/auth'
 // Import all mutations
 import '../graphql/mutations/auth'
+import '../graphql/mutations/operator'
 
 // Export the schema (ESM-friendly)
 import { builder } from '../builder'

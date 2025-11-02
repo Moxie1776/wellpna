@@ -17,6 +17,8 @@ class EmailService {
       host: process.env.SMTP_HOST || 'smtp.ethereal.email',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
+      requireTLS: process.env.SMTP_TLS === 'true',
+      debug: true,
       auth: process.env.SMTP_USERNAME
         ? {
             user: process.env.SMTP_USERNAME,
