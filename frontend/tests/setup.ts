@@ -10,7 +10,7 @@ import { logger } from '../src/utils'
 const originalWarn = console.warn
 console.warn = (...args) => {
   // Suppress the requestSubmit warning from JSDOM
-  if (args[0]?.includes?.("HTMLFormElement's requestSubmit() method")) {
+  if (args[0]?.includes?.('HTMLFormElement\'s requestSubmit() method')) {
     return
   }
   originalWarn.apply(console, args)

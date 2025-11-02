@@ -26,7 +26,8 @@ export async function createTestUserAndJwt(
   const data = generateTestUserData(overrides)
 
   // signUp now returns a simple confirmation String (no token/user).
-  // Tests should not select fields from signUp since the GraphQL type is String.
+  // Tests should not select fields from signUp since the GraphQL type is
+  // String.
   const signUpMutation = `
       mutation SignUp($data: SignUpInput!) {
         signUp(data: $data)

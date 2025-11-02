@@ -42,7 +42,9 @@ builder.mutationFields((t) => ({
   // Get import status/progress (placeholder for future implementation)
   getImportStatus: t.string({
     resolve: () => {
-      return 'Import functionality is available. Use importOperators mutation to start an import.'
+      return (
+        'Import functionality is available. Use importOperators mutation to start an import.'
+      )
     },
   }),
 }))

@@ -31,9 +31,15 @@ export default defineConfig({
           if (id.includes('.test.') || id.includes('/__tests__/')) {
             return `
               // Polyfill HTMLFormElement.requestSubmit
-              if (typeof HTMLFormElement !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
-                HTMLFormElement.prototype.requestSubmit = function(submitter) {
-                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+              if (
+                typeof HTMLFormElement !== 'undefined' &&
+                !HTMLFormElement.prototype.requestSubmit
+              ) {
+                HTMLFormElement.prototype.requestSubmit = function (submitter) {
+                  const submitEvent = new Event('submit', {
+                    bubbles: true,
+                    cancelable: true,
+                  })
                   submitEvent.submitter = submitter;
                   const cancelled = !this.dispatchEvent(submitEvent);
                   if (!cancelled) {
