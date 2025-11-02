@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/Moxie1776/wellpna/compare/v1.8.0...v1.9.0) (2025-11-02)
+
+
+### Features
+
+* implement operator data import with web scraping from TX RRC and NM OCD ([dd34a70](https://github.com/Moxie1776/wellpna/commit/dd34a70a754d8b5f102b2129daf1c6d150d96f86))
+
 # [1.8.0](https://github.com/Moxie1776/wellpna/compare/v1.7.0...v1.8.0) (2025-10-29)
 
 
